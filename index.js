@@ -40,7 +40,7 @@ const OWNER_COMMANDS = [
 ]
 
 // Your WhatsApp number (owner)
-const OWNER_NUMBER = 'YOUR_NUMBER_HERE@s.whatsapp.net'
+const OWNER_NUMBER = '2349122876837@s.whatsapp.net'
 
 async function startBot() {
     const { state, saveCreds } = await useMultiFileAuthState('auth_info')

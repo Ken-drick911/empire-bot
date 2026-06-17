@@ -13,7 +13,7 @@ const {
     mutedUsers,
     warnings,
     groupSettings
-} = require('./groupManagement')
+} = require('./src/commands/groupManagement') 
 
 // Empire System
 const { getUser, createUser } = require('./src/data/db')

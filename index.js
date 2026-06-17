@@ -61,7 +61,7 @@ async function startBot() {
         const sender = msg.key.participant || msg.key.remoteJid
         const isGroup = from.endsWith('@g.us')
 
-        // 1. Ping command (always works, even in private chats)
+        // 1. Ping command (always works)
         if (text.toLowerCase() === '.ping') {
             await sock.sendMessage(from, { text: '👑 Pong! Empire Bot is online.' }, { quoted: msg })
             return
@@ -69,17 +69,17 @@ async function startBot() {
 
         // ---- Group-only logic ----
         if (isGroup) {
-            // 2. Mute check – if muted, delete message silently and stop
+            // 2. Mute check
             const isMuted = await checkIfMuted(sock, msg, mutedUsers)
             if (isMuted) {
                 await deleteMutedMessage(sock, msg)
                 return
             }
 
-            // 3. Anti-spam (only if enabled)
+            // 3. Anti-spam
             await handleAntiSpam(sock, msg, { warnings, groupSettings, isUserAdmin })
 
-            // 4. Anti-link (only if enabled)
+            // 4. Anti-link
             await antiLinkHandler(sock, msg, {
                 groupSettings,
                 warnings,

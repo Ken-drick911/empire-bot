@@ -486,49 +486,6 @@ async function deleteCommandMessage(sock, msg) {
     } catch {}
 }
 
-// ---------- Menu ----------
-async function showMenu(sock, chatId, msg) {
-    // Get the sender's name
-    const sender = msg.key.participant || msg.key.remoteJid
-    let senderName = msg.pushName || sender.split('@')[0]
-    
-    const menuText = `
-⚜️ 𝐄𝐌𝐏𝐈𝐑𝐄 ⚜️
-│⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘│
-
-👑 𝗣𝗥𝗘𝗙𝗜𝗫: .
-⚔️ 𝗡𝗔𝗠𝗘: ${senderName}
-🏛️ 𝗘𝗠𝗣𝗘𝗥𝗢𝗥: 𝙺𝙴𝙽♠️
-
-│⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘│
-
-🛠️ 𝗜𝗠𝗣𝗘𝗥𝗜𝗔𝗟 𝗚𝗨𝗔𝗥𝗗𝗦 🛠️
-│⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘│
-├─ ♤ .kick
-├─ ♤ .warn
-├─ ♤ .mute
-├─ ♤ .unmute
-├─ ♤ .promote
-├─ ♤ .demote
-├─ ♤ .antilink
-├─ ♤ .antispam
-├─ ♤ .welcome
-├─ ♤ .leave
-├─ ♤ .setwelcome
-├─ ♤ .setleave
-├─ ♤ .tagall
-├─ ♤ .tagadmins
-├─ ♤ .hidetag
-├─ ♤ .open
-├─ ♤ .close
-├─ ♤ .menu
-│⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘│
-
-📜 Type .menu for this guide
-    `
-    await sock.sendMessage(chatId, { text: menuText, quoted: msg })
-}
-
 // ---------- Open / Close ----------
 async function openGroup(sock, chatId) {
     try {
@@ -569,7 +526,6 @@ async function handleGroupCommands(sock, msg, command, args, deps) {
         case 'tagall': await tagAll(sock, msg, args); break
         case 'tagadmins': await tagAdmins(sock, msg, args); break
         case 'hidetag': await hideTag(sock, msg, args); break
-        case 'menu': await showMenu(sock, chatId, msg); break
         case 'open': await openGroup(sock, chatId); break
         case 'close': await closeGroup(sock, chatId); break
         default:

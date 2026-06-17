@@ -13,12 +13,13 @@ const {
     mutedUsers,
     warnings,
     groupSettings
-} = require('./src/commands/groupManagement') 
+} = require('./src/commands/groupManagement')
 
 // Empire System
 const { getUser, createUser } = require('./src/data/db')
 const { awardMessageXP } = require('./src/engine/xp')
 const { menuCommand } = require('./src/commands/menu')
+const { dailyCommand } = require('./src/commands/daily')
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
 const question = (t) => new Promise((r) => rl.question(t, r))
@@ -28,7 +29,7 @@ const ADMIN_COMMANDS = [
     'kick', 'warn', 'mute', 'unmute', 'promote', 'demote',
     'antilink', 'antispam', 'welcome', 'leave', 'setwelcome',
     'setleave', 'tagall', 'tagadmins', 'hidetag', 'open', 'close',
-    'delete', 'purge', 'blacklist', 'resetwarn', 'news'
+    'delete', 'purge', 'blacklist', 'resetwarn', 'news', 'groupstats', 'gs'
 ]
 
 // Owner commands list
@@ -67,3 +68,130 @@ async function startBot() {
     sock.ev.on('creds.update', saveCreds)
 
     // Check if user is group admin
+    async function isUserAdmin(chatId, userId) {
+        try {
+            const meta = await sock.groupMetadata(chatId)
+            const participant = meta.participants.find(p => p.id === userId)
+            return participant?.admin === 'admin' || participant?.admin === 'superadmin'
+        } catch {
+            return false
+        }
+    }
+
+    // Check if user is owner
+    function isOwner(sender) {
+        return sender === OWNER_NUMBER
+    }
+
+    sock.ev.on('messages.upsert', async ({ messages, type }) => {
+        if (type !== 'notify') return
+        const msg = messages[0]
+        if (!msg.message) return
+
+        const from = msg.key.remoteJid
+        const text = msg.message.conversation || msg.message.extendedTextMessage?.text || ''
+        const sender = msg.key.participant || msg.key.remoteJid
+        const username = msg.pushName || sender.split('@')[0]
+        const isGroup = from.endsWith('@g.us')
+
+        // Create user if new
+        createUser(sender, username)
+
+        // ---- Ping ----
+        if (text.toLowerCase() === '.ping') {
+            await sock.sendMessage(from, { text: '👑 Pong! Empire Bot is online.' }, { quoted: msg })
+            return
+        }
+
+        // ---- Group only logic ----
+        if (isGroup) {
+
+            // Mute check
+            const isMuted = await checkIfMuted(sock, msg, mutedUsers)
+            if (isMuted) {
+                await deleteMutedMessage(sock, msg)
+                return
+            }
+
+            // Anti-spam
+            await handleAntiSpam(sock, msg, { warnings, groupSettings, isUserAdmin })
+
+            // Anti-link
+            await antiLinkHandler(sock, msg, {
+                groupSettings,
+                warnings,
+                isUserAdmin,
+                mutedUsers
+            })
+
+            // Award XP for messages
+            if (!text.startsWith('.')) {
+                const result = awardMessageXP(sender, username)
+                if (result?.leveled) {
+                    await sock.sendMessage(from, {
+                        text: `⚔️ @${username} leveled up to *${result.newRank} Lv.${result.newLevel}*!\n🎖️ Title: ${result.newTitle}`,
+                        mentions: [sender]
+                    })
+                }
+            }
+        }
+
+        // ---- Commands ----
+        if (text.startsWith('.')) {
+            const [command, ...args] = text.slice(1).trim().split(' ')
+            const cmd = command.toLowerCase()
+            const isAdmin = isGroup ? await isUserAdmin(from, sender) : false
+            const owner = isOwner(sender)
+
+            // Owner only commands
+            if (OWNER_COMMANDS.includes(cmd)) {
+                if (!owner) {
+                    await sock.sendMessage(from, { text: '👑 Only the Emperor can use this command.', quoted: msg })
+                    return
+                }
+                return
+            }
+
+            // Admin only commands
+            if (ADMIN_COMMANDS.includes(cmd)) {
+                if (!isAdmin && !owner) {
+                    await sock.sendMessage(from, { text: '🛡️ Only admins can use this command.', quoted: msg })
+                    return
+                }
+                await handleGroupCommands(sock, msg, cmd, args, {
+                    groupSettings,
+                    warnings,
+                    mutedUsers,
+                    isUserAdmin
+                })
+                return
+            }
+
+            // Everyone commands
+            switch (cmd) {
+                case 'ping':
+                    await sock.sendMessage(from, { text: '👑 Pong! Empire Bot is online.' }, { quoted: msg })
+                    break
+                case 'menu':
+                case 'm':
+                    await menuCommand(sock, msg, from)
+                    break
+                case 'daily':
+                    await dailyCommand(sock, msg, from, sender, username)
+                    break
+                default:
+                    break
+            }
+        }
+    })
+
+    // Welcome / Leave messages
+    sock.ev.on('group-participants.update', async (update) => {
+        const { id, participants, action } = update
+        if (action === 'add' || action === 'remove') {
+            await sendGroupMessage(sock, id, participants, action)
+        }
+    })
+}
+
+startBot()

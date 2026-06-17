@@ -433,8 +433,9 @@ async function tagAll(sock, msg, args) {
     try {
         const meta = await sock.groupMetadata(chatId)
         const participants = meta.participants.map(p => p.id)
+        const mentionLines = participants.map(p => `  ♤ @${p.split('@')[0]}`).join('\n')
         await sock.sendMessage(chatId, {
-            text: `📣 ${text}\n\n` + participants.map(p => `@${p.split('@')[0]}`).join(' '),
+            text: `📣 𝗜𝗠𝗣𝗘𝗥𝗜𝗔𝗟 𝗖𝗔𝗟𝗟\n━━━━━━━━━━━━━━━━\n📜 ${text}\n━━━━━━━━━━━━━━━━\n${mentionLines}\n━━━━━━━━━━━━━━━━`,
             mentions: participants,
             quoted: msg
         })
@@ -446,14 +447,14 @@ async function tagAll(sock, msg, args) {
 
 async function tagAdmins(sock, msg, args) {
     const chatId = msg.key.remoteJid
-    const text = args.join(' ') || '📢 Admins:'
+    const text = args.join(' ') || '📢 Admin notice!'
     try {
         const meta = await sock.groupMetadata(chatId)
         const admins = meta.participants.filter(p => p.admin === 'admin' || p.admin === 'superadmin').map(p => p.id)
         if (!admins.length) return reply(sock, chatId, 'ℹ️ No admins found.', msg)
-        const mentionText = admins.map(p => `@${p.split('@')[0]}`).join(' ')
+        const mentionLines = admins.map(p => `  🛡️ @${p.split('@')[0]}`).join('\n')
         await sock.sendMessage(chatId, {
-            text: `📣 ${text}\n\n${mentionText}`,
+            text: `🛡️ 𝗔𝗗𝗠𝗜𝗡 𝗔𝗟𝗘𝗥𝗧\n━━━━━━━━━━━━━━━━\n📜 ${text}\n━━━━━━━━━━━━━━━━\n${mentionLines}\n━━━━━━━━━━━━━━━━`,
             mentions: admins,
             quoted: msg
         })
@@ -470,7 +471,7 @@ async function hideTag(sock, msg, args) {
         const meta = await sock.groupMetadata(chatId)
         const participants = meta.participants.map(p => p.id)
         await sock.sendMessage(chatId, {
-            text: `📣 ${text}`,
+            text: `📣 𝗛𝗜𝗗𝗗𝗘𝗡 𝗕𝗥𝗢𝗔𝗗𝗖𝗔𝗦𝗧\n━━━━━━━━━━━━━━━━\n${text}\n━━━━━━━━━━━━━━━━`,
             mentions: participants,
             quoted: msg
         })
@@ -479,6 +480,42 @@ async function hideTag(sock, msg, args) {
         reply(sock, chatId, '❌ Failed to send hidetag.', msg)
     }
 }
+
+async function groupStats(sock, msg, groupSettings) {
+    const chatId = msg.key.remoteJid
+    try {
+        const meta = await sock.groupMetadata(chatId)
+        const participants = meta.participants
+        const admins = participants.filter(p => p.admin === 'admin' || p.admin === 'superadmin')
+        const created = new Date(meta.creation * 1000).toDateString()
+        const isOpen = meta.announce === false ? '🔓 Open' : '🔒 Closed'
+
+        const antilink = groupSettings.get(`antilink_${chatId}`) || 'off'
+        const antispam = groupSettings.get(`antispam_${chatId}`) ? '🟢 ON' : '🔴 OFF'
+        const welcome = groupSettings.get(`welcome_${chatId}`) ? '🟢 ON' : '🔴 OFF'
+        const leave = groupSettings.get(`leave_${chatId}`) ? '🟢 ON' : '🔴 OFF'
+
+        const text = `🏰 𝗚𝗥𝗢𝗨𝗣 𝗦𝗧𝗔𝗧𝗦
+━━━━━━━━━━━━━━━━
+📋 Name: ${meta.subject}
+📅 Created: ${created}
+👥 Members: ${participants.length}
+👑 Admins: ${admins.length}
+🔒 Status: ${isOpen}
+━━━━━━━━━━━━━━━━
+⚙️ 𝗧𝗢𝗚𝗚𝗟𝗘 𝗦𝗧𝗔𝗧𝗨𝗦
+━━━━━━━━━━━━━━━━
+🔗 Antilink: ${antilink.toUpperCase()}
+🛡️ Antispam: ${antispam}
+👋 Welcome: ${welcome}
+🚪 Leave: ${leave}
+━━━━━━━━━━━━━━━━`
+
+        await sock.sendMessage(chatId, { text, quoted: msg })
+    } catch {
+        reply(sock, chatId, '❌ Failed to fetch group stats.', msg)
+    }
+            }
 
 async function deleteCommandMessage(sock, msg) {
     try {
@@ -526,6 +563,10 @@ async function handleGroupCommands(sock, msg, command, args, deps) {
         case 'tagall': await tagAll(sock, msg, args); break
         case 'tagadmins': await tagAdmins(sock, msg, args); break
         case 'hidetag': await hideTag(sock, msg, args); break
+            case 'groupstats':
+case 'gs':
+    await groupStats(sock, msg, settings)
+    break
         case 'open': await openGroup(sock, chatId); break
         case 'close': await closeGroup(sock, chatId); break
         default:
@@ -546,5 +587,6 @@ module.exports = {
     groupSettings,
     spamTimestamps,
     botWarnings,
-    lastMessages
+    lastMessages,
+    groupStats 
               }

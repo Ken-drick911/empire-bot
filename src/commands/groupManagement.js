@@ -427,21 +427,21 @@ async function sendGroupMessage(sock, chatId, participants, action) {
 }
 
 // ---------- Tag commands ----------
-async function tagAll(sock, msg, args) {
+async function hideTag(sock, msg, args) {
     const chatId = msg.key.remoteJid
-    const text = args.join(' ') || '📢 Attention everyone!'
+    const text = args.join(' ')
+    if (!text) return reply(sock, chatId, '❌ Provide a message. Example: .hidetag hello everyone', msg)
     try {
         const meta = await sock.groupMetadata(chatId)
         const participants = meta.participants.map(p => p.id)
-        const mentionLines = participants.map(p => `  ♤ @${p.split('@')[0]}`).join('\n')
         await sock.sendMessage(chatId, {
-            text: `📣 𝗜𝗠𝗣𝗘𝗥𝗜𝗔𝗟 𝗖𝗔𝗟𝗟\n━━━━━━━━━━━━━━━━\n📜 ${text}\n━━━━━━━━━━━━━━━━\n${mentionLines}\n━━━━━━━━━━━━━━━━`,
+            text: text,
             mentions: participants,
             quoted: msg
         })
         await deleteCommandMessage(sock, msg)
     } catch {
-        reply(sock, chatId, '❌ Failed to tag all.', msg)
+        reply(sock, chatId, '❌ Failed to send hidetag.', msg)
     }
 }
 

@@ -20,6 +20,10 @@ const { getUser, createUser } = require('./src/data/db')
 const { awardMessageXP } = require('./src/engine/xp')
 const { menuCommand } = require('./src/commands/menu')
 const { dailyCommand } = require('./src/commands/daily')
+const { profileCommand } = require('./src/commands/profile')
+const { assetCommand } = require('./src/commands/asset')
+const { depositCommand, withdrawCommand, giveCommand } = require('./src/commands/economy')
+const { stealCommand } = require('./src/commands/steal')
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
 const question = (t) => new Promise((r) => rl.question(t, r))
@@ -179,6 +183,27 @@ async function startBot() {
                 case 'daily':
                     await dailyCommand(sock, msg, from, sender, username)
                     break
+                    case 'profile':
+case 'p':
+    await profileCommand(sock, msg, from, sender, username)
+    break
+case 'asset':
+    await assetCommand(sock, msg, from, sender)
+    break
+case 'deposit':
+case 'dep':
+    await depositCommand(sock, msg, from, sender, args)
+    break
+case 'withdraw':
+case 'wd':
+    await withdrawCommand(sock, msg, from, sender, args)
+    break
+case 'give':
+    await giveCommand(sock, msg, from, sender, args)
+    break
+case 'steal':
+    await stealCommand(sock, msg, from, sender, args)
+    break
                 default:
                     break
             }

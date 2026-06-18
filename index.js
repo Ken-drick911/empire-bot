@@ -26,6 +26,7 @@ const { depositCommand, withdrawCommand, giveCommand } = require('./src/commands
 const { stealCommand } = require('./src/commands/steal')
 const { leaderboardCommand, wealthLeaderboardCommand } = require('./src/commands/leaderboard')
 const { setpicCommand } = require('./src/commands/setpic')
+const { statsCommand } = require('./src/commands/stats')
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
 const question = (t) => new Promise((r) => rl.question(t, r))
@@ -217,6 +218,9 @@ case 'wlb':
     break
                     case 'setpic':
     await setpicCommand(sock, msg, from, sender)
+    break
+                    case 'stats':
+    await statsCommand(sock, msg, from, sender)
     break
                 default:
                     break

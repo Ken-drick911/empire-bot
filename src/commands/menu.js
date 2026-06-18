@@ -1,10 +1,11 @@
 const fs = require('fs')
 const path = require('path')
 
-const menuText = `⚜️ 𝐄𝐌𝐏𝐈𝐑𝐄 ⚜️
+function getMenuText(senderName) {
+    return `⚜️ 𝐄𝐌𝐏𝐈𝐑𝐄 ⚜️
 ⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘
 👑 𝗣𝗿𝗲𝗳𝗶𝘅: .
-⚔️ 𝗡𝗮𝗺𝗲: Ragnar
+⚔️ 𝗡𝗮𝗺𝗲: ${senderName}
 🏛️ 𝗘𝗺𝗽𝗲𝗿𝗼𝗿: 𝙺𝙴𝙽♠️
 ⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘⫘
 
@@ -143,10 +144,12 @@ const menuText = `⚜️ 𝐄𝐌𝐏𝐈𝐑𝐄 ⚜️
 ┣ ♤ .restart
 ┣ ♤ .listgroups
 ┗━━━━━━━━━━━`
+} 
 
-async function menuCommand(sock, msg, from) {
+async function menuCommand(sock, msg, from, username) {
     const botPicPath = path.join(__dirname, '../../media/bot.jpg')
     const hasPic = fs.existsSync(botPicPath)
+    const menuText = getMenuText(username)
 
     if (hasPic) {
         const image = fs.readFileSync(botPicPath)

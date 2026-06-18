@@ -106,10 +106,17 @@ async function startBot() {
         createUser(sender, username)
 
         // ---- Ping ----
-        if (text.toLowerCase() === '.ping') {
-            await sock.sendMessage(from, { text: '👑 Pong! Empire Bot is online.' }, { quoted: msg })
-            return
-        }
+if (text.toLowerCase() === '.ping') {
+    await sock.sendMessage(from, { text: 'Arthur is live...👑' }, { quoted: msg })
+    return
+}
+
+// ---- Test ----
+if (text.toLowerCase() === '.test') {
+    await sock.sendMessage(from, { text: 'Testing....' }, { quoted: msg })
+    await sock.sendMessage(from, { text: 'Arthur is live...👑' }, { quoted: msg })
+    return
+}
 
         // ---- Group only logic ----
         if (isGroup) {
@@ -177,9 +184,6 @@ async function startBot() {
 
             // Everyone commands
             switch (cmd) {
-                case 'ping':
-                    await sock.sendMessage(from, { text: '👑 Pong! Empire Bot is online.' }, { quoted: msg })
-                    break
                 case 'menu':
 case 'm':
     await menuCommand(sock, msg, from, username)

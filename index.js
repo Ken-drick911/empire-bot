@@ -179,9 +179,9 @@ async function startBot() {
                     await sock.sendMessage(from, { text: '👑 Pong! Empire Bot is online.' }, { quoted: msg })
                     break
                 case 'menu':
-                case 'm':
-                    await menuCommand(sock, msg, from)
-                    break
+case 'm':
+    await menuCommand(sock, msg, from, username)
+    break
                 case 'daily':
                     await dailyCommand(sock, msg, from, sender, username)
                     break

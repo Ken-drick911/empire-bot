@@ -1,0 +1,27 @@
+{
+  "name": "empire-bot",
+  "version": "1.0.0",
+  "description": "👑 Empire WhatsApp Bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ken-drick911/empire-bot.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Ken-drick911/empire-bot/issues"
+  },
+  "homepage": "https://github.com/Ken-drick911/empire-bot#readme",
+  "dependencies": {
+    "@whiskeysockets/baileys": "^7.0.0-rc13",
+    "pino": "^10.3.1",
+    "qrcode-terminal": "^0.12.0"
+  }
+}

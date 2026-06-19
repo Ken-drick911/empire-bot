@@ -99,6 +99,8 @@ async function startBot() {
         const from = msg.key.remoteJid
         const text = msg.message.conversation || msg.message.extendedTextMessage?.text || ''
         const sender = msg.key.participant || msg.key.remoteJid
+        console.log('SENDER:', sender)
+console.log('OWNER:', OWNER_NUMBER)
         const username = msg.pushName || sender.split('@')[0]
         const isGroup = from.endsWith('@g.us')
 

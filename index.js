@@ -31,6 +31,7 @@ const { ranksCommand, titlesCommand } = require('./src/commands/info')
 const { afkCommand, checkAfkReturn, checkAfkMention } = require('./src/commands/afk')
 const { activeCommand, inactiveCommand } = require('./src/commands/activity')
 const { isOnCooldown, getRemainingTime, setCooldown } = require('./src/engine/cooldown')
+const { addModCommand, removeModCommand, isModerator } = require('./src/commands/moderator')
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
 const question = (t) => new Promise((r) => rl.question(t, r))
@@ -38,7 +39,7 @@ const question = (t) => new Promise((r) => rl.question(t, r))
 // Admin commands list
 const ADMIN_COMMANDS = [
     'kick', 'warn', 'mute', 'unmute', 'promote', 'demote',
-    'antilink', 'antispam', 'welcome', 'leave', 'setwelcome',
+    'antilink', 'antispam', 'antism', 'welcome', 'leave', 'setwelcome',
     'setleave', 'tagall', 'tagadmins', 'hidetag', 'open', 'close',
     'delete', 'purge', 'blacklist', 'resetwarn', 'news', 'groupstats', 'gs'
 ]

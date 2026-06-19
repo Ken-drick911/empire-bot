@@ -270,6 +270,12 @@ async function toggleAntiSpam(sock, chatId, args, groupSettings) {
     groupSettings.set(`antispam_${chatId}`, setting === 'on')
     await sock.sendMessage(chatId, { text: `🛡️ Anti‑spam ${setting === 'on' ? 'ON' : 'OFF'}` })
 }
+async function toggleAntiStatusMention(sock, chatId, args, groupSettings) {
+    const setting = args[0]?.toLowerCase()
+    if (!['on', 'off'].includes(setting)) return reply(sock, chatId, '❌ Usage: .antism on/off')
+    groupSettings.set(`antism_${chatId}`, setting === 'on')
+    await sock.sendMessage(chatId, { text: `📵 Anti-status-mention ${setting === 'on' ? 'ON' : 'OFF'}` })
+}
 
 async function handleAntiSpam(sock, msg, deps) {
     const { warnings, groupSettings, isUserAdmin } = deps

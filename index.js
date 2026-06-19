@@ -48,7 +48,7 @@ const ADMIN_COMMANDS = [
 const OWNER_COMMANDS = [
     'appoint', 'setrep', 'setrank', 'givexp', 'givecoins',
     'resetuser', 'ban', 'unban', 'announce', 'broadcast',
-    'restart', 'listgroups'
+    'restart', 'listgroups', 'addmod', 'removemod'
 ]
 
 // Your WhatsApp number (owner)
@@ -185,7 +185,7 @@ if (text.toLowerCase() === '.test') {
             }
 
             // Admin only commands
-            if (ADMIN_COMMANDS.includes(cmd)) {
+            if (!isAdmin && !owner && !isModerator(sender)) {
                 if (!isAdmin && !owner) {
                     await sock.sendMessage(from, { text: '🛡️ Only admins can use this command.', quoted: msg })
                     return

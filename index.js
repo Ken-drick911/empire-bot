@@ -30,6 +30,7 @@ const { statsCommand } = require('./src/commands/stats')
 const { ranksCommand, titlesCommand } = require('./src/commands/info')
 const { afkCommand, checkAfkReturn, checkAfkMention } = require('./src/commands/afk')
 const { activeCommand, inactiveCommand } = require('./src/commands/activity')
+const { isOnCooldown, getRemainingTime, setCooldown } = require('./src/engine/cooldown')
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
 const question = (t) => new Promise((r) => rl.question(t, r))
@@ -195,6 +196,16 @@ if (text.toLowerCase() === '.test') {
                     isUserAdmin
                 })
                 return
+            }
+// Cooldown check (excludes commands with their own cooldown system)
+            const noCooldownCommands = ['daily', 'steal']
+            if (!noCooldownCommands.includes(cmd)) {
+                if (isOnCooldown(sender, cmd)) {
+                    const remaining = getRemainingTime(sender, cmd)
+                    await sock.sendMessage(from, { text: `⏳ Slow down! Try again in ${remaining}s.`, quoted: msg })
+                    return
+                }
+                setCooldown(sender, cmd)
             }
 
             // Everyone commands

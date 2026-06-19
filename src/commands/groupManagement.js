@@ -466,12 +466,13 @@ async function tagAdmins(sock, msg, args) {
 
 async function hideTag(sock, msg, args) {
     const chatId = msg.key.remoteJid
-    const text = args.join(' ') || '📢 Message from admin'
+    const text = args.join(' ')
+    if (!text) return reply(sock, chatId, '❌ Provide a message. Example: .hidetag hello everyone', msg)
     try {
         const meta = await sock.groupMetadata(chatId)
         const participants = meta.participants.map(p => p.id)
         await sock.sendMessage(chatId, {
-            text: `📣 𝗛𝗜𝗗𝗗𝗘𝗡 𝗕𝗥𝗢𝗔𝗗𝗖𝗔𝗦𝗧\n━━━━━━━━━━━━━━━━\n${text}\n━━━━━━━━━━━━━━━━`,
+            text: text,
             mentions: participants,
             quoted: msg
         })

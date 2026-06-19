@@ -28,6 +28,7 @@ const { leaderboardCommand, wealthLeaderboardCommand } = require('./src/commands
 const { setpicCommand } = require('./src/commands/setpic')
 const { statsCommand } = require('./src/commands/stats')
 const { ranksCommand, titlesCommand } = require('./src/commands/info')
+const { afkCommand, checkAfkReturn, checkAfkMention } = require('./src/commands/afk')
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
 const question = (t) => new Promise((r) => rl.question(t, r))
@@ -238,6 +239,9 @@ case 'wlb':
     break
 case 'titles':
     await titlesCommand(sock, msg, from)
+    break
+                    case 'afk':
+    await afkCommand(sock, msg, from, sender, args)
     break
                 default:
                     break

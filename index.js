@@ -32,6 +32,7 @@ const { afkCommand, checkAfkReturn, checkAfkMention } = require('./src/commands/
 const { activeCommand, inactiveCommand } = require('./src/commands/activity')
 const { isOnCooldown, getRemainingTime, setCooldown } = require('./src/engine/cooldown')
 const { addModCommand, removeModCommand, isModerator } = require('./src/commands/moderator')
+const { globalRankCommand, globalWealthCommand } = require('./src/commands/globalLeaderboard')
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
 const question = (t) => new Promise((r) => rl.question(t, r))
@@ -255,6 +256,12 @@ case 'lb':
 case 'wealthleaderboard':
 case 'wlb':
     await wealthLeaderboardCommand(sock, msg, from)
+    break
+                    case 'gr':
+    await globalRankCommand(sock, msg, from)
+    break
+case 'gwlb':
+    await globalWealthCommand(sock, msg, from)
     break
                     case 'setpic':
     await setpicCommand(sock, msg, from, sender)

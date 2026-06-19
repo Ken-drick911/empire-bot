@@ -104,6 +104,10 @@ async function startBot() {
 
         // Create user if new
         createUser(sender, username)
+        // DM restriction - only owner can use bot in DM
+if (!isGroup && sender !== OWNER_NUMBER) {
+    return
+}
 
         // ---- Ping ----
 if (text.toLowerCase() === '.ping') {

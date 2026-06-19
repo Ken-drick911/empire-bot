@@ -157,6 +157,13 @@ if (text.toLowerCase() === '.test') {
                 }
             }
         }
+        // AFK check - mention someone AFK
+        await checkAfkMention(sock, msg, from)
+
+        // AFK check - user returns from AFK
+        if (!text.startsWith('.')) {
+            await checkAfkReturn(sock, msg, from, sender, username)
+        }
 
         // ---- Commands ----
         if (text.startsWith('.')) {

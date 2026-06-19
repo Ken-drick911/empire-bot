@@ -181,6 +181,14 @@ if (text.toLowerCase() === '.test') {
                     await sock.sendMessage(from, { text: '👑 Only the Emperor can use this command.', quoted: msg })
                     return
                 }
+                if (cmd === 'addmod') {
+                    await addModCommand(sock, msg, from, args)
+                    return
+                }
+                if (cmd === 'removemod') {
+                    await removeModCommand(sock, msg, from, args)
+                    return
+                }
                 return
             }
 

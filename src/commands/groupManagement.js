@@ -563,6 +563,7 @@ async function handleGroupCommands(sock, msg, command, args, deps) {
         case 'demote': await demoteMember(sock, msg, args); break
         case 'antilink': await toggleAntiLink(sock, chatId, args, settings); break
         case 'antispam': await toggleAntiSpam(sock, chatId, args, settings); break
+            case 'antism': await toggleAntiStatusMention(sock, chatId, args, settings); break
         case 'welcome': await toggleWelcome(sock, chatId, args, settings); break
         case 'leave': await toggleLeave(sock, chatId, args, settings); break
         case 'setwelcome': await setWelcomeMessage(sock, chatId, args, msg); break
@@ -595,5 +596,6 @@ module.exports = {
     spamTimestamps,
     botWarnings,
     lastMessages,
-    groupStats 
+    groupStats,
+toggleAntiStatusMention
               }

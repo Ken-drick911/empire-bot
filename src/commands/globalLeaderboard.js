@@ -8,7 +8,7 @@ function getRankIndex(rankName) {
 const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟']
 
 async function globalRankCommand(sock, msg, from) {
-    const allUsers = Object.values(getAllUsers())
+    const allUsers = Object.values(await getAllUsers())
 
     if (!allUsers.length) {
         await sock.sendMessage(from, { text: '❌ No citizens found in the Empire yet.', quoted: msg })
@@ -38,7 +38,7 @@ ${list}
 }
 
 async function globalWealthCommand(sock, msg, from) {
-    const allUsers = Object.values(getAllUsers())
+    const allUsers = Object.values(await getAllUsers())
 
     if (!allUsers.length) {
         await sock.sendMessage(from, { text: '❌ No citizens found in the Empire yet.', quoted: msg })

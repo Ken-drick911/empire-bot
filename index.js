@@ -106,6 +106,13 @@ async function startBot() {
         const username = msg.pushName || sender.split('@')[0]
         const isGroup = from.endsWith('@g.us')
 
+        // Only track real text messages, not reactions/receipts/empty events
+        const hasRealContent = !!(msg.message.conversation || msg.message.extendedTextMessage?.text || msg.message.imageMessage || msg.message.videoMessage || msg.message.stickerMessage)
+        if (!hasRealContent) return
+
+        // Create user if new
+        createUser(sender, username)
+
         // Create user if new
         createUser(sender, username)
 

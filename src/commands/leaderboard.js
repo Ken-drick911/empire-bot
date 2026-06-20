@@ -9,7 +9,7 @@ function getRankIndex(rankName) {
 const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟']
 
 async function leaderboardCommand(sock, msg, from) {
-    const allUsers = Object.values(getAllUsers())
+    const allUsers = Object.values(await getAllUsers())
 
     if (!allUsers.length) {
         await sock.sendMessage(from, { text: '❌ No users found in the Empire yet.', quoted: msg })
@@ -42,7 +42,7 @@ ${list}
 }
 
 async function wealthLeaderboardCommand(sock, msg, from) {
-    const allUsers = Object.values(getAllUsers())
+    const allUsers = Object.values(await getAllUsers())
 
     if (!allUsers.length) {
         await sock.sendMessage(from, { text: '❌ No users found in the Empire yet.', quoted: msg })

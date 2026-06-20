@@ -1,29 +1,31 @@
-const fs = require('fs')
-const path = require('path')
+require('dotenv').config()
+const { MongoClient } = require('mongodb')
 
-const DB_PATH = path.join(__dirname, 'users.json')
+const client = new MongoClient(process.env.MONGO_URI)
+let db = null
+let usersCollection = null
+let connected = false
 
-function loadDB() {
-    if (!fs.existsSync(DB_PATH)) {
-        fs.writeFileSync(DB_PATH, JSON.stringify({}, null, 2))
-    }
-    return JSON.parse(fs.readFileSync(DB_PATH, 'utf-8'))
+async function connectDB() {
+    if (connected) return
+    await client.connect()
+    db = client.db('empireBot')
+    usersCollection = db.collection('users')
+    connected = true
+    console.log('✅ Connected to MongoDB')
 }
 
-function saveDB(data) {
-    fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2))
+async function getUser(id) {
+    await connectDB()
+    return await usersCollection.findOne({ id })
 }
 
-function getUser(id) {
-    const db = loadDB()
-    return db[id] || null
-}
+async function createUser(id, username) {
+    await connectDB()
+    const existing = await usersCollection.findOne({ id })
+    if (existing) return existing
 
-function createUser(id, username) {
-    const db = loadDB()
-    if (db[id]) return db[id]
-
-    db[id] = {
+    const newUser = {
         id,
         username,
         rank: 'Peasant',
@@ -37,6 +39,7 @@ function createUser(id, username) {
         vaultCap: 5000,
         streak: 0,
         totalMessages: 0,
+        recentMessages: 0,
         lastMessage: null,
         lastDaily: null,
         lastSteal: null,
@@ -45,23 +48,26 @@ function createUser(id, username) {
         timesStolen: 0,
         profilePic: null,
         authority: null,
+        isMod: false,
         joinDate: new Date().toISOString()
     }
 
-    saveDB(db)
-    return db[id]
+    await usersCollection.insertOne(newUser)
+    return newUser
 }
 
-function updateUser(id, updates) {
-    const db = loadDB()
-    if (!db[id]) return null
-    db[id] = { ...db[id], ...updates }
-    saveDB(db)
-    return db[id]
+async function updateUser(id, updates) {
+    await connectDB()
+    await usersCollection.updateOne({ id }, { $set: updates })
+    return await usersCollection.findOne({ id })
 }
 
-function getAllUsers() {
-    return loadDB()
+async function getAllUsers() {
+    await connectDB()
+    const all = await usersCollection.find({}).toArray()
+    const obj = {}
+    all.forEach(u => { obj[u.id] = u })
+    return obj
 }
 
-module.exports = { loadDB, saveDB, getUser, createUser, updateUser, getAllUsers }
+module.exports = { getUser, createUser, updateUser, getAllUsers }

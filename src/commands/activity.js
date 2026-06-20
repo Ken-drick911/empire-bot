@@ -3,7 +3,7 @@ const { getAllUsers } = require('../data/db')
 const FIVE_DAYS_MS = 5 * 24 * 60 * 60 * 1000
 
 async function activeCommand(sock, msg, from) {
-    const allUsers = Object.values(getAllUsers())
+    const allUsers = Object.values(await getAllUsers())
     const now = Date.now()
 
     const active = allUsers.filter(u => {
@@ -35,7 +35,7 @@ Total: ${active.length} member(s)`
 }
 
 async function inactiveCommand(sock, msg, from) {
-    const allUsers = Object.values(getAllUsers())
+    const allUsers = Object.values(await getAllUsers())
     const now = Date.now()
 
     const inactive = allUsers.filter(u => {

@@ -37,11 +37,11 @@ async function setpicCommand(sock, msg, from, sender) {
             fs.mkdirSync(pfpDir, { recursive: true })
         }
 
-        const fileName = `${sender.replace('@s.whatsapp.net', '')}.jpg`
+        const fileName = `${sender.replace('@s.whatsapp.net', '').replace('@lid', '')}.jpg`
         const filePath = path.join(pfpDir, fileName)
         fs.writeFileSync(filePath, buffer)
 
-        updateUser(sender, { profilePic: `media/pfp/${fileName}` })
+        await updateUser(sender, { profilePic: `media/pfp/${fileName}` })
 
         await sock.sendMessage(from, {
             text: '✅ Profile picture updated! Check it with *.profile*',

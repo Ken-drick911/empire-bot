@@ -20,11 +20,10 @@ function getStreakBonus(streak) {
     return { xp: 0, coins: 0 }
 }
 
-function claimDaily(userId) {
-    const user = getUser(userId)
+async function claimDaily(userId) {
+    const user = await getUser(userId)
     if (!user) return { success: false, reason: 'User not found.' }
 
-    // Check if already claimed today
     if (user.lastDaily) {
         const now = new Date()
         const last = new Date(user.lastDaily)
@@ -38,32 +37,22 @@ function claimDaily(userId) {
     const { daily } = XP_CONFIG
     const newStreak = getStreak(user)
     const bonus = getStreakBonus(newStreak)
-
     const totalXP = daily.baseXP + bonus.xp
     const totalCoins = daily.baseCoins + bonus.coins
 
-    // Award XP
-    const xpResult = awardXP(userId, totalXP)
+    const xpResult = await awardXP(userId, totalXP)
 
-    // Award coins to wallet
-    updateUser(userId, {
+    await updateUser(userId, {
         wallet: user.wallet + totalCoins,
         streak: newStreak,
         lastDaily: new Date().toISOString()
     })
 
     return {
-        success: true,
-        xpGained: totalXP,
-        coinsGained: totalCoins,
-        streak: newStreak,
-        bonusXP: bonus.xp,
-        bonusCoins: bonus.coins,
-        leveled: xpResult?.leveled || false,
-        promoted: xpResult?.promoted || false,
-        newRank: xpResult?.newRank,
-        newLevel: xpResult?.newLevel,
-        newTitle: xpResult?.newTitle
+        success: true, xpGained: totalXP, coinsGained: totalCoins, streak: newStreak,
+        bonusXP: bonus.xp, bonusCoins: bonus.coins,
+        leveled: xpResult?.leveled || false, promoted: xpResult?.promoted || false,
+        newRank: xpResult?.newRank, newLevel: xpResult?.newLevel, newTitle: xpResult?.newTitle
     }
 }
 

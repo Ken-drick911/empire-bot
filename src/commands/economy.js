@@ -3,7 +3,7 @@ const { getUser } = require('../data/db')
 
 async function depositCommand(sock, msg, from, sender, args) {
     const amount = parseInt(args[0])
-    const result = deposit(sender, amount)
+    const result = await deposit(sender, amount)
 
     if (!result.success) {
         await sock.sendMessage(from, { text: `❌ ${result.reason}`, quoted: msg })
@@ -18,7 +18,7 @@ async function depositCommand(sock, msg, from, sender, args) {
 
 async function withdrawCommand(sock, msg, from, sender, args) {
     const amount = parseInt(args[0])
-    const result = withdraw(sender, amount)
+    const result = await withdraw(sender, amount)
 
     if (!result.success) {
         await sock.sendMessage(from, { text: `❌ ${result.reason}`, quoted: msg })
@@ -42,7 +42,7 @@ async function giveCommand(sock, msg, from, sender, args) {
     }
 
     const amount = parseInt(args.find(a => !isNaN(parseInt(a))))
-    const result = give(sender, targetId, amount)
+    const result = await give(sender, targetId, amount)
 
     if (!result.success) {
         await sock.sendMessage(from, { text: `❌ ${result.reason}`, quoted: msg })

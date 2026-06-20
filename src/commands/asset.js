@@ -5,7 +5,7 @@ async function assetCommand(sock, msg, from, sender) {
     const mentioned = msg.message?.extendedTextMessage?.contextInfo?.mentionedJid || []
     const quoted = msg.message?.extendedTextMessage?.contextInfo?.participant
     const targetId = mentioned[0] || quoted || sender
-    const user = getUser(targetId)
+    const user = await getUser(targetId)
 
     if (!user) {
         await sock.sendMessage(from, { text: '❌ User not found in the Empire.', quoted: msg })

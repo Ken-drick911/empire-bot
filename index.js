@@ -33,11 +33,11 @@ const { activeCommand, inactiveCommand } = require('./src/commands/activity')
 const { isOnCooldown, getRemainingTime, setCooldown } = require('./src/engine/cooldown')
 const { addModCommand, removeModCommand, isModerator } = require('./src/commands/moderator')
 const { globalRankCommand, globalWealthCommand } = require('./src/commands/globalLeaderboard')
+const { OWNER_NUMBER } = require('./src/config/owner')
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
 const question = (t) => new Promise((r) => rl.question(t, r))
 
-// Admin commands list
 const ADMIN_COMMANDS = [
     'kick', 'warn', 'mute', 'unmute', 'promote', 'demote',
     'antilink', 'antispam', 'antism', 'welcome', 'leave', 'setwelcome',
@@ -45,14 +45,11 @@ const ADMIN_COMMANDS = [
     'delete', 'purge', 'blacklist', 'resetwarn', 'news', 'groupstats', 'gs'
 ]
 
-// Owner commands list
 const OWNER_COMMANDS = [
     'appoint', 'setrep', 'setrank', 'givexp', 'givecoins',
     'resetuser', 'ban', 'unban', 'announce', 'broadcast',
     'restart', 'listgroups', 'addmod', 'removemod'
 ]
-
-const { OWNER_NUMBER } = require('./src/config/owner')
 
 async function startBot() {
     const { state, saveCreds } = await useMultiFileAuthState('auth_info')
@@ -79,7 +76,6 @@ async function startBot() {
 
     sock.ev.on('creds.update', saveCreds)
 
-    // Check if user is group admin
     async function isUserAdmin(chatId, userId) {
         try {
             const meta = await sock.groupMetadata(chatId)
@@ -90,7 +86,6 @@ async function startBot() {
         }
     }
 
-    // Check if user is owner
     function isOwner(sender) {
         return sender === OWNER_NUMBER
     }
@@ -106,48 +101,35 @@ async function startBot() {
         const username = msg.pushName || sender.split('@')[0]
         const isGroup = from.endsWith('@g.us')
 
-        // Only track real text messages, not reactions/receipts/empty events
         const hasRealContent = !!(msg.message.conversation || msg.message.extendedTextMessage?.text || msg.message.imageMessage || msg.message.videoMessage || msg.message.stickerMessage)
         if (!hasRealContent) return
 
-        // Create user if new
-        createUser(sender, username)
+        await createUser(sender, username)
 
-        // Create user if new
-        createUser(sender, username)
-
-        // DM restriction - only owner can use bot in DM
         if (!isGroup && sender !== OWNER_NUMBER) {
             return
         }
 
-        // ---- Ping ----
         if (text.toLowerCase() === '.ping') {
             await sock.sendMessage(from, { text: 'Arthur is live...👑' }, { quoted: msg })
             return
         }
 
-        // ---- Test ----
         if (text.toLowerCase() === '.test') {
             await sock.sendMessage(from, { text: 'Testing....' }, { quoted: msg })
             await sock.sendMessage(from, { text: 'Arthur is live...👑' }, { quoted: msg })
             return
         }
 
-        // ---- Group only logic ----
         if (isGroup) {
-
-            // Mute check
             const isMuted = await checkIfMuted(sock, msg, mutedUsers)
             if (isMuted) {
                 await deleteMutedMessage(sock, msg)
                 return
             }
 
-            // Anti-spam
             await handleAntiSpam(sock, msg, { warnings, groupSettings, isUserAdmin })
 
-            // Anti-link
             await antiLinkHandler(sock, msg, {
                 groupSettings,
                 warnings,
@@ -155,9 +137,8 @@ async function startBot() {
                 mutedUsers
             })
 
-            // Award XP for messages
             if (!text.startsWith('.')) {
-                const result = awardMessageXP(sender, username)
+                const result = await awardMessageXP(sender, username)
                 if (result?.leveled) {
                     await sock.sendMessage(from, {
                         text: `⚔️ @${username} leveled up to *${result.newRank} Lv.${result.newLevel}*!\n🎖️ Title: ${result.newTitle}`,
@@ -167,22 +148,18 @@ async function startBot() {
             }
         }
 
-        // AFK check - mention someone AFK
         await checkAfkMention(sock, msg, from)
 
-        // AFK check - user returns from AFK
         if (!text.startsWith('.')) {
             await checkAfkReturn(sock, msg, from, sender, username)
         }
 
-        // ---- Commands ----
         if (text.startsWith('.')) {
             const [command, ...args] = text.slice(1).trim().split(' ')
             const cmd = command.toLowerCase()
             const isAdmin = isGroup ? await isUserAdmin(from, sender) : false
             const owner = isOwner(sender)
 
-            // Owner only commands
             if (OWNER_COMMANDS.includes(cmd)) {
                 if (!owner) {
                     await sock.sendMessage(from, { text: '👑 Only the Emperor can use this command.', quoted: msg })
@@ -199,9 +176,8 @@ async function startBot() {
                 return
             }
 
-            // Admin only commands
             if (ADMIN_COMMANDS.includes(cmd)) {
-                if (!isAdmin && !owner && !isModerator(sender)) {
+                if (!isAdmin && !owner && !(await isModerator(sender))) {
                     await sock.sendMessage(from, { text: '🛡️ Only admins can use this command.', quoted: msg })
                     return
                 }
@@ -214,7 +190,6 @@ async function startBot() {
                 return
             }
 
-            // Cooldown check (excludes commands with their own cooldown system)
             const noCooldownCommands = ['daily', 'steal']
             if (!noCooldownCommands.includes(cmd)) {
                 if (isOnCooldown(sender, cmd)) {
@@ -225,15 +200,14 @@ async function startBot() {
                 setCooldown(sender, cmd)
             }
 
-            // Everyone commands
             switch (cmd) {
                 case 'menu':
                 case 'm':
                     await menuCommand(sock, msg, from, username)
                     break
-                    case 'decree':
-    await decreeCommand(sock, msg, from, sender, username)
-    break
+                case 'decree':
+                    await decreeCommand(sock, msg, from, sender, username)
+                    break
                 case 'daily':
                     await dailyCommand(sock, msg, from, sender, username)
                     break
@@ -300,7 +274,6 @@ async function startBot() {
         }
     })
 
-    // Welcome / Leave messages
     sock.ev.on('group-participants.update', async (update) => {
         const { id, participants, action } = update
         if (action === 'add' || action === 'remove') {

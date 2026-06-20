@@ -10,7 +10,7 @@ async function stealCommand(sock, msg, from, sender, args) {
         return
     }
 
-    const result = attemptSteal(sender, targetId)
+    const result = await attemptSteal(sender, targetId)
 
     if (!result.success && result.reason) {
         await sock.sendMessage(from, { text: `❌ ${result.reason}`, quoted: msg })

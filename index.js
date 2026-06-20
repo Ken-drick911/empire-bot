@@ -18,7 +18,7 @@ const {
 // Empire System
 const { getUser, createUser } = require('./src/data/db')
 const { awardMessageXP } = require('./src/engine/xp')
-const { menuCommand } = require('./src/commands/menu')
+const { menuCommand, decreeCommand } = require('./src/commands/menu')
 const { dailyCommand } = require('./src/commands/daily')
 const { profileCommand } = require('./src/commands/profile')
 const { assetCommand } = require('./src/commands/asset')
@@ -231,6 +231,9 @@ async function startBot() {
                 case 'm':
                     await menuCommand(sock, msg, from, username)
                     break
+                    case 'decree':
+    await decreeCommand(sock, msg, from, sender, username)
+    break
                 case 'daily':
                     await dailyCommand(sock, msg, from, sender, username)
                     break

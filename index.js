@@ -52,8 +52,7 @@ const OWNER_COMMANDS = [
     'restart', 'listgroups', 'addmod', 'removemod'
 ]
 
-// Your WhatsApp number (owner)
-const OWNER_NUMBER = '204926412185650@lid'
+const { OWNER_NUMBER } = require('./src/config/owner')
 
 async function startBot() {
     const { state, saveCreds } = await useMultiFileAuthState('auth_info')

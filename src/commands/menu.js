@@ -1,5 +1,6 @@
 const fs = require('fs')
 const path = require('path')
+const { isOwnerId } = require('../config/owner')
 
 function getMenuText(senderName) {
     return `╭───⚜️ 𝐄𝐌𝐏𝐈𝐑𝐄 ⚜️───╮
@@ -9,11 +10,8 @@ function getMenuText(senderName) {
 ╰─────────────────╯
 📜 𝗜𝗠𝗣𝗘𝗥𝗜𝗔𝗟 𝗗𝗢𝗦𝗦𝗜𝗘𝗥 📜
 ┣ ♤ .profile / .p
-┣ ♤ .rank / .r
 ┣ ♤ .stats
 ┣ ♤ .setpic
-┣ ♤ .bio
-┣ ♤ .edit
 ┗━━━━━━━━━━━
 
 💰 𝗜𝗠𝗣𝗘𝗥𝗜𝗔𝗟 𝗧𝗥𝗘𝗔𝗦𝗨𝗥𝗬 💰
@@ -29,106 +27,54 @@ function getMenuText(senderName) {
 ┣ ♤ .top
 ┣ ♤ .leaderboard / .lb
 ┣ ♤ .wealthleaderboard / .wlb
+┣ ♤ .gr
+┣ ♤ .gwlb
 ┣ ♤ .ranks
 ┣ ♤ .titles
-┣ ♤ .reputation
 ┗━━━━━━━━━━━
 
 ⚙️ 𝗜𝗠𝗣𝗘𝗥𝗜𝗔𝗟 𝗛𝗘𝗥𝗔𝗟𝗗𝗥𝗬 ⚙️
-┣ ♤ .rules
+┣ ♤ .ping
 ┣ ♤ .test
-┣ ♤ .mods
-┣ ♤ .owner
-┣ ♤ .bots
-┣ ♤ .url
 ┣ ♤ .menu
-┗━━━━━━━━━━━
-
-🎮 𝗜𝗠𝗣𝗘𝗥𝗜𝗔𝗟 𝗔𝗥𝗘𝗡𝗔 🎮
-┣ ♤ .ttt
-┣ ♤ .wcg
-┣ ♤ .aquiz
-┣ ♤ .wouldyourather / .wyr
-┣ ♤ .truth
-┣ ♤ .dare
-┣ ♤ .joke
-┗━━━━━━━━━━━
-
-📲 𝗜𝗠𝗣𝗘𝗥𝗜𝗔𝗟 𝗦𝗖𝗥𝗜𝗕𝗘𝗦 📲
-┣ ♤ .ig
-┣ ♤ .ttk
-┣ ♤ .yt
-┣ ♤ .x
-┣ ♤ .fb
-┣ ♤ .play
-┣ ♤ .anime
-┣ ♤ .manga
-┣ ♤ .manhwa
-┣ ♤ .novel
-┗━━━━━━━━━━━
-
-🔍 𝗜𝗠𝗣𝗘𝗥𝗜𝗔𝗟 𝗦𝗖𝗢𝗨𝗧𝗦 🔍
-┣ ♤ .pinterest / .pint
-┣ ♤ .sauce
-┣ ♤ .wallpaper
-┣ ♤ .lyrics
-┣ ♤ .igstalk
-┣ ♤ .shazam
-┗━━━━━━━━━━━
-
-🤖 𝗜𝗠𝗣𝗘𝗥𝗜𝗔𝗟 𝗢𝗥𝗔𝗖𝗟𝗘 🤖
-┣ ♤ .gpt
-┣ ♤ .copilot
-┣ ♤ .perplexity
-┣ ♤ .imagine
-┣ ♤ .upscale
-┣ ♤ .translate / .tt
-┣ ♤ .transcribe / .tb
-┣ ♤ .ocr
-┣ ♤ .tldr
-┣ ♤ .tts
-┗━━━━━━━━━━━
-
-🔧 𝗜𝗠𝗣𝗘𝗥𝗜𝗔𝗟 𝗙𝗢𝗥𝗚𝗘 🔧
-┣ ♤ .sticker / .s
-┣ ♤ .take
-┣ ♤ .toimg
-┣ ♤ .tovid
-┣ ♤ .rotate
-┣ ♤ .carbon
-┣ ♤ .fancy
+┣ ♤ .afk
 ┗━━━━━━━━━━━
 
 🛠️ 𝗜𝗠𝗣𝗘𝗥𝗜𝗔𝗟 𝗚𝗨𝗔𝗥𝗗𝗦 🛠️
 ┣ ♤ .kick
 ┣ ♤ .warn
-┣ ♤ .resetwarn
 ┣ ♤ .mute
 ┣ ♤ .unmute
 ┣ ♤ .promote
 ┣ ♤ .demote
 ┣ ♤ .antilink
 ┣ ♤ .antispam
-┣ ♤ .blacklist
+┣ ♤ .antism
 ┣ ♤ .welcome
-┣ ♤ .leave
 ┣ ♤ .setwelcome
 ┣ ♤ .setleave
-┣ ♤ .purge
 ┣ ♤ .hidetag
 ┣ ♤ .tagall
 ┣ ♤ .tagadmins
 ┣ ♤ .groupstats / .gs
-┣ ♤ .activity
 ┣ ♤ .active
 ┣ ♤ .inactive
 ┣ ♤ .open
 ┣ ♤ .close
-┣ ♤ .news
-┣ ♤ .delete
+┗━━━━━━━━━━━`
+}
+
+function getDecreeText(senderName) {
+    return `╭───👑 𝐃𝐄𝐂𝐑𝐄𝐄 👑───╮
+│ Emperor Command List
+│ ${senderName}
+╰─────────────────╯
+👑 𝗢𝗪𝗡𝗘𝗥 𝗢𝗡𝗟𝗬 👑
+┣ ♤ .addmod (number)
+┣ ♤ .removemod (number)
 ┗━━━━━━━━━━━
 
-👑 𝗜𝗠𝗣𝗘𝗥𝗜𝗔𝗟 𝗧𝗛𝗥𝗢𝗡𝗘 👑
+⚠️ 𝗡𝗢𝗧 𝗬𝗘𝗧 𝗖𝗢𝗗𝗘𝗗 (𝗣𝗟𝗔𝗖𝗘𝗛𝗢𝗟𝗗𝗘𝗥) ⚠️
 ┣ ♤ .appoint
 ┣ ♤ .setrep
 ┣ ♤ .setrank
@@ -142,7 +88,7 @@ function getMenuText(senderName) {
 ┣ ♤ .restart
 ┣ ♤ .listgroups
 ┗━━━━━━━━━━━`
-} 
+}
 
 async function menuCommand(sock, msg, from, username) {
     const botPicPath = path.join(__dirname, '../../media/bot.jpg')
@@ -151,15 +97,18 @@ async function menuCommand(sock, msg, from, username) {
 
     if (hasPic) {
         const image = fs.readFileSync(botPicPath)
-        await sock.sendMessage(from, {
-            image,
-            caption: menuText
-        }, { quoted: msg })
+        await sock.sendMessage(from, { image, caption: menuText }, { quoted: msg })
     } else {
-        await sock.sendMessage(from, {
-            text: menuText
-        }, { quoted: msg })
+        await sock.sendMessage(from, { text: menuText }, { quoted: msg })
     }
 }
 
-module.exports = { menuCommand }
+async function decreeCommand(sock, msg, from, sender, username) {
+    if (!isOwnerId(sender)) {
+        await sock.sendMessage(from, { text: '👑 Only the Emperor may view the Decree.', quoted: msg })
+        return
+    }
+    await sock.sendMessage(from, { text: getDecreeText(username), quoted: msg })
+}
+
+module.exports = { menuCommand, decreeCommand }

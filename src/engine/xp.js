@@ -90,14 +90,22 @@ function awardXP(userId, amount) {
     const tempUser = { ...user, xp: newXP }
     const result = checkLevelUp(tempUser)
 
-    updateUser(userId, {
-        xp: result.xp,
-        level: result.level,
-        rank: result.rank,
-        title: result.title,
-        vaultCap: result.vaultCap,
-        xpToNext: getXPToNext(result.level)
-    })
+    const now = Date.now()
+const lastMsgTime = user.lastMessage ? new Date(user.lastMessage).getTime() : 0
+const daysSinceLastMsg = (now - lastMsgTime) / (1000 * 60 * 60 * 24)
+const newRecentCount = daysSinceLastMsg > 5 ? 1 : (user.recentMessages || 0) + 1
+
+updateUser(userId, {
+    xp: result.xp,
+    level: result.level,
+    rank: result.rank,
+    title: result.title,
+    vaultCap: result.vaultCap,
+    xpToNext: getXPToNext(result.level),
+    totalMessages: user.totalMessages + 1,
+    recentMessages: newRecentCount,
+    lastMessage: new Date().toISOString()
+})
 
     return {
         gained: amount,

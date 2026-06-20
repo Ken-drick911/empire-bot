@@ -1,59 +1,44 @@
-const { getUser, updateUser } = require('../data/db')
-const { awardXP } = require('./xp')
-const { XP_CONFIG } = require('../config/xp')
+const { claimDaily } = require('../engine/daily')
+const { getUser } = require('../data/db')
 
-function getStreak(user) {
-    if (!user.lastDaily) return 0
-    const now = new Date()
-    const last = new Date(user.lastDaily)
-    const diffDays = Math.floor((now - last) / (1000 * 60 * 60 * 24))
-    if (diffDays === 1) return user.streak + 1
-    if (diffDays === 0) return user.streak
-    return 0
-}
+async function dailyCommand(sock, msg, from, sender, username) {
+    const result = await claimDaily(sender)
 
-function getStreakBonus(streak) {
-    const { daily } = XP_CONFIG
-    if (streak >= 30) return daily.bonusStreak30
-    if (streak >= 7) return daily.bonusStreak7
-    if (streak >= 3) return daily.bonusStreak3
-    return { xp: 0, coins: 0 }
-}
-
-async function claimDaily(userId) {
-    const user = await getUser(userId)
-    if (!user) return { success: false, reason: 'User not found.' }
-
-    if (user.lastDaily) {
-        const now = new Date()
-        const last = new Date(user.lastDaily)
-        const diffHours = (now - last) / (1000 * 60 * 60)
-        if (diffHours < 24) {
-            const hoursLeft = Math.ceil(24 - diffHours)
-            return { success: false, reason: `Already claimed. Come back in ${hoursLeft} hour(s).` }
-        }
+    if (!result.success) {
+        await sock.sendMessage(from, {
+            text: `⏳ 𝗗𝗔𝗜𝗟𝗬 𝗥𝗘𝗪𝗔𝗥𝗗\n━━━━━━━━━━━━━━━━\n❌ ${result.reason}\n━━━━━━━━━━━━━━━━`,
+            quoted: msg
+        })
+        return
     }
 
-    const { daily } = XP_CONFIG
-    const newStreak = getStreak(user)
-    const bonus = getStreakBonus(newStreak)
-    const totalXP = daily.baseXP + bonus.xp
-    const totalCoins = daily.baseCoins + bonus.coins
+    const user = await getUser(sender)
 
-    const xpResult = await awardXP(userId, totalXP)
-
-    await updateUser(userId, {
-        wallet: user.wallet + totalCoins,
-        streak: newStreak,
-        lastDaily: new Date().toISOString()
-    })
-
-    return {
-        success: true, xpGained: totalXP, coinsGained: totalCoins, streak: newStreak,
-        bonusXP: bonus.xp, bonusCoins: bonus.coins,
-        leveled: xpResult?.leveled || false, promoted: xpResult?.promoted || false,
-        newRank: xpResult?.newRank, newLevel: xpResult?.newLevel, newTitle: xpResult?.newTitle
+    let streakText = `🔥 Streak: ${result.streak} day(s)`
+    if (result.bonusXP > 0 || result.bonusCoins > 0) {
+        streakText += `\n🎁 Streak Bonus: +${result.bonusXP} XP  +${result.bonusCoins} 🪙`
     }
+
+    let rewardText = `💰 𝗗𝗔𝗜𝗟𝗬 𝗥𝗘𝗪𝗔𝗥𝗗
+━━━━━━━━━━━━━━━━
+👤 ${username}
+━━━━━━━━━━━━━━━━
+⚡ XP Gained:    +${result.xpGained}
+🪙 Coins Gained: +${result.coinsGained}
+━━━━━━━━━━━━━━━━
+${streakText}
+━━━━━━━━━━━━━━━━
+👝 Wallet: ${user.wallet} 🪙
+⚡ XP: ${user.xp} / ${user.xpToNext}
+━━━━━━━━━━━━━━━━`
+
+    if (result.promoted) {
+        rewardText += `\n\n🎊 RANK UP! Welcome to *${result.newRank}*!\n🎖️ Title: ${result.newTitle}`
+    } else if (result.leveled) {
+        rewardText += `\n\n⚔️ LEVEL UP! *${result.newRank} Lv.${result.newLevel}*\n🎖️ Title: ${result.newTitle}`
+    }
+
+    await sock.sendMessage(from, { text: rewardText, quoted: msg })
 }
 
-module.exports = { claimDaily }
+module.exports = { dailyCommand }

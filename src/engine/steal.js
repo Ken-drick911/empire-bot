@@ -6,9 +6,9 @@ function getRankIndex(rankName) {
     return RANKS.findIndex(r => r.name === rankName)
 }
 
-function canSteal(userId, targetId) {
-    const user = getUser(userId)
-    const target = getUser(targetId)
+async function canSteal(userId, targetId) {
+    const user = await getUser(userId)
+    const target = await getUser(targetId)
 
     if (!user || !target) return { allowed: false, reason: 'User not found.' }
     if (userId === targetId) return { allowed: false, reason: "You can't steal from yourself." }
@@ -32,12 +32,12 @@ function canSteal(userId, targetId) {
     return { allowed: true }
 }
 
-function attemptSteal(userId, targetId) {
-    const check = canSteal(userId, targetId)
+async function attemptSteal(userId, targetId) {
+    const check = await canSteal(userId, targetId)
     if (!check.allowed) return { success: false, reason: check.reason }
 
-    const user = getUser(userId)
-    const target = getUser(targetId)
+    const user = await getUser(userId)
+    const target = await getUser(targetId)
     const { steal } = XP_CONFIG
 
     const userRankIdx = getRankIndex(user.rank)
@@ -50,7 +50,7 @@ function attemptSteal(userId, targetId) {
     const roll = Math.random()
     const success = roll <= successRate
 
-    updateUser(userId, { lastSteal: new Date().toISOString() })
+    await updateUser(userId, { lastSteal: new Date().toISOString() })
 
     if (!success) {
         return { success: false, caught: true }
@@ -58,11 +58,11 @@ function attemptSteal(userId, targetId) {
 
     const stolenAmount = Math.floor(target.wallet * steal.percentage)
 
-    updateUser(userId, {
+    await updateUser(userId, {
         wallet: user.wallet + stolenAmount,
         timesStolen: (user.timesStolen || 0) + 1
     })
-    updateUser(targetId, {
+    await updateUser(targetId, {
         wallet: target.wallet - stolenAmount,
         timesRobbed: (target.timesRobbed || 0) + 1
     })

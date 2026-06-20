@@ -22,7 +22,6 @@ function checkLevelUp(user) {
 
     while (xp >= getXPToNext(level)) {
         xp -= getXPToNext(level)
-
         if (level >= 10) {
             const next = getNextRank(rank)
             if (next) {
@@ -39,29 +38,26 @@ function checkLevelUp(user) {
     const newTitle = getTitle(newRank, level)
     const newVaultCap = getRankByName(newRank)?.vaultCap || user.vaultCap
 
-    return {
-        xp,
-        level,
-        rank: newRank,
-        title: newTitle,
-        vaultCap: newVaultCap,
-        leveled,
-        promoted
-    }
+    return { xp, level, rank: newRank, title: newTitle, vaultCap: newVaultCap, leveled, promoted }
 }
 
-function awardMessageXP(userId, username) {
-    let user = getUser(userId) || createUser(userId, username)
+async function awardMessageXP(userId, username) {
+    let user = await getUser(userId)
+    if (!user) user = await createUser(userId, username)
 
     if (isOnCooldown(user)) return null
     if (!username || username.length < XP_CONFIG.minMessageLength) return null
 
     const gained = XP_CONFIG.messageXP
-    let newXP = user.xp + gained
-    const tempUser = { ...user, xp: newXP }
+    const tempUser = { ...user, xp: user.xp + gained }
     const result = checkLevelUp(tempUser)
 
-    updateUser(userId, {
+    const now = Date.now()
+    const lastMsgTime = user.lastMessage ? new Date(user.lastMessage).getTime() : 0
+    const daysSinceLastMsg = (now - lastMsgTime) / (1000 * 60 * 60 * 24)
+    const newRecentCount = daysSinceLastMsg > 5 ? 1 : (user.recentMessages || 0) + 1
+
+    await updateUser(userId, {
         xp: result.xp,
         level: result.level,
         rank: result.rank,
@@ -69,52 +65,30 @@ function awardMessageXP(userId, username) {
         vaultCap: result.vaultCap,
         xpToNext: getXPToNext(result.level),
         totalMessages: user.totalMessages + 1,
+        recentMessages: newRecentCount,
         lastMessage: new Date().toISOString()
     })
 
-    return {
-        gained,
-        leveled: result.leveled,
-        promoted: result.promoted,
-        newRank: result.rank,
-        newLevel: result.level,
-        newTitle: result.title
-    }
+    return { gained, leveled: result.leveled, promoted: result.promoted, newRank: result.rank, newLevel: result.level, newTitle: result.title }
 }
 
-function awardXP(userId, amount) {
-    const user = getUser(userId)
+async function awardXP(userId, amount) {
+    const user = await getUser(userId)
     if (!user) return null
 
-    let newXP = user.xp + amount
-    const tempUser = { ...user, xp: newXP }
+    const tempUser = { ...user, xp: user.xp + amount }
     const result = checkLevelUp(tempUser)
 
-    const now = Date.now()
-const lastMsgTime = user.lastMessage ? new Date(user.lastMessage).getTime() : 0
-const daysSinceLastMsg = (now - lastMsgTime) / (1000 * 60 * 60 * 24)
-const newRecentCount = daysSinceLastMsg > 5 ? 1 : (user.recentMessages || 0) + 1
+    await updateUser(userId, {
+        xp: result.xp,
+        level: result.level,
+        rank: result.rank,
+        title: result.title,
+        vaultCap: result.vaultCap,
+        xpToNext: getXPToNext(result.level)
+    })
 
-updateUser(userId, {
-    xp: result.xp,
-    level: result.level,
-    rank: result.rank,
-    title: result.title,
-    vaultCap: result.vaultCap,
-    xpToNext: getXPToNext(result.level),
-    totalMessages: user.totalMessages + 1,
-    recentMessages: newRecentCount,
-    lastMessage: new Date().toISOString()
-})
-
-    return {
-        gained: amount,
-        leveled: result.leveled,
-        promoted: result.promoted,
-        newRank: result.rank,
-        newLevel: result.level,
-        newTitle: result.title
-    }
+    return { gained: amount, leveled: result.leveled, promoted: result.promoted, newRank: result.rank, newLevel: result.level, newTitle: result.title }
 }
 
 module.exports = { awardMessageXP, awardXP, getXPToNext }

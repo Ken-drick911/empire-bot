@@ -5,11 +5,10 @@ const fs = require('fs')
 const path = require('path')
 
 async function profileCommand(sock, msg, from, sender, username) {
-    // Check if viewing someone else's profile
     const mentioned = msg.message?.extendedTextMessage?.contextInfo?.mentionedJid || []
     const quoted = msg.message?.extendedTextMessage?.contextInfo?.participant
     const targetId = mentioned[0] || quoted || sender
-    const user = getUser(targetId)
+    const user = await getUser(targetId)
 
     if (!user) {
         await sock.sendMessage(from, { text: '❌ User not found in the Empire.', quoted: msg })

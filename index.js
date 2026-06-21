@@ -33,6 +33,7 @@ const { activeCommand, inactiveCommand } = require('./src/commands/activity')
 const { isOnCooldown, getRemainingTime, setCooldown } = require('./src/engine/cooldown')
 const { addModCommand, removeModCommand, isModerator } = require('./src/commands/moderator')
 const { globalRankCommand, globalWealthCommand } = require('./src/commands/globalLeaderboard')
+const { reputationListCommand, myReputationCommand } = require('./src/commands/reputation')
 const { OWNER_NUMBER } = require('./src/config/owner')
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
@@ -259,6 +260,14 @@ async function startBot() {
                 case 'titles':
                     await titlesCommand(sock, msg, from)
                     break
+                    case 'reputation':
+case 'rep':
+    await reputationListCommand(sock, msg, from)
+    break
+case 'myreputation':
+case 'mr':
+    await myReputationCommand(sock, msg, from, sender, username)
+    break
                 case 'afk':
                     await afkCommand(sock, msg, from, sender, args)
                     break

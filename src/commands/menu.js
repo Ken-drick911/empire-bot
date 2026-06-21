@@ -31,6 +31,8 @@ function getMenuText(senderName) {
 ┣ ♤ .gwlb
 ┣ ♤ .ranks
 ┣ ♤ .titles
+┣ ♤ .reputation / .rep
+┣ ♤ .myreputation / .mr
 ┗━━━━━━━━━━━
 
 ⚙️ 𝗜𝗠𝗣𝗘𝗥𝗜𝗔𝗟 𝗛𝗘𝗥𝗔𝗟𝗗𝗥𝗬 ⚙️

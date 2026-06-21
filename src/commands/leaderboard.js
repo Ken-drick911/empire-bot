@@ -9,14 +9,26 @@ function getRankIndex(rankName) {
 const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟']
 
 async function leaderboardCommand(sock, msg, from) {
-    const allUsers = Object.values(await getAllUsers())
+    const isGroup = from.endsWith('@g.us')
+    const allUsersObj = await getAllUsers()
+    let pool = Object.values(allUsersObj)
 
-    if (!allUsers.length) {
-        await sock.sendMessage(from, { text: '❌ No users found in the Empire yet.', quoted: msg })
+    if (isGroup) {
+        try {
+            const meta = await sock.groupMetadata(from)
+            const memberIds = meta.participants.map(p => p.id)
+            pool = pool.filter(u => memberIds.includes(u.id))
+        } catch {
+            // fallback to full pool if metadata fails
+        }
+    }
+
+    if (!pool.length) {
+        await sock.sendMessage(from, { text: '❌ No ranked members found in this group yet.', quoted: msg })
         return
     }
 
-    const sorted = allUsers.sort((a, b) => {
+    const sorted = pool.sort((a, b) => {
         const rankDiff = getRankIndex(b.rank) - getRankIndex(a.rank)
         if (rankDiff !== 0) return rankDiff
         const levelDiff = b.level - a.level
@@ -42,14 +54,26 @@ ${list}
 }
 
 async function wealthLeaderboardCommand(sock, msg, from) {
-    const allUsers = Object.values(await getAllUsers())
+    const isGroup = from.endsWith('@g.us')
+    const allUsersObj = await getAllUsers()
+    let pool = Object.values(allUsersObj)
 
-    if (!allUsers.length) {
-        await sock.sendMessage(from, { text: '❌ No users found in the Empire yet.', quoted: msg })
+    if (isGroup) {
+        try {
+            const meta = await sock.groupMetadata(from)
+            const memberIds = meta.participants.map(p => p.id)
+            pool = pool.filter(u => memberIds.includes(u.id))
+        } catch {
+            // fallback to full pool if metadata fails
+        }
+    }
+
+    if (!pool.length) {
+        await sock.sendMessage(from, { text: '❌ No ranked members found in this group yet.', quoted: msg })
         return
     }
 
-    const sorted = allUsers
+    const sorted = pool
         .map(u => ({ ...u, netWorth: u.wallet + u.vault }))
         .sort((a, b) => b.netWorth - a.netWorth)
         .slice(0, 10)

@@ -106,7 +106,7 @@ async function muteMembers(sock, msg, args, mutedUsers, isUserAdmin) {
     const targets = getTargetUsers(msg, args)
     if (!targets.length) return reply(sock, chatId, '❌ Tag or reply to the member(s) to mute.\nExample: .mute @user1 @user2 30m', msg)
     if (targets.length > 10) return reply(sock, chatId, '❌ Max 10 members at once.', msg)
-    let durationStr = args.find(a => /^\d+[mhd]$/i.test(a)) || '1h'
+    let durationStr = args.find(a => /^\d+(s|sec|secs|seconds|m|min|mins|minutes|h|hr|hrs|hours|d|day|days)$/i.test(a)) || '1h'
     const durationMs = parseDuration(durationStr)
     if (!durationMs) return reply(sock, chatId, '❌ Invalid duration. Use like: 30m, 2h, 1d', msg)
     if (!mutedUsers.has(chatId)) mutedUsers.set(chatId, new Map())

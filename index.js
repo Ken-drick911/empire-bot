@@ -34,6 +34,8 @@ const { isOnCooldown, getRemainingTime, setCooldown } = require('./src/engine/co
 const { addModCommand, removeModCommand, isModerator } = require('./src/commands/moderator')
 const { globalRankCommand, globalWealthCommand } = require('./src/commands/globalLeaderboard')
 const { reputationListCommand, myReputationCommand } = require('./src/commands/reputation')
+const { giveCoinsCommand, banCommand, unbanCommand } = require('./src/commands/ownerCommands')
+const { isBanned } = require('./src/engine/moderation')
 const { OWNER_NUMBER } = require('./src/config/owner')
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
@@ -48,7 +50,7 @@ const ADMIN_COMMANDS = [
 
 const OWNER_COMMANDS = [
     'appoint', 'setrep', 'setrank', 'givexp', 'givecoins',
-    'resetuser', 'ban', 'unban', 'announce', 'broadcast',
+    'resetuser', 'announce', 'broadcast',
     'restart', 'listgroups', 'addmod', 'removemod'
 ]
 
@@ -106,6 +108,10 @@ async function startBot() {
         if (!hasRealContent) return
 
         await createUser(sender, username)
+
+        if (await isBanned(sender)) {
+            return
+        }
 
         if (!isGroup && sender !== OWNER_NUMBER) {
             return
@@ -173,6 +179,23 @@ async function startBot() {
                 if (cmd === 'removemod') {
                     await removeModCommand(sock, msg, from, args)
                     return
+                }
+                if (cmd === 'givecoins') {
+                    await giveCoinsCommand(sock, msg, from, args)
+                    return
+                }
+                return
+            }
+
+            if (cmd === 'ban' || cmd === 'unban') {
+                if (!owner && !(await isModerator(sender))) {
+                    await sock.sendMessage(from, { text: '👑 Only the Emperor or Moderators can use this command.', quoted: msg })
+                    return
+                }
+                if (cmd === 'ban') {
+                    await banCommand(sock, msg, from, args)
+                } else {
+                    await unbanCommand(sock, msg, from, args)
                 }
                 return
             }
@@ -260,14 +283,6 @@ async function startBot() {
                 case 'titles':
                     await titlesCommand(sock, msg, from)
                     break
-                    case 'reputation':
-case 'rep':
-    await reputationListCommand(sock, msg, from)
-    break
-case 'myreputation':
-case 'mr':
-    await myReputationCommand(sock, msg, from, sender, username)
-    break
                 case 'afk':
                     await afkCommand(sock, msg, from, sender, args)
                     break
@@ -276,6 +291,14 @@ case 'mr':
                     break
                 case 'inactive':
                     await inactiveCommand(sock, msg, from)
+                    break
+                case 'reputation':
+                case 'rep':
+                    await reputationListCommand(sock, msg, from)
+                    break
+                case 'myreputation':
+                case 'mr':
+                    await myReputationCommand(sock, msg, from, sender, username)
                     break
                 default:
                     break

@@ -403,14 +403,14 @@ async function toggleLeave(sock, chatId, args, groupSettings) {
     await sock.sendMessage(chatId, { text: `👋 Leave messages ${setting === 'on' ? 'ON' : 'OFF'}` })
 }
 
-async function setWelcomeMessage(sock, chatId, args, msg) {
+async function setWelcomeMessage(sock, chatId, args, msg, groupSettings) {
     const text = args.join(' ')
     if (!text) return reply(sock, chatId, '❌ Please provide a message.\nExample: .setwelcome "Welcome @ to the group!"', msg)
     groupSettings.set(`welcome_msg_${chatId}`, text)
     await sock.sendMessage(chatId, { text: `✅ Welcome message set:\n${text}` })
 }
 
-async function setLeaveMessage(sock, chatId, args) {
+async function setLeaveMessage(sock, chatId, args, groupSettings) {
     const text = args.join(' ')
     if (!text) return reply(sock, chatId, '❌ Please provide a message.\nExample: .setleave "Goodbye @, see you later!"')
     groupSettings.set(`leave_msg_${chatId}`, text)
@@ -566,8 +566,8 @@ async function handleGroupCommands(sock, msg, command, args, deps) {
             case 'antism': await toggleAntiStatusMention(sock, chatId, args, settings); break
         case 'welcome': await toggleWelcome(sock, chatId, args, settings); break
         case 'leave': await toggleLeave(sock, chatId, args, settings); break
-        case 'setwelcome': await setWelcomeMessage(sock, chatId, args, msg); break
-        case 'setleave': await setLeaveMessage(sock, chatId, args); break
+        case 'setwelcome': await setWelcomeMessage(sock, chatId, args, msg, groupSettings); break
+case 'setleave': await setLeaveMessage(sock, chatId, args, groupSettings); break
         case 'tagall': await tagAll(sock, msg, args); break
         case 'tagadmins': await tagAdmins(sock, msg, args); break
         case 'hidetag': await hideTag(sock, msg, args); break

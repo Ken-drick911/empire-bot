@@ -417,7 +417,7 @@ async function setLeaveMessage(sock, chatId, args, groupSettings) {
     await sock.sendMessage(chatId, { text: `✅ Leave message set:\n${text}` })
 }
 
-async function sendGroupMessage(sock, chatId, participants, action) {
+async function sendGroupMessage(sock, chatId, participants, action, groupSettings) {
     const key = action === 'add' ? `welcome_${chatId}` : `leave_${chatId}`
     if (!groupSettings.get(key)) return
     const msgKey = action === 'add' ? `welcome_msg_${chatId}` : `leave_msg_${chatId}`
@@ -426,9 +426,11 @@ async function sendGroupMessage(sock, chatId, participants, action) {
         template = action === 'add' ? '👋 Welcome @!' : '👋 Goodbye @!'
     }
     for (const p of participants) {
-        const mention = `@${p.split('@')[0]}`
+        const id = typeof p === 'string' ? p : p.id
+        if (!id) continue
+        const mention = `@${id.split('@')[0]}`
         const finalMsg = template.replace(/@/g, mention)
-        await sock.sendMessage(chatId, { text: finalMsg, mentions: [p] })
+        await sock.sendMessage(chatId, { text: finalMsg, mentions: [id] })
     }
 }
 

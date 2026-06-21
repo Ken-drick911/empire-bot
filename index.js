@@ -309,7 +309,7 @@ async function startBot() {
     sock.ev.on('group-participants.update', async (update) => {
         const { id, participants, action } = update
         if (action === 'add' || action === 'remove') {
-            await sendGroupMessage(sock, id, participants, action)
+            await sendGroupMessage(sock, id, participants, action, groupSettings)
         }
     })
 }

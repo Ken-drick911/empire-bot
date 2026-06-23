@@ -8,9 +8,11 @@ async function pair() {
   const { state, saveCreds } = await useMultiFileAuthState(AUTH_FOLDER);
 
   const sock = makeWASocket({
-    auth: state,
-    printQRInTerminal: false,
-  });
+  auth: state,
+  printQRInTerminal: false,
+  connectTimeoutMs: 60000,
+  defaultQueryTimeoutMs: 60000,
+});
 
   sock.ev.on('creds.update', saveCreds);
 

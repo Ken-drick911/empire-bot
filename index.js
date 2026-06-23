@@ -1,6 +1,5 @@
 const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
 const pino = require('pino')
-const readline = require('readline')
 
 // Group Management
 const {
@@ -40,8 +39,6 @@ const { announceCommand, broadcastCommand, restartCommand, listGroupsCommand } =
 const { isBanned } = require('./src/engine/moderation')
 const { OWNER_NUMBER } = require('./src/config/owner')
 
-const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
-const question = (t) => new Promise((r) => rl.question(t, r))
 
 const ADMIN_COMMANDS = [
     'kick', 'warn', 'mute', 'unmute', 'promote', 'demote',

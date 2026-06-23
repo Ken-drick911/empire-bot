@@ -10,8 +10,9 @@ async function pair() {
   const sock = makeWASocket({
   auth: state,
   printQRInTerminal: false,
-  connectTimeoutMs: 60000,
-  defaultQueryTimeoutMs: 60000,
+  connectTimeoutMs: 120000,
+  defaultQueryTimeoutMs: 120000,
+  keepAliveIntervalMs: 10000,
 });
 
   sock.ev.on('creds.update', saveCreds);
@@ -28,21 +29,22 @@ async function pair() {
   }
 
   sock.ev.on('connection.update', ({ connection, lastDisconnect }) => {
-    if (connection === 'open') {
-      console.log('\n✅ Paired successfully! Auth session saved to auth_info_baileys/');
-      console.log('You can now stop this script and deploy normally.');
-      process.exit(0);
+  if (connection === 'open') {
+    console.log('\n✅ Paired successfully! Auth session saved to auth_info_baileys/');
+    console.log('You can now stop this script and deploy normally.');
+    process.exit(0);
+  }
+  if (connection === 'close') {
+    const code = lastDisconnect?.error?.output?.statusCode;
+    if (code === DisconnectReason.loggedOut) {
+      console.log('Logged out.');
+      process.exit(1);
+    } else {
+      console.log('Connection closed, reconnecting in 3s...');
+      setTimeout(pair, 3000);
     }
-    if (connection === 'close') {
-      const code = lastDisconnect?.error?.output?.statusCode;
-      if (code !== DisconnectReason.loggedOut) {
-        console.log('Connection closed, retrying...');
-      } else {
-        console.log('Logged out.');
-        process.exit(1);
-      }
-    }
-  });
+  }
+});
 }
 
 pair();

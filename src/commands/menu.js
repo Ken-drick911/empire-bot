@@ -5,7 +5,7 @@ const { isOwnerId } = require('../config/owner')
 function getMenuText(senderName) {
     return `╭───⚜️ 𝐄𝐌𝐏𝐈𝐑𝐄 ⚜️───╮
 │ 👑 Prefix: .
-│ ⚔️ Name: ${senderName}
+│ ⚔️ Name: 𝗔𝗿𝘁𝗵𝘂𝗿
 │ 🏛️ Emperor: 𝙺𝙴𝙽♠️
 ╰─────────────────╯
 📜 𝗜𝗠𝗣𝗘𝗥𝗜𝗔𝗟 𝗗𝗢𝗦𝗦𝗜𝗘𝗥 📜
@@ -70,7 +70,7 @@ function getMenuText(senderName) {
 function getDecreeText(senderName) {
     return `╭───👑 𝐃𝐄𝐂𝐑𝐄𝐄 👑───╮
 │ Emperor Command List
-│ ${senderName}
+│ 𝗔𝗿𝘁𝗵𝘂𝗿
 ╰─────────────────╯
 👑 𝗢𝗪𝗡𝗘𝗥 𝗢𝗡𝗟𝗬 👑
 ┣ ♤ .addmod (number)
@@ -117,7 +117,7 @@ function getModMenuText(senderName) {
 ┣ ♤ .modmenu
 ┗━━━━━━━━━━━
 
-— Serve the Empire, ${senderName} ⚔️`
+— Serve the Empire ⚔️
 }
 
 async function menuCommand(sock, msg, from, username) {

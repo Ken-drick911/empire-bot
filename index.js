@@ -54,18 +54,12 @@ const OWNER_COMMANDS = [
 ]
 
 async function startBot() {
-    const { state, saveCreds } = await useMultiFileAuthState('auth_info')
+    const { state, saveCreds } = await useMultiFileAuthState('./auth_info_baileys')
     const sock = makeWASocket({
         auth: state,
         logger: pino({ level: 'silent' }),
         printQRInTerminal: false
     })
-
-    if (!sock.authState.creds.registered) {
-        const num = await question('Enter your WhatsApp number with country code: ')
-        const code = await sock.requestPairingCode(num.trim())
-        console.log('Your pairing code: ' + code)
-    }
 
     sock.ev.on('connection.update', async (u) => {
         const { connection, lastDisconnect } = u

@@ -40,6 +40,7 @@ function getMenuText(senderName) {
 ┣ ♤ .test
 ┣ ♤ .menu
 ┣ ♤ .afk
+┣ ♤ .checkin
 ┗━━━━━━━━━━━
 
 🛠️ 𝗜𝗠𝗣𝗘𝗥𝗜𝗔𝗟 𝗚𝗨𝗔𝗥𝗗𝗦 🛠️
@@ -74,22 +75,49 @@ function getDecreeText(senderName) {
 👑 𝗢𝗪𝗡𝗘𝗥 𝗢𝗡𝗟𝗬 👑
 ┣ ♤ .addmod (number)
 ┣ ♤ .removemod (number)
+┣ ♤ .appoint (number) (rank)
+┣ ♤ .setrank (number) (rank)
+┣ ♤ .givexp (number) (amount)
+┣ ♤ .givecoins (number) (amount)
+┣ ♤ .ban (number) [time]
+┣ ♤ .unban (number)
+┣ ♤ .restart
 ┗━━━━━━━━━━━
 
-⚠️ 𝗡𝗢𝗧 𝗬𝗘𝗧 𝗖𝗢𝗗𝗘𝗗 (𝗣𝗟𝗔𝗖𝗘𝗛𝗢𝗟𝗗𝗘𝗥) ⚠️
-┣ ♤ .appoint
-┣ ♤ .setrep
-┣ ♤ .setrank
-┣ ♤ .givexp
-┣ ♤ .givecoins
-┣ ♤ .resetuser
-┣ ♤ .ban
-┣ ♤ .unban
-┣ ♤ .announce
-┣ ♤ .broadcast
-┣ ♤ .restart
+⚔️ 𝗢𝗪𝗡𝗘𝗥 + 𝗠𝗢𝗗 👑
+┣ ♤ .resetuser (number)
+┣ ♤ .announce (message)
+┣ ♤ .broadcast (message)
 ┣ ♤ .listgroups
+┣ ♤ .modmenu
 ┗━━━━━━━━━━━`
+}
+
+function getModMenuText(senderName) {
+    return `╭───⚔️ 𝗠𝗢𝗗 𝗔𝗥𝗦𝗘𝗡𝗔𝗟 ⚔️───╮
+│ Moderator Command List
+│ ${senderName}
+╰─────────────────╯
+🛡️ 𝗠𝗢𝗗𝗘𝗥𝗔𝗧𝗜𝗢𝗡 🛡️
+┣ ♤ .ban (number) [time]
+┣ ♤ .unban (number)
+┣ ♤ .resetuser (number)
+┣ ♤ .warn @user
+┣ ♤ .kick @user
+┣ ♤ .mute / .unmute
+┗━━━━━━━━━━━
+
+📢 𝗕𝗥𝗢𝗔𝗗𝗖𝗔𝗦𝗧 📢
+┣ ♤ .announce (message)
+┣ ♤ .broadcast (message)
+┗━━━━━━━━━━━
+
+📋 𝗜𝗡𝗙𝗢 📋
+┣ ♤ .listgroups
+┣ ♤ .modmenu
+┗━━━━━━━━━━━
+
+— Serve the Empire, ${senderName} ⚔️`
 }
 
 async function menuCommand(sock, msg, from, username) {
@@ -113,4 +141,8 @@ async function decreeCommand(sock, msg, from, sender, username) {
     await sock.sendMessage(from, { text: getDecreeText(username), quoted: msg })
 }
 
-module.exports = { menuCommand, decreeCommand }
+async function modMenuCommand(sock, msg, from, username) {
+    await sock.sendMessage(from, { text: getModMenuText(username), quoted: msg })
+}
+
+module.exports = { menuCommand, decreeCommand, modMenuCommand }

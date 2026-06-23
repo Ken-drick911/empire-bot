@@ -18,7 +18,7 @@ const {
 // Empire System
 const { getUser, createUser } = require('./src/data/db')
 const { awardMessageXP } = require('./src/engine/xp')
-const { menuCommand, decreeCommand } = require('./src/commands/menu')
+const { menuCommand, decreeCommand, modMenuCommand } = require('./src/commands/menu')
 const { dailyCommand } = require('./src/commands/daily')
 const { profileCommand } = require('./src/commands/profile')
 const { assetCommand } = require('./src/commands/asset')
@@ -35,6 +35,8 @@ const { addModCommand, removeModCommand, isModerator } = require('./src/commands
 const { globalRankCommand, globalWealthCommand } = require('./src/commands/globalLeaderboard')
 const { reputationListCommand, myReputationCommand } = require('./src/commands/reputation')
 const { giveCoinsCommand, banCommand, unbanCommand } = require('./src/commands/ownerCommands')
+const { appointCommand, setRankCommand, giveXPCommand, resetUserCommand } = require('./src/commands/ownerCommands2')
+const { announceCommand, broadcastCommand, restartCommand, listGroupsCommand } = require('./src/commands/ownerCommands3')
 const { isBanned } = require('./src/engine/moderation')
 const { OWNER_NUMBER } = require('./src/config/owner')
 
@@ -232,6 +234,50 @@ async function startBot() {
                 case 'decree':
                     await decreeCommand(sock, msg, from, sender, username)
                     break
+                    case 'modmenu':
+  if (!owner && !(await isModerator(sender))) return sock.sendMessage(from, { text: '❌ Moderators only.', quoted: msg })
+  await modMenuCommand(sock, msg, from, username)
+  break
+
+case 'appoint':
+  if (!owner) return sock.sendMessage(from, { text: '❌ Owner only.', quoted: msg })
+  await appointCommand(sock, msg, from, args)
+  break
+
+case 'setrank':
+  if (!owner) return sock.sendMessage(from, { text: '❌ Owner only.', quoted: msg })
+  await setRankCommand(sock, msg, from, args)
+  break
+
+case 'givexp':
+  if (!owner) return sock.sendMessage(from, { text: '❌ Owner only.', quoted: msg })
+  await giveXPCommand(sock, msg, from, args)
+  break
+
+case 'resetuser':
+  if (!owner && !(await isModerator(sender))) return sock.sendMessage(from, { text: '❌ Owner/Mod only.', quoted: msg })
+  await resetUserCommand(sock, msg, from, args)
+  break
+
+case 'announce':
+  if (!owner && !(await isModerator(sender))) return sock.sendMessage(from, { text: '❌ Owner/Mod only.', quoted: msg })
+  await announceCommand(sock, msg, from, args)
+  break
+
+case 'broadcast':
+  if (!owner && !(await isModerator(sender))) return sock.sendMessage(from, { text: '❌ Owner/Mod only.', quoted: msg })
+  await broadcastCommand(sock, msg, from, args)
+  break
+
+case 'restart':
+  if (!owner) return sock.sendMessage(from, { text: '❌ Owner only.', quoted: msg })
+  await restartCommand(sock, msg, from)
+  break
+
+case 'listgroups':
+  if (!owner && !(await isModerator(sender))) return sock.sendMessage(from, { text: '❌ Owner/Mod only.', quoted: msg })
+  await listGroupsCommand(sock, msg, from)
+  break
                 case 'daily':
                     await dailyCommand(sock, msg, from, sender, username)
                     break

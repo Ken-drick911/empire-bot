@@ -1,0 +1,15 @@
+[33m63368e4[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Update index.js
+[33ma06bef4[m Fixed readline stdout typo
+[33m7ad8f7f[m Update WhatsApp pairing code input handling
+[33m5c37bd5[m Removed Railway-specific code from index.js
+[33m0f4ce71[m Implement health check server for Railway
+[33m8957620[m Merge branch 'main' of https://github.com/Ken-drick911/empire-bot
+[33m7ebd08f[m Added global error handlers for Railway debugging
+[33m333ad73[m Implement error handling in startBot
+[33m5e0f5b5[m Merge branch 'main' of https://github.com/Ken-drick911/empire-bot
+[33me6d3ec5[m Set Node 20 engine requirement for Railway
+[33mdd63504[m Update index.js
+[33md77ea6a[m Merge branch 'main' of https://github.com/Ken-drick911/empire-bot
+[33m67ba7e6[m Updated package-lock.json for Railway deployment
+[33m7490aee[m Delete empire-bot-full.zip
+[33m5c04213[m Removed deployment zip files

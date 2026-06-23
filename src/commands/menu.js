@@ -117,7 +117,7 @@ function getModMenuText(senderName) {
 ┣ ♤ .modmenu
 ┗━━━━━━━━━━━
 
-— Serve the Empire ⚔️
+— Serve the Empire ⚔️`
 }
 
 async function menuCommand(sock, msg, from, username) {

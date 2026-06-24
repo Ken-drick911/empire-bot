@@ -33,16 +33,15 @@ const BOT_WARN_LIMIT = 2
 // ---------- Helpers ----------
 function parseDuration(str) {
     if (!str) return null
-    const match = str.match(/^(\d+)([mhd])$/i)
+    const match = str.match(/^(\d+)(s|sec|secs|seconds|m|min|mins|minutes|h|hr|hrs|hours|d|day|days)$/i)
     if (!match) return null
     const val = parseInt(match[1])
     const unit = match[2].toLowerCase()
-    switch(unit) {
-        case 'm': return val * 60 * 1000
-        case 'h': return val * 60 * 60 * 1000
-        case 'd': return val * 24 * 60 * 60 * 1000
-        default: return null
-    }
+    if (unit.startsWith('s')) return val * 1000
+    if (unit.startsWith('m')) return val * 60 * 1000
+    if (unit.startsWith('h')) return val * 60 * 60 * 1000
+    if (unit.startsWith('d')) return val * 24 * 60 * 60 * 1000
+    return null
 }
 
 function formatTime(ms) {

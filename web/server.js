@@ -25,7 +25,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'))
 })
 
-const client = new MongoClient(process.env.MONGODB_URI)
+const client = new MongoClient(process.env.MONGO_URI)
 client.connect().then(() => {
     global._db = client.db('empireBot')
     app.listen(PORT, () => {

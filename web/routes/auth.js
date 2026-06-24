@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const { getDB } = require('../../src/data/db')
+const getDB = () => global._db
 
 const JWT_SECRET = process.env.JWT_SECRET || 'empire_secret_key'
 

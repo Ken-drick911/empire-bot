@@ -70,7 +70,10 @@ async function attemptSteal(userId, targetId) {
     return { success: false, caught: true, fine, penalty }
     }
 
-    const stolenAmount = Math.floor(target.wallet * steal.percentage)
+    const minSteal = 0.05
+const maxSteal = 0.30
+const stealRate = minSteal + Math.random() * (maxSteal - minSteal)
+const stolenAmount = Math.floor(target.wallet * stealRate)
 
     await updateUser(userId, {
         wallet: user.wallet + stolenAmount,

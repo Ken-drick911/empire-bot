@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const auth = require('../middleware/authMiddleware')
-const { getDB } = require('../../src/data/db')
+const getDB = () => global._db
 
 // Get own profile
 router.get('/me', auth, async (req, res) => {

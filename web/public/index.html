@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Empire Bot</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Navbar -->
+        <nav class="navbar">
+            <div class="nav-logo">⚔️ EMPIRE</div>
+            <button class="nav-toggle" onclick="toggleMenu()">☰</button>
+            <div class="nav-links" id="navLinks">
+                <a href="#" onclick="showPage('home')">Home</a>
+                <a href="#" onclick="showPage('leaderboard')">Leaderboard</a>
+                <a href="#" onclick="showPage('shop')">Shop</a>
+                <a href="#" onclick="showPage('profile')" id="profileLink" style="display:none">Profile</a>
+                <button class="btn-login" id="loginBtn" onclick="showPage('login')">Login</button>
+                <button class="btn-logout" id="logoutBtn" style="display:none" onclick="logout()">Logout</button>
+            </div>
+        </nav>
+
+        <!-- Pages -->
+        <div id="page-home" class="page active">
+            <div class="hero">
+                <h1>⚔️ EMPIRE</h1>
+                <p>A medieval WhatsApp community. Rise through the ranks. Build your legacy.</p>
+                <button onclick="showPage('login')" class="btn-primary">Join the Empire</button>
+            </div>
+        </div>
+
+        <div id="page-login" class="page">
+            <div class="auth-card">
+                <h2 id="authTitle">Login</h2>
+                <div id="loginForm">
+                    <input type="tel" id="loginPhone" placeholder="Phone (e.g. 2348012345678)">
+                    <input type="password" id="loginPassword" placeholder="Password">
+                    <button class="btn-primary" onclick="login()">Login</button>
+                    <p>No account? <a href="#" onclick="toggleAuth()">Register</a></p>
+                </div>
+                <div id="registerForm" style="display:none">
+                    <input type="text" id="regUsername" placeholder="Username">
+                    <input type="tel" id="regPhone" placeholder="Phone (e.g. 2348012345678)">
+                    <input type="password" id="regPassword" placeholder="Password">
+                    <button class="btn-primary" onclick="register()">Register</button>
+                    <p>Have account? <a href="#" onclick="toggleAuth()">Login</a></p>
+                </div>
+                <p id="authMsg" class="msg"></p>
+            </div>
+        </div>
+
+        <div id="page-profile" class="page">
+            <div class="profile-card">
+                <div class="profile-cover" id="profileCover"></div>
+                <div class="profile-avatar-wrap">
+                    <img id="profileAvatar" src="/images/default-avatar.png" class="profile-avatar">
+                </div>
+                <h2 id="profileName"></h2>
+                <p id="profileTitle" class="profile-title"></p>
+                <p id="profileBio" class="profile-bio"></p>
+                <div class="profile-stats">
+                    <div class="stat"><span id="statXP">0</span><label>XP</label></div>
+                    <div class="stat"><span id="statLevel">1</span><label>Level</label></div>
+                    <div class="stat"><span id="statWallet">0</span><label>Wallet</label></div>
+                    <div class="stat"><span id="statVault">0</span><label>Vault</label></div>
+                </div>
+                <div class="xp-bar-wrap">
+                    <div class="xp-bar" id="xpBar"></div>
+                </div>
+                <div class="profile-rank" id="profileRank"></div>
+                <div class="profile-edit">
+                    <input type="url" id="editAvatar" placeholder="Avatar image URL">
+                    <input type="url" id="editCover" placeholder="Cover image URL">
+                    <input type="text" id="editBio" placeholder="Bio">
+                    <button class="btn-primary" onclick="updateProfile()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-shop" class="page">
+            <h1 class="page-title">⚔️ IMPERIAL SHOP</h1>
+            <div class="wallet-bar">
+                <span>💰 Wallet: <b id="shopWallet">0</b></span>
+                <span>🏦 Vault: <b id="shopVault">0</b></span>
+            </div>
+            <div class="shop-grid" id="shopGrid"></div>
+        </div>
+
+        <div id="page-leaderboard" class="page">
+            <h1 class="page-title">🏆 HALL OF FAME</h1>
+            <div class="lb-tabs">
+                <button class="lb-tab active" onclick="loadLeaderboard('xp', this)">⚔️ XP</button>
+                <button class="lb-tab" onclick="loadLeaderboard('wealth', this)">💰 Wealth</button>
+            </div>
+            <div id="lbPodium" class="lb-podium"></div>
+            <div id="lbList" class="lb-list"></div>
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+</body>
+  </html>

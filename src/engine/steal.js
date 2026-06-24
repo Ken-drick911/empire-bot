@@ -53,7 +53,21 @@ async function attemptSteal(userId, targetId) {
     await updateUser(userId, { lastSteal: new Date().toISOString() })
 
     if (!success) {
-        return { success: false, caught: true }
+    const fineRoll = Math.random()
+    let fine = 0
+    let penalty = 'warning'
+
+    if (fineRoll > 0.40 && fineRoll <= 0.70) {
+        fine = Math.floor(user.wallet * 0.05)
+        penalty = 'small'
+    } else if (fineRoll > 0.70) {
+        fine = Math.floor(user.wallet * 0.15)
+        penalty = 'harsh'
+    }
+
+    const newWallet = Math.max(0, user.wallet - fine)
+    if (fine > 0) await updateUser(userId, { wallet: newWallet })
+    return { success: false, caught: true, fine, penalty }
     }
 
     const stolenAmount = Math.floor(target.wallet * steal.percentage)

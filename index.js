@@ -1,6 +1,6 @@
 const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
 const pino = require('pino')
-const { saveSession, loadSession } = require('./src/data/db')
+const { saveSession, loadSession, getAllGroupSettings } = require('./src/data/db')
 
 // Group Management
 const {
@@ -55,13 +55,20 @@ const OWNER_COMMANDS = [
 ]
 
 async function startBot() {
-    const { state, saveCreds } = await useMultiFileAuthState('./auth_info_baileys')
+    
     const sock = makeWASocket({
         auth: state,
         logger: pino({ level: 'silent' }),
         printQRInTerminal: false
     })
-
+const savedSettings = await getAllGroupSettings()
+savedSettings.forEach(doc => {
+    const { chatId, ...settings } = doc
+    Object.entries(settings).forEach(([key, value]) => {
+        if (key !== '_id') groupSettings.set(`${key}_${chatId}`, value)
+    })
+})
+console.log(`✅ Loaded settings for ${savedSettings.length} groups`)
     sock.ev.on('connection.update', async (u) => {
         const { connection, lastDisconnect } = u
         if (connection === 'close') {

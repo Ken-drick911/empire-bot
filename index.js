@@ -173,10 +173,16 @@ console.log(`✅ Loaded settings for ${savedSettings.length} groups`)
             const owner = isOwner(sender)
 
             if (OWNER_COMMANDS.includes(cmd)) {
-                if (!owner) {
-                    await sock.sendMessage(from, { text: '👑 Only the Emperor can use this command.', quoted: msg })
-                    return
-                }
+    const isMod = await isModerator(sender)
+    const modAllowed = ['announce', 'broadcast', 'listgroups', 'tagall']
+    if (!owner && !isMod) {
+        await sock.sendMessage(from, { text: '👑 Only the Emperor can use this command.', quoted: msg })
+        return
+    }
+    if (!owner && isMod && !modAllowed.includes(cmd)) {
+        await sock.sendMessage(from, { text: '👑 Only the Emperor can use this command.', quoted: msg })
+        return
+    }
                 if (cmd === 'addmod') {
                     await addModCommand(sock, msg, from, args)
                     return

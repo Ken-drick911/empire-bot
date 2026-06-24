@@ -104,4 +104,10 @@ async function loadSession() {
     return session ? session.data : null
 }
 
-module.exports = { getUser, createUser, updateUser, getAllUsers, saveSession, loadSession, getGroupSettings, updateGroupSettings }
+async function getAllGroupSettings() {
+    await connectDB()
+    const col = db.collection('groupSettings')
+    return await col.find({}).toArray()
+}
+
+module.exports = { getUser, createUser, updateUser, getAllUsers, saveSession, loadSession, getGroupSettings, updateGroupSettings, getAllGroupSettings }

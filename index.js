@@ -66,7 +66,7 @@ async function startBot() {
         const { connection, lastDisconnect } = u
         if (connection === 'close') {
             const r = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut
-            if (r) startBot()
+            if (r) setTimeout(startBot, 5000)
         }
         if (connection === 'open') console.log('✅ Empire Bot connected!')
     })

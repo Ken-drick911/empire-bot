@@ -2,7 +2,7 @@ require('dotenv').config()
 const express = require('express')
 const cookieParser = require('cookie-parser')
 const path = require('path')
-const { connectDB } = require('../src/data/db')
+const { MongoClient } = require('mongodb')
 
 const authRoutes = require('./routes/auth')
 const profileRoutes = require('./routes/profile')
@@ -25,7 +25,9 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'))
 })
 
-connectDB().then(() => {
+const client = new MongoClient(process.env.MONGODB_URI)
+client.connect().then(() => {
+    global._db = client.db('empireBot')
     app.listen(PORT, () => {
         console.log(`🌐 Empire Web running on port ${PORT}`)
     })

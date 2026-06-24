@@ -19,7 +19,10 @@ async function pair() {
 
   if (!sock.authState.creds.registered) {
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-    rl.question('Enter your WhatsApp number (e.g. 27831234567): ', async (number) => {
+    const number = '2349122876837'  // e.g. 2348012345678
+const code = await sock.requestPairingCode(number.trim())
+console.log(`\n✅ Your pairing code: ${code}\n`)
+console.log('Enter this code in WhatsApp → Linked Devices → Link with phone number')
       rl.close();
       const code = await sock.requestPairingCode(number.trim());
       console.log(`\n✅ Your pairing code: ${code}\n`);

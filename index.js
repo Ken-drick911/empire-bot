@@ -1,5 +1,6 @@
 const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
 const pino = require('pino')
+const { saveSession, loadSession } = require('./src/data/db')
 
 // Group Management
 const {
@@ -70,7 +71,10 @@ async function startBot() {
         if (connection === 'open') console.log('✅ Empire Bot connected!')
     })
 
-    sock.ev.on('creds.update', saveCreds)
+    sock.ev.on('creds.update', async () => {
+    saveCreds()
+    await saveSession(JSON.stringify(state))
+})
 
     async function isUserAdmin(chatId, userId) {
         try {

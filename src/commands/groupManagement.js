@@ -2,7 +2,23 @@
 
 const mutedUsers = new Map()
 const warnings = new Map()
-const groupSettings = new Map()
+const { getGroupSettings, updateGroupSettings } = require('../data/db')
+
+const groupSettings = new Proxy(new Map(), {
+    get(target, prop) {
+        if (prop === 'set') {
+            return (key, value) => {
+                target.set(key, value)
+                const parts = key.split('_')
+                const chatId = parts.slice(1).join('_')
+                const setting = parts[0]
+                updateGroupSettings(chatId, { [setting]: value }).catch(() => {})
+                return target
+            }
+        }
+        return typeof target[prop] === 'function' ? target[prop].bind(target) : target[prop]
+    }
+})
 
 // Anti-spam storage
 const spamTimestamps = new Map()

@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const { getDB } = require('../../src/data/db')
+const getDB = () => global._db
 
 router.get('/', async (req, res) => {
     try {

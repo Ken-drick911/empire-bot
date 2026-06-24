@@ -46,7 +46,7 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ error: 'Wrong password' })
 
         const token = jwt.sign({ phone: user.phone }, JWT_SECRET, { expiresIn: '7d' })
-        res.cookie('empire_token', token, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 })
+        res.cookie('token', token, { httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000, sameSite: 'none', secure: true })
         res.json({ success: true, username: user.username })
     } catch (err) {
         res.status(500).json({ error: 'Server error' })

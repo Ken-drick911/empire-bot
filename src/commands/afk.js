@@ -14,7 +14,7 @@ async function afkCommand(sock, msg, from, sender, args) {
     const tone = getToneForUser(owner, user?.rank)
 
     const category = classifyReason(reason)
-    const notice = getRandomMessage(category)
+    const notice = getRandomMessage(category, tone)
 
     const text = `⚜️ 𝗜𝗺𝗽𝗲𝗿𝗶𝗮𝗹 𝗗𝘂𝘁𝘆 𝗖𝗮𝗹𝗹𝘀 𝗥𝗲𝗴𝗶𝘀𝘁𝗲𝗿𝗲𝗱
 

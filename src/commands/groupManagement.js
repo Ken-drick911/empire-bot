@@ -568,6 +568,27 @@ async function closeGroup(sock, chatId) {
 }
 
 // ---------- Command Dispatcher ----------
+async function tagAll(sock, msg, args) {
+    const chatId = msg.key.remoteJid
+    try {
+        const meta = await sock.groupMetadata(chatId)
+        const members = meta.participants
+        const text = args.join(' ') || '📢 Attention!'
+        
+        const mentionLines = members.map((p, i) => 
+            `${i + 1}. @${p.id.split('@')[0]}`
+        ).join('\n')
+        
+        await sock.sendMessage(chatId, {
+            text: `⚔️ *IMPERIAL SUMMONS* ⚔️\n${'─'.repeat(20)}\n📜 ${text}\n${'─'.repeat(20)}\n\n${mentionLines}`,
+            mentions: members.map(p => p.id),
+            quoted: msg
+        })
+        await deleteCommandMessage(sock, msg)
+    } catch {
+        await sock.sendMessage(chatId, { text: '❌ Failed to tag all members.' })
+    }
+            }
 async function handleGroupCommands(sock, msg, command, args, deps) {
     const { groupSettings: settings, warnings: warns, isUserAdmin, mutedUsers: muted } = deps
     const chatId = msg.key.remoteJid
@@ -615,5 +636,6 @@ module.exports = {
     botWarnings,
     lastMessages,
     groupStats,
-toggleAntiStatusMention
+toggleAntiStatusMention,
+    tagAll
               }

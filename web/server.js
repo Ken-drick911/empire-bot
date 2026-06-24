@@ -21,7 +21,7 @@ app.use('/api/profile', profileRoutes)
 app.use('/api/shop', shopRoutes)
 
 // Serve frontend
-app.get('*', (req, res) => {
+app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'))
 })
 

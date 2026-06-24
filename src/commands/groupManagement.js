@@ -598,8 +598,9 @@ async function tagAll(sock, msg, args) {
             quoted: msg
         })
         await deleteCommandMessage(sock, msg)
-    } catch {
-        await sock.sendMessage(chatId, { text: '❌ Failed to tag all members.' })
+    } catch (err) {
+        console.error('tagAll error:', err)
+        await sock.sendMessage(chatId, { text: '❌ Error: ' + err.message })
     }
                                         }
 async function handleGroupCommands(sock, msg, command, args, deps) {

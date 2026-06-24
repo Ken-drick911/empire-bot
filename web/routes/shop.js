@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const auth = require('../middleware/authMiddleware')
-const { getDB } = require('../../src/data/db')
+const getDB = () => global._db
 
 const SHOP_ITEMS = [
     { id: 'pistol', name: 'Pistol', category: 'WEAPON', price: 2500, description: 'Required to steal coins from others.', emoji: '🔫' },

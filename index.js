@@ -55,7 +55,7 @@ const OWNER_COMMANDS = [
 ]
 
 async function startBot() {
-    const { state, saveCreds } = await useMultiFileAuthState('./auth_info');
+    const { state, saveCreds } = await useMultiFileAuthState('./auth_info_baileys')
 
     const sock = makeWASocket({
         auth: state,

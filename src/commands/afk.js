@@ -15,7 +15,6 @@ async function afkCommand(sock, msg, from, sender, args) {
 
     const category = classifyReason(reason)
     const notice = getRandomMessage(category)
-    const tonePrefix = getTonePrefix(tone)
 
     const text = `⚜️ 𝗜𝗺𝗽𝗲𝗿𝗶𝗮𝗹 𝗗𝘂𝘁𝘆 𝗖𝗮𝗹𝗹𝘀 𝗥𝗲𝗴𝗶𝘀𝘁𝗲𝗿𝗲𝗱
 
@@ -25,7 +24,6 @@ async function afkCommand(sock, msg, from, sender, args) {
 ${reason || 'Not provided'}
 
 📜 Notice:
-${tonePrefix}
 ${notice}`
 
     await sock.sendMessage(from, { text, mentions: [sender], quoted: msg })

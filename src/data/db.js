@@ -80,6 +80,23 @@ async function saveSession(sessionData) {
     )
 }
 
+async function getGroupSettings(chatId) {
+    await connectDB()
+    const col = db.collection('groupSettings')
+    const doc = await col.findOne({ chatId })
+    return doc || { chatId }
+}
+
+async function updateGroupSettings(chatId, updates) {
+    await connectDB()
+    const col = db.collection('groupSettings')
+    await col.updateOne(
+        { chatId },
+        { $set: { chatId, ...updates } },
+        { upsert: true }
+    )
+}
+
 async function loadSession() {
     await connectDB()
     const sessionsCollection = db.collection('sessions')
@@ -87,4 +104,4 @@ async function loadSession() {
     return session ? session.data : null
 }
 
-module.exports = { getUser, createUser, updateUser, getAllUsers, saveSession, loadSession }
+module.exports = { getUser, createUser, updateUser, getAllUsers, saveSession, loadSession, getGroupSettings, updateGroupSettings }

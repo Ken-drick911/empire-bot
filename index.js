@@ -57,10 +57,13 @@ const OWNER_COMMANDS = [
 async function startBot() {
     
     const sock = makeWASocket({
-        auth: state,
-        logger: pino({ level: 'silent' }),
-        printQRInTerminal: false
-    })
+        const { state, saveCreds } = await useMultiFileAuthState('./auth_info');
+
+const sock = makeWASocket({
+    auth: state,
+    logger: pino({ level: 'silent' }),
+    printQRInTerminal: false
+});
 const savedSettings = await getAllGroupSettings()
 savedSettings.forEach(doc => {
     const { chatId, ...settings } = doc

@@ -70,4 +70,21 @@ async function getAllUsers() {
     return obj
 }
 
-module.exports = { getUser, createUser, updateUser, getAllUsers }
+async function saveSession(sessionData) {
+    await connectDB()
+    const sessionsCollection = db.collection('sessions')
+    await sessionsCollection.updateOne(
+        { id: 'main' },
+        { $set: { id: 'main', data: sessionData, updatedAt: new Date().toISOString() } },
+        { upsert: true }
+    )
+}
+
+async function loadSession() {
+    await connectDB()
+    const sessionsCollection = db.collection('sessions')
+    const session = await sessionsCollection.findOne({ id: 'main' })
+    return session ? session.data : null
+}
+
+module.exports = { getUser, createUser, updateUser, getAllUsers, saveSession, loadSession }

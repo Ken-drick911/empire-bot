@@ -10,25 +10,32 @@ router.get('/me', auth, async (req, res) => {
         const phone = req.user.phone
         const jid = phone + '@s.whatsapp.net'
 
-        const user = await db.collection('users').findOne({ phone })
-        const stats = await db.collection('userStats').findOne({ userId: jid })
+        const webUser = await db.collection('users').findOne({ phone })
+        if (!webUser) return res.status(404).json({ error: 'User not found' })
 
-        if (!user) return res.status(404).json({ error: 'User not found' })
+        // Find bot stats using phone number formats
+        const botUser = await db.collection('users').findOne({
+            $or: [
+                { id: jid },
+                { id: phone },
+                { id: phone + '@lid' }
+            ]
+        })
 
         res.json({
-            username: user.username,
+            username: webUser.username,
             phone,
-            avatar: user.avatar || null,
-            cover: user.cover || null,
-            bio: user.bio || '',
-            xp: stats?.xp || 0,
-            level: stats?.level || 1,
-            rank: stats?.rank || 'Peasant',
-            wallet: stats?.wallet || 0,
-            vault: stats?.vault || 0,
-            reputation: stats?.reputation || 0,
-            title: stats?.title || '',
-            inventory: user.inventory || []
+            avatar: webUser.avatar || null,
+            cover: webUser.cover || null,
+            bio: webUser.bio || '',
+            xp: botUser?.xp || 0,
+            level: botUser?.level || 1,
+            rank: botUser?.rank || 'Peasant',
+            wallet: botUser?.wallet || 0,
+            vault: botUser?.vault || 0,
+            reputation: botUser?.reputation || 0,
+            title: botUser?.title || '',
+            inventory: webUser.inventory || []
         })
     } catch (err) {
         res.status(500).json({ error: 'Server error' })

@@ -17,8 +17,7 @@ router.get('/me', auth, async (req, res) => {
         const botUser = await db.collection('users').findOne({
     $or: [
         { id: jid },
-        { id: phone + '@lid' },
-        { id: '204926412185650@lid' }
+        { phone: phone }
     ]
 })
 

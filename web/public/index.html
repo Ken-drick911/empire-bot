@@ -8,21 +8,20 @@
 </head>
 <body>
     <div id="app">
-        <!-- Navbar -->
         <nav class="navbar">
-    <div class="nav-logo">⚔️ EMPIRE</div>
-    <button class="nav-toggle" onclick="toggleMenu()">☰</button>
-    <div class="nav-links" id="navLinks">
-        <a href="#" onclick="showPage('home')">Home</a>
-        <a href="#" onclick="showPage('leaderboard')">Leaderboard</a>
-        <a href="#" onclick="showPage('shop')" id="navShop" style="display:none">Shop</a>
-        <a href="#" onclick="showPage('profile')" id="navProfile" style="display:none">Profile</a>
-        <button class="btn-login" id="loginBtn" onclick="showPage('login')">Login</button>
-        <button class="btn-logout" id="logoutBtn" style="display:none" onclick="logout()">Logout</button>
-    </div>
+            <div class="nav-logo">⚔️ EMPIRE</div>
+            <button class="nav-toggle" onclick="toggleMenu()">☰</button>
+            <div class="nav-links" id="navLinks">
+                <a href="#" onclick="showPage('home')">Home</a>
+                <a href="#" onclick="showPage('leaderboard')">Leaderboard</a>
+                <a href="#" onclick="showPage('shop')" id="navShop" style="display:none">Shop</a>
+                <a href="#" onclick="showPage('profile')" id="navProfile" style="display:none">Profile</a>
+                <button class="btn-login" id="loginBtn" onclick="showPage('login')">Login</button>
+                <button class="btn-logout" id="logoutBtn" style="display:none" onclick="logout()">Logout</button>
+            </div>
         </nav>
 
-        <!-- Pages -->
+        <!-- Home -->
         <div id="page-home" class="page active">
             <div class="hero">
                 <h1>⚔️ EMPIRE</h1>
@@ -31,6 +30,7 @@
             </div>
         </div>
 
+        <!-- Login -->
         <div id="page-login" class="page">
             <div class="auth-card">
                 <h2 id="authTitle">Login</h2>
@@ -51,36 +51,52 @@
             </div>
         </div>
 
+        <!-- Profile -->
         <div id="page-profile" class="page">
             <div class="profile-card">
-                <div class="profile-cover" id="profileCover"></div>
-                <div class="profile-avatar-wrap">
-                    <img id="profileAvatar" src="/images/default-avatar.png" class="profile-avatar">
+                <div class="profile-cover" id="profileCover">
+                    <div class="cover-overlay">
+                        <img id="profileAvatar" src="https://i.imgur.com/HeIi0wU.png" class="profile-avatar">
+                        <div class="cover-info">
+                            <h2 id="profileName"></h2>
+                            <p id="profileBio" class="profile-bio"></p>
+                            <p id="profileTitle" class="profile-title"></p>
+                            <div class="xp-bar-wrap">
+                                <span id="xpText" class="xp-text"></span>
+                                <div class="xp-bar-bg"><div class="xp-bar" id="xpBar"></div></div>
+                            </div>
+                            <div class="profile-rank" id="profileRank"></div>
+                        </div>
+                    </div>
                 </div>
-                <h2 id="profileName"></h2>
-                <p id="profileTitle" class="profile-title"></p>
-                <p id="profileBio" class="profile-bio"></p>
                 <div class="profile-stats">
                     <div class="stat"><span id="statXP">0</span><label>XP</label></div>
                     <div class="stat"><span id="statLevel">1</span><label>Level</label></div>
                     <div class="stat"><span id="statWallet">0</span><label>Wallet</label></div>
                     <div class="stat"><span id="statVault">0</span><label>Vault</label></div>
                 </div>
-                <div class="xp-bar-wrap">
-                    <div class="xp-bar" id="xpBar"></div>
-                </div>
-                <div class="profile-rank" id="profileRank"></div>
                 <div class="profile-edit">
-                    <label style="color:#888;font-size:0.85rem">Avatar URL (paste image link)</label>
-<input type="url" id="editAvatar" placeholder="https://i.imgur.com/yourimage.jpg">
-<label style="color:#888;font-size:0.85rem">Cover URL (paste image link)</label>
-<input type="url" id="editCover" placeholder="https://i.imgur.com/yourcover.jpg">
-                    <input type="text" id="editBio" placeholder="Bio">
-                    <button class="btn-primary" onclick="updateProfile()">Save Changes</button>
+                    <p class="edit-title">✏️ Edit Profile</p>
+                    <label>Avatar</label>
+                    <div class="upload-wrap">
+                        <input type="file" id="avatarFile" accept="image/*" onchange="uploadImage('avatar')">
+                        <span class="upload-hint">or paste URL</span>
+                        <input type="url" id="editAvatar" placeholder="https://i.imgur.com/yourimage.jpg">
+                    </div>
+                    <label>Cover Photo</label>
+                    <div class="upload-wrap">
+                        <input type="file" id="coverFile" accept="image/*" onchange="uploadImage('cover')">
+                        <span class="upload-hint">or paste URL</span>
+                        <input type="url" id="editCover" placeholder="https://i.imgur.com/yourcover.jpg">
+                    </div>
+                    <label>Bio</label>
+                    <input type="text" id="editBio" placeholder="Your imperial bio...">
+                    <button class="btn-primary" onclick="updateProfile()">⚔️ Save Changes</button>
                 </div>
             </div>
         </div>
 
+        <!-- Shop -->
         <div id="page-shop" class="page">
             <h1 class="page-title">⚔️ IMPERIAL SHOP</h1>
             <div class="wallet-bar">
@@ -90,8 +106,9 @@
             <div class="shop-grid" id="shopGrid"></div>
         </div>
 
+        <!-- Leaderboard -->
         <div id="page-leaderboard" class="page">
-            <h1 class="page-title">🏆 HALL OF FAME</h1>
+            <h1 class="page-title">👑 HALL OF FAME</h1>
             <div class="lb-tabs">
                 <button class="lb-tab active" onclick="loadLeaderboard('xp', this)">⚔️ XP</button>
                 <button class="lb-tab" onclick="loadLeaderboard('wealth', this)">💰 Wealth</button>
@@ -103,4 +120,4 @@
 
     <script src="/js/app.js"></script>
 </body>
-  </html>
+</html>

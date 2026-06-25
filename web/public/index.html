@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Empire Bot</title>
+    <title>Empire</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
@@ -56,45 +56,73 @@
         <!-- Profile -->
         <div id="page-profile" class="page">
             <div class="profile-card">
-                <!-- Cover -->
+
+                <!-- Cover + Avatar -->
                 <div class="profile-cover" id="profileCover">
-                    <div class="cover-actions">
-                        <label class="cover-btn" for="coverFile">📷 Edit Cover</label>
+                    <div class="cover-fade"></div>
+                    <div class="cover-top-actions">
+                        <label class="action-btn" for="coverFile">📷 Cover</label>
                         <input type="file" id="coverFile" accept="image/*" style="display:none" onchange="uploadImage('cover')">
-                    </div>
-                    <!-- Avatar -->
-                    <div class="avatar-wrap">
-                        <img id="profileAvatar" src="https://i.imgur.com/HeIi0wU.png" class="profile-avatar">
-                        <label class="avatar-edit-btn" for="avatarFile">✏️</label>
+                        <label class="action-btn" for="avatarFile">👤 Avatar</label>
                         <input type="file" id="avatarFile" accept="image/*" style="display:none" onchange="uploadImage('avatar')">
+                    </div>
+                    <div class="avatar-centered">
+                        <img id="profileAvatar" src="https://i.imgur.com/HeIi0wU.png" class="profile-avatar">
                     </div>
                 </div>
 
-                <!-- Info -->
+                <!-- Name + Bio -->
                 <div class="profile-info">
                     <h2 id="profileName"></h2>
-                    <p id="profileBio" class="profile-bio"></p>
                     <div class="profile-rank" id="profileRank"></div>
+
+                    <!-- Bio display -->
+                    <div id="bioDisplay" class="bio-display">
+                        <p id="profileBio" class="profile-bio">No bio yet</p>
+                        <button class="bio-edit-btn" onclick="showBioEdit()">✏️ Edit Bio</button>
+                    </div>
+
+                    <!-- Bio edit -->
+                    <div id="bioEdit" class="bio-edit-wrap" style="display:none">
+                        <input type="text" id="editBio" placeholder="Your imperial bio..." maxlength="80">
+                        <div class="bio-edit-actions">
+                            <button class="btn-cancel" onclick="hideBioEdit()">Cancel</button>
+                            <button class="btn-primary" onclick="updateProfile()">Save</button>
+                        </div>
+                    </div>
+
+                    <!-- XP Bar -->
                     <div class="xp-section">
-                        <span id="xpText" class="xp-text"></span>
-                        <div class="xp-bar-bg"><div class="xp-bar" id="xpBar"></div></div>
+                        <div class="xp-labels">
+                            <span id="xpText" class="xp-label-left"></span>
+                            <span id="xpPercent" class="xp-label-right"></span>
+                        </div>
+                        <div class="xp-bar-bg">
+                            <div class="xp-bar" id="xpBar"></div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Stats -->
                 <div class="profile-stats">
-                    <div class="stat"><span id="statXP">0</span><label>XP</label></div>
-                    <div class="stat"><span id="statLevel">1</span><label>LEVEL</label></div>
-                    <div class="stat"><span id="statWallet">0</span><label>WALLET</label></div>
-                    <div class="stat"><span id="statVault">0</span><label>VAULT</label></div>
+                    <div class="stat">
+                        <span id="statLevel">1</span>
+                        <label>LEVEL</label>
+                    </div>
+                    <div class="stat">
+                        <span id="statWallet">0</span>
+                        <label>WALLET</label>
+                    </div>
+                    <div class="stat">
+                        <span id="statVault">0</span>
+                        <label>VAULT</label>
+                    </div>
+                    <div class="stat">
+                        <span id="statRank">-</span>
+                        <label>RANK</label>
+                    </div>
                 </div>
 
-                <!-- Edit Bio -->
-                <div class="profile-edit">
-                    <p class="edit-title">✏️ Edit Bio</p>
-                    <input type="text" id="editBio" placeholder="Your imperial bio...">
-                    <button class="btn-primary" onclick="updateProfile()">Save</button>
-                </div>
             </div>
         </div>
 
@@ -102,8 +130,8 @@
         <div id="page-shop" class="page">
             <h1 class="page-title">⚔️ IMPERIAL SHOP</h1>
             <div class="wallet-bar">
-                <div class="wallet-item">💰 <span id="shopWallet">0</span> <small>Wallet</small></div>
-                <div class="wallet-item">🏦 <span id="shopVault">0</span> <small>Vault</small></div>
+                <div class="wallet-item">💰 <span id="shopWallet">0</span><small>Wallet</small></div>
+                <div class="wallet-item">🏦 <span id="shopVault">0</span><small>Vault</small></div>
             </div>
             <div class="shop-grid" id="shopGrid"></div>
         </div>
@@ -122,4 +150,4 @@
 
     <script src="/js/app.js"></script>
 </body>
-    </html>
+                    </html>

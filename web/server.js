@@ -9,7 +9,7 @@ const profileRoutes = require('./routes/profile')
 const shopRoutes = require('./routes/shop')
 
 const app = express()
-const PORT = process.env.WEB_PORT || 3000
+const PORT = process.env.PORT || process.env.WEB_PORT || 3000
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))

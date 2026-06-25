@@ -370,3 +370,4 @@ case 'listgroups':
 }
 
 startBot()
+require('./web/server.js')

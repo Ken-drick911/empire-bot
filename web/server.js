@@ -29,12 +29,17 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'))
 })
 
-const client = new MongoClient(process.env.MONGO_URI)
-client.connect().then(() => {
-    global._db = client.db('empireBot')
+async function startWeb() {
+    if (!global._db) {
+        const client = new MongoClient(process.env.MONGO_URI)
+        await client.connect()
+        global._db = client.db('empireBot')
+    }
     app.listen(PORT, () => {
         console.log(`🌐 Empire Web running on port ${PORT}`)
     })
-})
+}
+
+startWeb()
 
 module.exports = app

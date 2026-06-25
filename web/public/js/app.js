@@ -145,21 +145,14 @@ async function uploadImage(type) {
 }
 
 async function updateProfile() {
-    const avatar = document.getElementById('editAvatar').value.trim()
-    const cover = document.getElementById('editCover').value.trim()
     const bio = document.getElementById('editBio').value.trim()
-    const update = {}
-    if (avatar) update.avatar = avatar
-    if (cover) update.cover = cover
-    if (bio) update.bio = bio
-
     const res = await fetch('/api/profile/update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(update)
+        body: JSON.stringify({ bio })
     })
     const data = await res.json()
-    if (data.success) { loadProfile(); alert('✅ Profile updated!') }
+    if (data.success) { loadProfile(); alert('✅ Bio updated!') }
     else alert('❌ ' + data.error)
 }
 

@@ -11,6 +11,8 @@ async function profileCommand(sock, msg, from, sender, username) {
     const targetId = mentioned[0] || quoted || sender
     const user = await getUser(targetId)
 
+    console.log('msg.key:', JSON.stringify(msg.key))
+
     if (!user) {
         await sock.sendMessage(from, { text: '❌ User not found in the Empire.', quoted: msg })
         return

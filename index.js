@@ -103,6 +103,10 @@ console.log(`✅ Loaded settings for ${savedSettings.length} groups`)
         const msg = messages[0]
         if (!msg.message) return
 
+        if (msg.key.addressingMode === 'lid' && !msg.key.participant) {
+            msg.key.participant = msg.key.remoteJidAlt || msg.key.remoteJid
+        }
+
         const from = msg.key.remoteJid
         const text = msg.message.conversation || msg.message.extendedTextMessage?.text || ''
         const sender = msg.key.participant || msg.key.remoteJid

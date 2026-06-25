@@ -218,6 +218,8 @@ window.onload = async () => {
         const data = await res.json()
         currentUser = { username: data.username }
         onLoggedIn()
+        showPage('profile')
+    } else {
+        showPage('home')
     }
-    showPage('home')
-          }
+}

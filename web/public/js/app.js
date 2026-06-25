@@ -96,26 +96,46 @@ function onLoggedOut() {
 }
 
 // Profile
+function showBioEdit() {
+    document.getElementById('bioDisplay').style.display = 'none'
+    document.getElementById('bioEdit').style.display = 'block'
+    document.getElementById('editBio').value = document.getElementById('profileBio').textContent
+    document.getElementById('editBio').focus()
+}
+
+function hideBioEdit() {
+    document.getElementById('bioEdit').style.display = 'none'
+    document.getElementById('bioDisplay').style.display = 'block'
+}
+
 async function loadProfile() {
     const res = await fetch('/api/profile/me')
     if (res.status === 401) { showPage('login'); return }
     const data = await res.json()
+
     document.getElementById('profileName').textContent = data.username
-    document.getElementById('profileTitle').textContent = data.title || ''
-    document.getElementById('profileBio').textContent = data.bio || ''
-    document.getElementById('statXP').textContent = data.xp
-    document.getElementById('statLevel').textContent = data.level
-    document.getElementById('statWallet').textContent = data.wallet
-    document.getElementById('statVault').textContent = data.vault
-    document.getElementById('profileRank').textContent = '⚔️ ' + data.rank
+    document.getElementById('profileBio').textContent = data.bio || 'No bio yet'
+    document.getElementById('profileRank').textContent = '⚔️ ' + (data.rank || 'Peasant')
+    document.getElementById('statLevel').textContent = data.level || 1
+    document.getElementById('statWallet').textContent = (data.wallet || 0).toLocaleString()
+    document.getElementById('statVault').textContent = (data.vault || 0).toLocaleString()
+    document.getElementById('statRank').textContent = data.rank || 'Peasant'
+
     if (data.avatar) document.getElementById('profileAvatar').src = data.avatar
     if (data.cover) {
-        document.getElementById('profileCover').style.backgroundImage = `url(${data.cover})`
-        document.getElementById('profileCover').style.backgroundSize = 'cover'
+        const cover = document.getElementById('profileCover')
+        cover.style.backgroundImage = `url(${data.cover})`
+        cover.style.backgroundSize = 'cover'
+        cover.style.backgroundPosition = 'center'
     }
+
     const xpPerLevel = 1000
-    const pct = ((data.xp % xpPerLevel) / xpPerLevel) * 100
+    const xp = data.xp || 0
+    const currentXP = xp % xpPerLevel
+    const pct = Math.min((currentXP / xpPerLevel) * 100, 100)
     document.getElementById('xpBar').style.width = pct + '%'
+    document.getElementById('xpText').textContent = `${currentXP} / ${xpPerLevel} XP`
+    document.getElementById('xpPercent').textContent = Math.round(pct) + '%'
 }
 
 async function uploadImage(type) {
@@ -152,8 +172,12 @@ async function updateProfile() {
         body: JSON.stringify({ bio })
     })
     const data = await res.json()
-    if (data.success) { loadProfile(); alert('✅ Bio updated!') }
-    else alert('❌ ' + data.error)
+    if (data.success) {
+        hideBioEdit()
+        loadProfile()
+    } else {
+        alert('❌ ' + data.error)
+    }
 }
 
 // Shop

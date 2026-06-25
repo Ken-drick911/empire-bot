@@ -7,7 +7,7 @@ async function addModCommand(sock, msg, from, args) {
     const targetId = `${number}@s.whatsapp.net`
     let user = await getUser(targetId)
     if (!user) user = await createUser(targetId, number)
-    await updateUser(targetId, { isMod: true })
+    await updateUser(targetId, { isMod: true, phone: number })
 
     await sock.sendMessage(from, { text: `✅ ${number} is now a Moderator.`, quoted: msg })
 }
@@ -20,13 +20,24 @@ async function removeModCommand(sock, msg, from, args) {
     const user = await getUser(targetId)
     if (!user) return sock.sendMessage(from, { text: '❌ User not found.', quoted: msg })
 
-    await updateUser(targetId, { isMod: false })
+    await updateUser(targetId, { isMod: false, phone: number })
     await sock.sendMessage(from, { text: `✅ ${number} is no longer a Moderator.`, quoted: msg })
 }
 
 async function isModerator(userId) {
     const user = await getUser(userId)
-    return user?.isMod === true
+    if (user?.isMod === true) return true
+
+    const phone = userId.replace('@s.whatsapp.net', '').replace('@lid', '')
+    try {
+        const db = global._db
+        if (db) {
+            const u = await db.collection('users').findOne({ phone, isMod: true })
+            if (u) return true
+        }
+    } catch {}
+
+    return false
 }
 
 module.exports = { addModCommand, removeModCommand, isModerator }

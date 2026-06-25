@@ -8,24 +8,20 @@ router.get('/', async (req, res) => {
         const type = req.query.type || 'xp'
         const sortField = type === 'wealth' ? 'wallet' : 'xp'
 
-        const stats = await db.collection('userStats')
-            .find({})
+        const users = await db.collection('users')
+            .find({ id: { $regex: '@s.whatsapp.net' } })
             .sort({ [sortField]: -1 })
             .limit(20)
             .toArray()
 
-        const users = await Promise.all(stats.map(async (s) => {
-            const phone = s.userId.replace('@s.whatsapp.net', '')
-            const user = await db.collection('users').findOne({ phone })
-            return {
-                username: user?.username || phone,
-                score: s[sortField] || 0,
-                rank: s.rank || 'Peasant',
-                level: s.level || 1
-            }
+        const result = users.map(u => ({
+            username: u.username || u.id.replace('@s.whatsapp.net', ''),
+            score: u[sortField] || 0,
+            rank: u.rank || 'Peasant',
+            level: u.level || 1
         }))
 
-        res.json({ users })
+        res.json({ users: result })
     } catch (err) {
         res.status(500).json({ error: 'Server error' })
     }

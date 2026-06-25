@@ -19,6 +19,10 @@ app.use(express.static(path.join(__dirname, 'public')))
 app.use('/api/auth', authRoutes)
 app.use('/api/profile', profileRoutes)
 app.use('/api/shop', shopRoutes)
+const leaderboardRoutes = require('./routes/leaderboard')
+const uploadRoutes = require('./routes/upload')
+app.use('/api/leaderboard', leaderboardRoutes)
+app.use('/api/upload', uploadRoutes)
 
 // Serve frontend
 app.get('/', (req, res) => {

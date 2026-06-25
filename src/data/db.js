@@ -27,6 +27,7 @@ async function createUser(id, username) {
 
     const newUser = {
         id,
+        phone: id.replace('@s.whatsapp.net', '').replace('@lid', ''),
         username,
         rank: 'Peasant',
         level: 1,

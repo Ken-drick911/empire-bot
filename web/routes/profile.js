@@ -14,29 +14,23 @@ router.get('/me', auth, async (req, res) => {
         if (!webUser) return res.status(404).json({ error: 'User not found' })
 
         // Find bot stats using phone number formats
-        const botUser = await db.collection('users').findOne({
-            $or: [
-                { id: jid },
-                { id: phone },
-                { id: phone + '@lid' }
-            ]
-        })
+        const botUser = await db.collection('users').findOne({ id: jid })
 
         res.json({
-            username: webUser.username,
-            phone,
-            avatar: webUser.avatar || null,
-            cover: webUser.cover || null,
-            bio: webUser.bio || '',
-            xp: botUser?.xp || 0,
-            level: botUser?.level || 1,
-            rank: botUser?.rank || 'Peasant',
-            wallet: botUser?.wallet || 0,
-            vault: botUser?.vault || 0,
-            reputation: botUser?.reputation || 0,
-            title: botUser?.title || '',
-            inventory: webUser.inventory || []
-        })
+    username: webUser.username,
+    phone,
+    avatar: webUser.avatar || null,
+    cover: webUser.cover || null,
+    bio: webUser.bio || '',
+    xp: botUser?.xp || 0,
+    level: botUser?.level || 1,
+    rank: botUser?.rank || 'Peasant',
+    wallet: botUser?.wallet || 0,
+    vault: botUser?.vault || 0,
+    reputation: botUser?.reputation || null,
+    title: botUser?.title || '',
+    inventory: webUser.inventory || []
+})
     } catch (err) {
         res.status(500).json({ error: 'Server error' })
     }

@@ -118,17 +118,49 @@ async function loadProfile() {
     document.getElementById('xpBar').style.width = pct + '%'
 }
 
+async function uploadImage(type) {
+    const fileInput = document.getElementById(type + 'File')
+    const file = fileInput.files[0]
+    if (!file) return
+
+    const formData = new FormData()
+    formData.append(type, file)
+
+    const res = await fetch('/api/upload/' + type, {
+        method: 'POST',
+        body: formData
+    })
+    const data = await res.json()
+    if (data.success) {
+        if (type === 'avatar') {
+            document.getElementById('profileAvatar').src = data.url
+        } else {
+            document.getElementById('profileCover').style.backgroundImage = `url(${data.url})`
+            document.getElementById('profileCover').style.backgroundSize = 'cover'
+        }
+        alert('✅ ' + type + ' uploaded!')
+    } else {
+        alert('❌ ' + data.error)
+    }
+}
+
 async function updateProfile() {
     const avatar = document.getElementById('editAvatar').value.trim()
     const cover = document.getElementById('editCover').value.trim()
     const bio = document.getElementById('editBio').value.trim()
+    const update = {}
+    if (avatar) update.avatar = avatar
+    if (cover) update.cover = cover
+    if (bio) update.bio = bio
+
     const res = await fetch('/api/profile/update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ avatar, cover, bio })
+        body: JSON.stringify(update)
     })
     const data = await res.json()
     if (data.success) { loadProfile(); alert('✅ Profile updated!') }
+    else alert('❌ ' + data.error)
 }
 
 // Shop

@@ -27,10 +27,13 @@ const lastMessages = new Map()
 
 const SPAM_WINDOW = 5000
 const SPAM_LIMIT = 5
-const SPAM_WARN_LIMIT = 3
 const BOT_WARN_LIMIT = 2
 
 // ---------- Helpers ----------
+function getWarnLimit(chatId) {
+    return groupSettings.get(`warnlimit_${chatId}`) || 3
+}
+
 function parseDuration(str) {
     if (!str) return null
     const match = str.match(/^(\d+)(s|sec|secs|seconds|m|min|mins|minutes|h|hr|hrs|hours|d|day|days)$/i)
@@ -95,24 +98,57 @@ async function warnMember(sock, msg, args, warnings) {
     const targets = getTargetUsers(msg, args)
     if (!targets.length) return reply(sock, chatId, '❌ Tag or reply to the member(s) to warn.', msg)
     if (targets.length > 10) return reply(sock, chatId, '❌ Max 10 members at once.', msg)
+    const maxWarns = getWarnLimit(chatId)
     let results = [], kicked = []
     for (const t of targets) {
         const key = `${chatId}_${t}`
         const count = (warnings.get(key) || 0) + 1
         warnings.set(key, count)
-        if (count >= 3) {
+        if (count >= maxWarns) {
             try {
                 await sock.groupParticipantsUpdate(chatId, [t], 'remove')
                 kicked.push(`@${t.split('@')[0]}`)
                 warnings.delete(key)
-            } catch { results.push(`@${t.split('@')[0]} (warn ${count}/3 - kick failed)`) }
+            } catch { results.push(`@${t.split('@')[0]} (warn ${count}/${maxWarns} - kick failed)`) }
         } else {
-            results.push(`@${t.split('@')[0]} (warn ${count}/3)`)
+            results.push(`@${t.split('@')[0]} (warn ${count}/${maxWarns})`)
         }
     }
-    let text = `⚠️ Warnings issued:\n${results.join('\n')}`
-    if (kicked.length) text += `\n\n❗ Kicked for 3 warnings: ${kicked.join(', ')}`
+    let text = `⚠️ *Warning Issued*\n━━━━━━━━━━━━━━━━\n${results.join('\n')}`
+    if (kicked.length) text += `\n\n⚔️ Kicked at ${maxWarns} warnings: ${kicked.join(', ')}`
     await sock.sendMessage(chatId, { text, mentions: targets, quoted: msg })
+    await deleteCommandMessage(sock, msg)
+}
+
+// ---------- Reset Warn ----------
+async function resetWarn(sock, msg, args, warnings) {
+    const chatId = msg.key.remoteJid
+    const targets = getTargetUsers(msg, args)
+    if (!targets.length) return reply(sock, chatId, '❌ Tag or reply to the member(s) to reset warnings.', msg)
+    let reset = []
+    for (const t of targets) {
+        const key = `${chatId}_${t}`
+        warnings.delete(key)
+        reset.push(`@${t.split('@')[0]}`)
+    }
+    await sock.sendMessage(chatId, {
+        text: `✅ *Warnings Reset*\n━━━━━━━━━━━━━━━━\n${reset.join('\n')}`,
+        mentions: targets,
+        quoted: msg
+    })
+    await deleteCommandMessage(sock, msg)
+}
+
+// ---------- Set Warn Limit ----------
+async function setWarnLimit(sock, msg, args) {
+    const chatId = msg.key.remoteJid
+    const limit = parseInt(args[0])
+    if (!limit || limit < 1 || limit > 5) return reply(sock, chatId, '❌ Usage: .setwarn 1-5\nExample: .setwarn 3', msg)
+    groupSettings.set(`warnlimit_${chatId}`, limit)
+    await sock.sendMessage(chatId, {
+        text: `⚙️ *Warn Limit Updated*\n━━━━━━━━━━━━━━━━\nMembers will be kicked after *${limit} warning(s)*.`,
+        quoted: msg
+    })
 }
 
 // ---------- Mute ----------
@@ -130,53 +166,36 @@ async function muteMembers(sock, msg, args, mutedUsers, isUserAdmin) {
     const timeStr = formatTime(durationMs)
     let muted = [], failed = []
     for (const t of targets) {
-        if (await isUserAdmin(chatId, t)) {
-            failed.push(`@${t.split('@')[0]} (admin)`)
-            continue
-        }
-        if (chatMutes.has(t)) {
-            failed.push(`@${t.split('@')[0]} (already muted)`)
-            continue
-        }
+        if (await isUserAdmin(chatId, t)) { failed.push(`@${t.split('@')[0]} (admin)`); continue }
+        if (chatMutes.has(t)) { failed.push(`@${t.split('@')[0]} (already muted)`); continue }
         chatMutes.set(t, { until, reason: '' })
         muted.push(`@${t.split('@')[0]}`)
         setTimeout(() => autoUnmuteMember(sock, chatId, t, mutedUsers), durationMs)
-    }
-    if (!muted.length && !failed.length) {
-        mutedUsers.delete(chatId)
-        return reply(sock, chatId, '❌ No members were muted.', msg)
     }
     let text = `🔇 Muted ${muted.length} member(s) for ${timeStr}.\n`
     if (muted.length) text += `✅ ${muted.join(', ')}\n`
     if (failed.length) text += `❌ ${failed.join(', ')}`
     if (muted.length) text += `\n⏰ Auto-unmute at ${new Date(until).toLocaleTimeString()}`
-    const allMentions = [...muted, ...failed].map(m => m.replace('@', '') + '@s.whatsapp.net').filter(id => id.includes('@'))
-    await sock.sendMessage(chatId, { text, mentions: allMentions.length ? allMentions : undefined, quoted: msg })
+    const allMentions = targets
+    await sock.sendMessage(chatId, { text, mentions: allMentions, quoted: msg })
 }
 
 async function unmuteMembers(sock, msg, args, mutedUsers) {
     const chatId = msg.key.remoteJid
     const targets = getTargetUsers(msg, args)
     if (!targets.length) return reply(sock, chatId, '❌ Tag or reply to the member(s) to unmute.', msg)
-    if (targets.length > 10) return reply(sock, chatId, '❌ Max 10 members at once.', msg)
     if (!mutedUsers.has(chatId)) return reply(sock, chatId, 'ℹ️ No one is muted.', msg)
     const chatMutes = mutedUsers.get(chatId)
     let unmuted = [], notMuted = []
     for (const t of targets) {
-        if (chatMutes.has(t)) {
-            chatMutes.delete(t)
-            unmuted.push(`@${t.split('@')[0]}`)
-        } else {
-            notMuted.push(`@${t.split('@')[0]}`)
-        }
+        if (chatMutes.has(t)) { chatMutes.delete(t); unmuted.push(`@${t.split('@')[0]}`) }
+        else { notMuted.push(`@${t.split('@')[0]}`) }
     }
     if (chatMutes.size === 0) mutedUsers.delete(chatId)
     let text = ''
-    if (unmuted.length) text += `🔊 Unmuted ${unmuted.length} member(s): ${unmuted.join(', ')}`
+    if (unmuted.length) text += `🔊 Unmuted: ${unmuted.join(', ')}`
     if (notMuted.length) text += `\nℹ️ Not muted: ${notMuted.join(', ')}`
-    if (!text) text = '❌ No changes.'
-    const allMentions = [...unmuted, ...notMuted].map(m => m.replace('@', '') + '@s.whatsapp.net').filter(id => id.includes('@'))
-    await sock.sendMessage(chatId, { text, mentions: allMentions.length ? allMentions : undefined, quoted: msg })
+    await sock.sendMessage(chatId, { text: text || '❌ No changes.', mentions: targets, quoted: msg })
 }
 
 async function autoUnmuteMember(sock, chatId, target, mutedUsers) {
@@ -187,10 +206,7 @@ async function autoUnmuteMember(sock, chatId, target, mutedUsers) {
     if (info.until > Date.now()) return
     chatMutes.delete(target)
     if (chatMutes.size === 0) mutedUsers.delete(chatId)
-    await sock.sendMessage(chatId, {
-        text: `🔊 @${target.split('@')[0]} auto-unmuted (time expired).`,
-        mentions: [target]
-    })
+    await sock.sendMessage(chatId, { text: `🔊 @${target.split('@')[0]} auto-unmuted.`, mentions: [target] })
 }
 
 // ---------- Promote & Demote ----------
@@ -198,17 +214,14 @@ async function promoteMember(sock, msg, args) {
     const chatId = msg.key.remoteJid
     const targets = getTargetUsers(msg, args)
     if (!targets.length) return reply(sock, chatId, '❌ Tag or reply to the member(s) to promote.', msg)
-    if (targets.length > 10) return reply(sock, chatId, '❌ Max 10 members at once.', msg)
     let done = [], fail = []
     for (const t of targets) {
-        try { await sock.groupParticipantsUpdate(chatId, [t], 'promote'); done.push(`@${t.split('@')[0]}`) } 
+        try { await sock.groupParticipantsUpdate(chatId, [t], 'promote'); done.push(`@${t.split('@')[0]}`) }
         catch { fail.push(`@${t.split('@')[0]}`) }
     }
-    const mentions = [...done, ...fail].map(m => m.replace('@', '') + '@s.whatsapp.net').filter(id => id.includes('@'))
     await sock.sendMessage(chatId, {
-        text: `⬆️ Promoted ${done.length}: ${done.join(', ')}` + (fail.length ? `\n❌ Failed: ${fail.join(', ')}` : ''),
-        mentions: mentions.length ? mentions : undefined,
-        quoted: msg
+        text: `⬆️ Promoted: ${done.join(', ')}` + (fail.length ? `\n❌ Failed: ${fail.join(', ')}` : ''),
+        mentions: targets, quoted: msg
     })
 }
 
@@ -216,17 +229,14 @@ async function demoteMember(sock, msg, args) {
     const chatId = msg.key.remoteJid
     const targets = getTargetUsers(msg, args)
     if (!targets.length) return reply(sock, chatId, '❌ Tag or reply to the member(s) to demote.', msg)
-    if (targets.length > 10) return reply(sock, chatId, '❌ Max 10 members at once.', msg)
     let done = [], fail = []
     for (const t of targets) {
-        try { await sock.groupParticipantsUpdate(chatId, [t], 'demote'); done.push(`@${t.split('@')[0]}`) } 
+        try { await sock.groupParticipantsUpdate(chatId, [t], 'demote'); done.push(`@${t.split('@')[0]}`) }
         catch { fail.push(`@${t.split('@')[0]}`) }
     }
-    const mentions = [...done, ...fail].map(m => m.replace('@', '') + '@s.whatsapp.net').filter(id => id.includes('@'))
     await sock.sendMessage(chatId, {
-        text: `⬇️ Demoted ${done.length}: ${done.join(', ')}` + (fail.length ? `\n❌ Failed: ${fail.join(', ')}` : ''),
-        mentions: mentions.length ? mentions : undefined,
-        quoted: msg
+        text: `⬇️ Demoted: ${done.join(', ')}` + (fail.length ? `\n❌ Failed: ${fail.join(', ')}` : ''),
+        mentions: targets, quoted: msg
     })
 }
 
@@ -239,7 +249,7 @@ async function toggleAntiLink(sock, chatId, args, groupSettings) {
         return reply(sock, chatId, `ℹ️ Current mode: ${current}\nUsage: .antilink off / whatsapp / all`)
     }
     groupSettings.set(`antilink_${chatId}`, mode)
-    await sock.sendMessage(chatId, { text: `🔗 Anti‑link set to: ${mode.toUpperCase()}` })
+    await sock.sendMessage(chatId, { text: `🔗 Anti-link set to: ${mode.toUpperCase()}` })
 }
 
 async function antiLinkHandler(sock, msg, deps) {
@@ -254,10 +264,8 @@ async function antiLinkHandler(sock, msg, deps) {
     if (!matches) return
     const isWhatsAppLink = (url) => {
         const lower = url.toLowerCase()
-        return lower.includes('wa.me') ||
-               lower.includes('whatsapp.com') ||
-               lower.includes('chat.whatsapp.com') ||
-               lower.includes('api.whatsapp.com')
+        return lower.includes('wa.me') || lower.includes('whatsapp.com') ||
+               lower.includes('chat.whatsapp.com') || lower.includes('api.whatsapp.com')
     }
     let shouldBlock = false
     if (mode === 'all') shouldBlock = true
@@ -265,26 +273,32 @@ async function antiLinkHandler(sock, msg, deps) {
     if (!shouldBlock) return
     const sender = msg.key.participant || msg.key.remoteJid
     if (await isUserAdmin(chatId, sender)) return
-    if (mutedUsers.has(chatId) && mutedUsers.get(chatId).has(sender)) {
-        await deleteMutedMessage(sock, msg)
-        return
+    try { await sock.sendMessage(chatId, { delete: msg.key }) } catch {}
+    const maxWarns = getWarnLimit(chatId)
+    const key = `${chatId}_${sender}`
+    const count = (warnings.get(key) || 0) + 1
+    warnings.set(key, count)
+    if (count >= maxWarns) {
+        try {
+            await sock.groupParticipantsUpdate(chatId, [sender], 'remove')
+            warnings.delete(key)
+            await sock.sendMessage(chatId, { text: `🚫 @${sender.split('@')[0]} kicked for sending links (${maxWarns} warnings).`, mentions: [sender] })
+        } catch {
+            await sock.sendMessage(chatId, { text: `⚠️ @${sender.split('@')[0]} reached max warnings for links but kick failed.`, mentions: [sender] })
+        }
+    } else {
+        await sock.sendMessage(chatId, { text: `🔗 @${sender.split('@')[0]} link deleted — Warning ${count}/${maxWarns}`, mentions: [sender] })
     }
-    await warnMember(sock, msg, [sender], warnings)
-    await sock.sendMessage(chatId, {
-        text: `🚫 Links not allowed! @${sender.split('@')[0]} warned.`,
-        mentions: [sender]
-    })
 }
 
 // ---------- Anti-spam ----------
 async function toggleAntiSpam(sock, chatId, args, groupSettings) {
     const setting = args[0]?.toLowerCase()
-    if (!['on', 'off'].includes(setting)) {
-        return reply(sock, chatId, '❌ Usage: .antispam on/off')
-    }
+    if (!['on', 'off'].includes(setting)) return reply(sock, chatId, '❌ Usage: .antispam on/off')
     groupSettings.set(`antispam_${chatId}`, setting === 'on')
-    await sock.sendMessage(chatId, { text: `🛡️ Anti‑spam ${setting === 'on' ? 'ON' : 'OFF'}` })
+    await sock.sendMessage(chatId, { text: `🛡️ Anti-spam ${setting === 'on' ? 'ON' : 'OFF'}` })
 }
+
 async function toggleAntiStatusMention(sock, chatId, args, groupSettings) {
     const setting = args[0]?.toLowerCase()
     if (!['on', 'off'].includes(setting)) return reply(sock, chatId, '❌ Usage: .antism on/off')
@@ -304,7 +318,8 @@ async function handleAntiSpam(sock, msg, deps) {
     if (sender === sock.user.id) return
     if (await isUserAdmin(chatId, sender)) return
     const now = Date.now()
-    // Spam detection
+    const maxWarns = getWarnLimit(chatId)
+
     if (!spamTimestamps.has(chatId)) spamTimestamps.set(chatId, new Map())
     const userTimestamps = spamTimestamps.get(chatId)
     if (!userTimestamps.has(sender)) userTimestamps.set(sender, [])
@@ -313,39 +328,30 @@ async function handleAntiSpam(sock, msg, deps) {
     recent.push(now)
     userTimestamps.set(sender, recent)
     if (recent.length > SPAM_LIMIT) {
-        await deleteMutedMessage(sock, msg)
+        try { await sock.sendMessage(chatId, { delete: msg.key }) } catch {}
         const warnKey = `${chatId}_${sender}`
         const warnCount = (warnings.get(warnKey) || 0) + 1
         warnings.set(warnKey, warnCount)
-        if (warnCount >= SPAM_WARN_LIMIT) {
+        if (warnCount >= maxWarns) {
             try {
                 await sock.groupParticipantsUpdate(chatId, [sender], 'remove')
-                await sock.sendMessage(chatId, {
-                    text: `🚫 @${sender.split('@')[0]} kicked for spam (3 warnings).`,
-                    mentions: [sender]
-                })
+                await sock.sendMessage(chatId, { text: `🚫 @${sender.split('@')[0]} kicked for spam (${maxWarns} warnings).`, mentions: [sender] })
                 warnings.delete(warnKey)
             } catch {
-                await sock.sendMessage(chatId, {
-                    text: `⚠️ @${sender.split('@')[0]} reached 3 spam warnings but I couldn't kick.`,
-                    mentions: [sender]
-                })
+                await sock.sendMessage(chatId, { text: `⚠️ @${sender.split('@')[0]} reached spam warning limit but kick failed.`, mentions: [sender] })
             }
         } else {
-            await sock.sendMessage(chatId, {
-                text: `⚠️ @${sender.split('@')[0]} spam warning ${warnCount}/${SPAM_WARN_LIMIT}. Slow down!`,
-                mentions: [sender]
-            })
+            await sock.sendMessage(chatId, { text: `⚠️ @${sender.split('@')[0]} spam warning ${warnCount}/${maxWarns}. Slow down!`, mentions: [sender] })
         }
         return
     }
-    // Anti-bot (duplicate consecutive messages)
+
     if (text && !isSticker) {
         if (!lastMessages.has(chatId)) lastMessages.set(chatId, new Map())
         const userLast = lastMessages.get(chatId)
         const prev = userLast.get(sender)
         if (prev && prev.text === text && (now - prev.timestamp) < 10000) {
-            await deleteMutedMessage(sock, msg)
+            try { await sock.sendMessage(chatId, { delete: msg.key }) } catch {}
             if (!botWarnings.has(chatId)) botWarnings.set(chatId, new Map())
             const userBotWarns = botWarnings.get(chatId)
             const botCount = (userBotWarns.get(sender) || 0) + 1
@@ -353,23 +359,13 @@ async function handleAntiSpam(sock, msg, deps) {
             if (botCount >= BOT_WARN_LIMIT) {
                 try {
                     await sock.groupParticipantsUpdate(chatId, [sender], 'remove')
-                    await sock.sendMessage(chatId, {
-                        text: `🤖 @${sender.split('@')[0]} kicked for bot-like behaviour (${botCount} warnings).`,
-                        mentions: [sender]
-                    })
+                    await sock.sendMessage(chatId, { text: `🤖 @${sender.split('@')[0]} kicked for bot-like behaviour.`, mentions: [sender] })
                     userBotWarns.delete(sender)
-                    if (userBotWarns.size === 0) botWarnings.delete(chatId)
                 } catch {
-                    await sock.sendMessage(chatId, {
-                        text: `⚠️ @${sender.split('@')[0]} reached bot warning limit but I couldn't kick.`,
-                        mentions: [sender]
-                    })
+                    await sock.sendMessage(chatId, { text: `⚠️ @${sender.split('@')[0]} bot warning ${botCount}/${BOT_WARN_LIMIT}.`, mentions: [sender] })
                 }
             } else {
-                await sock.sendMessage(chatId, {
-                    text: `🤖 @${sender.split('@')[0]} bot warning ${botCount}/${BOT_WARN_LIMIT}. Stop repeating messages!`,
-                    mentions: [sender]
-                })
+                await sock.sendMessage(chatId, { text: `🤖 @${sender.split('@')[0]} bot warning ${botCount}/${BOT_WARN_LIMIT}. Stop repeating messages!`, mentions: [sender] })
             }
             return
         }
@@ -388,19 +384,14 @@ async function checkIfMuted(sock, msg, mutedUsers) {
     if (info.until < Date.now()) {
         chatMutes.delete(sender)
         if (chatMutes.size === 0) mutedUsers.delete(chatId)
-        await sock.sendMessage(chatId, {
-            text: `🔊 @${sender.split('@')[0]} auto-unmuted (time expired).`,
-            mentions: [sender]
-        })
+        await sock.sendMessage(chatId, { text: `🔊 @${sender.split('@')[0]} auto-unmuted.`, mentions: [sender] })
         return false
     }
     return true
 }
 
 async function deleteMutedMessage(sock, msg) {
-    try {
-        await sock.sendMessage(msg.key.remoteJid, { delete: msg.key })
-    } catch {}
+    try { await sock.sendMessage(msg.key.remoteJid, { delete: msg.key }) } catch {}
 }
 
 // ---------- Welcome / Leave ----------
@@ -420,14 +411,14 @@ async function toggleLeave(sock, chatId, args, groupSettings) {
 
 async function setWelcomeMessage(sock, chatId, args, msg, groupSettings) {
     const text = args.join(' ')
-    if (!text) return reply(sock, chatId, '❌ Please provide a message.\nExample: .setwelcome "Welcome @ to the group!"', msg)
+    if (!text) return reply(sock, chatId, '❌ Please provide a message.\nExample: .setwelcome Welcome @ to the group!', msg)
     groupSettings.set(`welcome_msg_${chatId}`, text)
     await sock.sendMessage(chatId, { text: `✅ Welcome message set:\n${text}` })
 }
 
 async function setLeaveMessage(sock, chatId, args, groupSettings) {
     const text = args.join(' ')
-    if (!text) return reply(sock, chatId, '❌ Please provide a message.\nExample: .setleave "Goodbye @, see you later!"')
+    if (!text) return reply(sock, chatId, '❌ Please provide a message.\nExample: .setleave Goodbye @!')
     groupSettings.set(`leave_msg_${chatId}`, text)
     await sock.sendMessage(chatId, { text: `✅ Leave message set:\n${text}` })
 }
@@ -437,9 +428,7 @@ async function sendGroupMessage(sock, chatId, participants, action, groupSetting
     if (!groupSettings.get(key)) return
     const msgKey = action === 'add' ? `welcome_msg_${chatId}` : `leave_msg_${chatId}`
     let template = groupSettings.get(msgKey)
-    if (!template) {
-        template = action === 'add' ? '👋 Welcome @!' : '👋 Goodbye @!'
-    }
+    if (!template) template = action === 'add' ? '👋 Welcome @!' : '👋 Goodbye @!'
     for (const p of participants) {
         const id = typeof p === 'string' ? p : p.id
         if (!id) continue
@@ -457,11 +446,7 @@ async function hideTag(sock, msg, args) {
     try {
         const meta = await sock.groupMetadata(chatId)
         const participants = meta.participants.map(p => p.id)
-        await sock.sendMessage(chatId, {
-            text: text,
-            mentions: participants,
-            quoted: msg
-        })
+        await sock.sendMessage(chatId, { text, mentions: participants, quoted: msg })
         await deleteCommandMessage(sock, msg)
     } catch {
         reply(sock, chatId, '❌ Failed to send hidetag.', msg)
@@ -478,30 +463,11 @@ async function tagAdmins(sock, msg, args) {
         const mentionLines = admins.map(p => `  🛡️ @${p.split('@')[0]}`).join('\n')
         await sock.sendMessage(chatId, {
             text: `🛡️ 𝗔𝗗𝗠𝗜𝗡 𝗔𝗟𝗘𝗥𝗧\n━━━━━━━━━━━━━━━━\n📜 ${text}\n━━━━━━━━━━━━━━━━\n${mentionLines}\n━━━━━━━━━━━━━━━━`,
-            mentions: admins,
-            quoted: msg
+            mentions: admins, quoted: msg
         })
         await deleteCommandMessage(sock, msg)
     } catch {
         reply(sock, chatId, '❌ Failed to tag admins.', msg)
-    }
-}
-
-async function hideTag(sock, msg, args) {
-    const chatId = msg.key.remoteJid
-    const text = args.join(' ')
-    if (!text) return reply(sock, chatId, '❌ Provide a message. Example: .hidetag hello everyone', msg)
-    try {
-        const meta = await sock.groupMetadata(chatId)
-        const participants = meta.participants.map(p => p.id)
-        await sock.sendMessage(chatId, {
-            text: text,
-            mentions: participants,
-            quoted: msg
-        })
-        await deleteCommandMessage(sock, msg)
-    } catch {
-        reply(sock, chatId, '❌ Failed to send hidetag.', msg)
     }
 }
 
@@ -513,12 +479,12 @@ async function groupStats(sock, msg, groupSettings) {
         const admins = participants.filter(p => p.admin === 'admin' || p.admin === 'superadmin')
         const created = new Date(meta.creation * 1000).toDateString()
         const isOpen = meta.announce === false ? '🔓 Open' : '🔒 Closed'
-
         const antilink = groupSettings.get(`antilink_${chatId}`) || 'off'
         const antispam = groupSettings.get(`antispam_${chatId}`) ? '🟢 ON' : '🔴 OFF'
+        const antism = groupSettings.get(`antism_${chatId}`) ? '🟢 ON' : '🔴 OFF'
         const welcome = groupSettings.get(`welcome_${chatId}`) ? '🟢 ON' : '🔴 OFF'
         const leave = groupSettings.get(`leave_${chatId}`) ? '🟢 ON' : '🔴 OFF'
-
+        const warnLimit = getWarnLimit(chatId)
         const text = `🏰 𝗚𝗥𝗢𝗨𝗣 𝗦𝗧𝗔𝗧𝗦
 ━━━━━━━━━━━━━━━━
 📋 Name: ${meta.subject}
@@ -531,20 +497,19 @@ async function groupStats(sock, msg, groupSettings) {
 ━━━━━━━━━━━━━━━━
 🔗 Antilink: ${antilink.toUpperCase()}
 🛡️ Antispam: ${antispam}
+📵 Anti-SM: ${antism}
 👋 Welcome: ${welcome}
 🚪 Leave: ${leave}
+⚠️ Warn Limit: ${warnLimit}
 ━━━━━━━━━━━━━━━━`
-
         await sock.sendMessage(chatId, { text, quoted: msg })
     } catch {
         reply(sock, chatId, '❌ Failed to fetch group stats.', msg)
     }
-            }
+}
 
 async function deleteCommandMessage(sock, msg) {
-    try {
-        await sock.sendMessage(msg.key.remoteJid, { delete: msg.key })
-    } catch {}
+    try { await sock.sendMessage(msg.key.remoteJid, { delete: msg.key }) } catch {}
 }
 
 // ---------- Open / Close ----------
@@ -566,32 +531,22 @@ async function closeGroup(sock, chatId) {
     }
 }
 
-// ---------- Command Dispatcher ----------
+// ---------- Tag All ----------
 async function tagAll(sock, msg, args) {
     const chatId = msg.key.remoteJid
     const sender = msg.key.participant || msg.key.remoteJid
     try {
         const meta = await sock.groupMetadata(chatId)
         const members = meta.participants
-
-        const isAdmin = members.find(p => p.id === sender)?.admin === 'admin' || 
+        const isAdmin = members.find(p => p.id === sender)?.admin === 'admin' ||
                         members.find(p => p.id === sender)?.admin === 'superadmin'
         const isMod = await require('../data/db').isModerator(sender)
         const owner = require('../config/owner').isOwner(sender)
-
         if (!isAdmin && !isMod && !owner) {
-            return await sock.sendMessage(chatId, { 
-                text: '❌ Only admins, moderators, or the owner can use this command.', 
-                quoted: msg 
-            })
+            return await sock.sendMessage(chatId, { text: '❌ Only admins, moderators, or the owner can use this command.', quoted: msg })
         }
-
         const text = args.join(' ') || '📢 Attention, all members!'
-
-        const mentionLines = members.map((p, i) => 
-            `${i + 1}. @${p.id.split('@')[0]}`
-        ).join('\n')
-
+        const mentionLines = members.map((p, i) => `${i + 1}. @${p.id.split('@')[0]}`).join('\n')
         await sock.sendMessage(chatId, {
             text: `⚔️ *IMPERIAL SUMMONS* ⚔️\n${'─'.repeat(20)}\n📜 ${text}\n${'─'.repeat(20)}\n\n${mentionLines}`,
             mentions: members.map(p => p.id),
@@ -599,10 +554,11 @@ async function tagAll(sock, msg, args) {
         })
         await deleteCommandMessage(sock, msg)
     } catch (err) {
-        console.error('tagAll error:', err)
         await sock.sendMessage(chatId, { text: '❌ Error: ' + err.message })
     }
-                                        }
+}
+
+// ---------- Command Dispatcher ----------
 async function handleGroupCommands(sock, msg, command, args, deps) {
     const { groupSettings: settings, warnings: warns, isUserAdmin, mutedUsers: muted } = deps
     const chatId = msg.key.remoteJid
@@ -610,24 +566,24 @@ async function handleGroupCommands(sock, msg, command, args, deps) {
     switch(command) {
         case 'kick': await kickMember(sock, msg, args); break
         case 'warn': await warnMember(sock, msg, args, warns); break
+        case 'resetwarn': await resetWarn(sock, msg, args, warns); break
+        case 'setwarn': await setWarnLimit(sock, msg, args); break
         case 'mute': await muteMembers(sock, msg, args, muted, isUserAdmin); break
         case 'unmute': await unmuteMembers(sock, msg, args, muted); break
         case 'promote': await promoteMember(sock, msg, args); break
         case 'demote': await demoteMember(sock, msg, args); break
         case 'antilink': await toggleAntiLink(sock, chatId, args, settings); break
         case 'antispam': await toggleAntiSpam(sock, chatId, args, settings); break
-            case 'antism': await toggleAntiStatusMention(sock, chatId, args, settings); break
+        case 'antism': await toggleAntiStatusMention(sock, chatId, args, settings); break
         case 'welcome': await toggleWelcome(sock, chatId, args, settings); break
         case 'leave': await toggleLeave(sock, chatId, args, settings); break
-        case 'setwelcome': await setWelcomeMessage(sock, chatId, args, msg, groupSettings); break
-case 'setleave': await setLeaveMessage(sock, chatId, args, groupSettings); break
+        case 'setwelcome': await setWelcomeMessage(sock, chatId, args, msg, settings); break
+        case 'setleave': await setLeaveMessage(sock, chatId, args, settings); break
         case 'tagall': await tagAll(sock, msg, args); break
         case 'tagadmins': await tagAdmins(sock, msg, args); break
         case 'hidetag': await hideTag(sock, msg, args); break
-            case 'groupstats':
-case 'gs':
-    await groupStats(sock, msg, settings)
-    break
+        case 'groupstats':
+        case 'gs': await groupStats(sock, msg, settings); break
         case 'open': await openGroup(sock, chatId); break
         case 'close': await closeGroup(sock, chatId); break
         default:
@@ -650,6 +606,6 @@ module.exports = {
     botWarnings,
     lastMessages,
     groupStats,
-toggleAntiStatusMention,
+    toggleAntiStatusMention,
     tagAll
-              }
+                    }

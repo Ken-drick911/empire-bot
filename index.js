@@ -42,10 +42,10 @@ const { OWNER_NUMBER } = require('./src/config/owner')
 
 
 const ADMIN_COMMANDS = [
-    'kick', 'warn', 'mute', 'unmute', 'promote', 'demote',
+    'kick', 'warn', 'resetwarn', 'setwarn', 'mute', 'unmute', 'promote', 'demote',
     'antilink', 'antispam', 'antism', 'welcome', 'leave', 'setwelcome',
     'setleave', 'tagall', 'tagadmins', 'hidetag', 'open', 'close',
-    'delete', 'purge', 'blacklist', 'resetwarn', 'news', 'groupstats', 'gs', 'active', 'inactive'
+    'delete', 'purge', 'blacklist', 'news', 'groupstats', 'gs', 'active', 'inactive'
 ]
 
 const OWNER_COMMANDS = [

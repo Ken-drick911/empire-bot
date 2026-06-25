@@ -14,7 +14,13 @@ router.get('/me', auth, async (req, res) => {
         if (!webUser) return res.status(404).json({ error: 'User not found' })
 
         // Find bot stats using phone number formats
-        const botUser = await db.collection('users').findOne({ id: jid })
+        const botUser = await db.collection('users').findOne({
+    $or: [
+        { id: jid },
+        { id: phone + '@lid' },
+        { id: '204926412185650@lid' }
+    ]
+})
 
         res.json({
     username: webUser.username,

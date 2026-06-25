@@ -1,35 +1,43 @@
 const express = require('express')
 const router = express.Router()
 const multer = require('multer')
-const path = require('path')
+const cloudinary = require('cloudinary').v2
 const auth = require('../middleware/authMiddleware')
 const getDB = () => global._db
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, path.join(__dirname, '../public/uploads'))
-    },
-    filename: (req, file, cb) => {
-        const ext = path.extname(file.originalname)
-        const name = req.user.phone.replace(/\D/g, '') + '_' + file.fieldname + '_' + Date.now() + ext
-        cb(null, name)
-    }
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
 })
 
+const storage = multer.memoryStorage()
 const upload = multer({
     storage,
     limits: { fileSize: 5 * 1024 * 1024 },
     fileFilter: (req, file, cb) => {
         const allowed = /jpeg|jpg|png|gif|webp/
-        const ok = allowed.test(path.extname(file.originalname).toLowerCase())
+        const ok = allowed.test(file.mimetype)
         if (ok) cb(null, true)
         else cb(new Error('Images only'))
     }
 })
 
+const uploadToCloud = (buffer, folder) => {
+    return new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+            { folder: `empire/${folder}`, resource_type: 'image' },
+            (err, result) => {
+                if (err) reject(err)
+                else resolve(result.secure_url)
+            }
+        ).end(buffer)
+    })
+}
+
 router.post('/avatar', auth, upload.single('avatar'), async (req, res) => {
     try {
-        const url = '/uploads/' + req.file.filename
+        const url = await uploadToCloud(req.file.buffer, 'avatars')
         await getDB().collection('users').updateOne(
             { phone: req.user.phone },
             { $set: { avatar: url } }
@@ -42,7 +50,7 @@ router.post('/avatar', auth, upload.single('avatar'), async (req, res) => {
 
 router.post('/cover', auth, upload.single('cover'), async (req, res) => {
     try {
-        const url = '/uploads/' + req.file.filename
+        const url = await uploadToCloud(req.file.buffer, 'covers')
         await getDB().collection('users').updateOne(
             { phone: req.user.phone },
             { $set: { cover: url } }

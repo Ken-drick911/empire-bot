@@ -24,27 +24,29 @@
         <!-- Home -->
         <div id="page-home" class="page active">
             <div class="hero">
-                <h1>⚔️ EMPIRE</h1>
-                <p>A medieval WhatsApp community. Rise through the ranks. Build your legacy.</p>
-                <button onclick="currentUser ? showPage('profile') : showPage('login')" class="btn-primary">Join the Empire</button>
+                <div class="hero-emblem">⚔️</div>
+                <h1>EMPIRE</h1>
+                <p>A medieval WhatsApp community.<br>Rise through the ranks. Build your legacy.</p>
+                <button onclick="currentUser ? showPage('profile') : showPage('login')" class="btn-primary">Enter the Empire</button>
             </div>
         </div>
 
         <!-- Login -->
         <div id="page-login" class="page">
             <div class="auth-card">
+                <div class="auth-emblem">⚔️</div>
                 <h2 id="authTitle">Login</h2>
                 <div id="loginForm">
                     <input type="tel" id="loginPhone" placeholder="Phone (e.g. 2348012345678)">
                     <input type="password" id="loginPassword" placeholder="Password">
-                    <button class="btn-primary" onclick="login()">Login</button>
+                    <button class="btn-primary" onclick="login()">Enter</button>
                     <p>No account? <a href="#" onclick="toggleAuth()">Register</a></p>
                 </div>
                 <div id="registerForm" style="display:none">
-                    <input type="text" id="regUsername" placeholder="Username">
+                    <input type="text" id="regUsername" placeholder="Choose a name, warrior">
                     <input type="tel" id="regPhone" placeholder="Phone (e.g. 2348012345678)">
                     <input type="password" id="regPassword" placeholder="Password">
-                    <button class="btn-primary" onclick="register()">Register</button>
+                    <button class="btn-primary" onclick="register()">Join the Empire</button>
                     <p>Have account? <a href="#" onclick="toggleAuth()">Login</a></p>
                 </div>
                 <p id="authMsg" class="msg"></p>
@@ -54,44 +56,44 @@
         <!-- Profile -->
         <div id="page-profile" class="page">
             <div class="profile-card">
+                <!-- Cover -->
                 <div class="profile-cover" id="profileCover">
-                    <div class="cover-overlay">
+                    <div class="cover-actions">
+                        <label class="cover-btn" for="coverFile">📷 Edit Cover</label>
+                        <input type="file" id="coverFile" accept="image/*" style="display:none" onchange="uploadImage('cover')">
+                    </div>
+                    <!-- Avatar -->
+                    <div class="avatar-wrap">
                         <img id="profileAvatar" src="https://i.imgur.com/HeIi0wU.png" class="profile-avatar">
-                        <div class="cover-info">
-                            <h2 id="profileName"></h2>
-                            <p id="profileBio" class="profile-bio"></p>
-                            <p id="profileTitle" class="profile-title"></p>
-                            <div class="xp-bar-wrap">
-                                <span id="xpText" class="xp-text"></span>
-                                <div class="xp-bar-bg"><div class="xp-bar" id="xpBar"></div></div>
-                            </div>
-                            <div class="profile-rank" id="profileRank"></div>
-                        </div>
+                        <label class="avatar-edit-btn" for="avatarFile">✏️</label>
+                        <input type="file" id="avatarFile" accept="image/*" style="display:none" onchange="uploadImage('avatar')">
                     </div>
                 </div>
+
+                <!-- Info -->
+                <div class="profile-info">
+                    <h2 id="profileName"></h2>
+                    <p id="profileBio" class="profile-bio"></p>
+                    <div class="profile-rank" id="profileRank"></div>
+                    <div class="xp-section">
+                        <span id="xpText" class="xp-text"></span>
+                        <div class="xp-bar-bg"><div class="xp-bar" id="xpBar"></div></div>
+                    </div>
+                </div>
+
+                <!-- Stats -->
                 <div class="profile-stats">
                     <div class="stat"><span id="statXP">0</span><label>XP</label></div>
-                    <div class="stat"><span id="statLevel">1</span><label>Level</label></div>
-                    <div class="stat"><span id="statWallet">0</span><label>Wallet</label></div>
-                    <div class="stat"><span id="statVault">0</span><label>Vault</label></div>
+                    <div class="stat"><span id="statLevel">1</span><label>LEVEL</label></div>
+                    <div class="stat"><span id="statWallet">0</span><label>WALLET</label></div>
+                    <div class="stat"><span id="statVault">0</span><label>VAULT</label></div>
                 </div>
+
+                <!-- Edit Bio -->
                 <div class="profile-edit">
-                    <p class="edit-title">✏️ Edit Profile</p>
-                    <label>Avatar</label>
-                    <div class="upload-wrap">
-                        <input type="file" id="avatarFile" accept="image/*" onchange="uploadImage('avatar')">
-                        <span class="upload-hint">or paste URL</span>
-                        <input type="url" id="editAvatar" placeholder="https://i.imgur.com/yourimage.jpg">
-                    </div>
-                    <label>Cover Photo</label>
-                    <div class="upload-wrap">
-                        <input type="file" id="coverFile" accept="image/*" onchange="uploadImage('cover')">
-                        <span class="upload-hint">or paste URL</span>
-                        <input type="url" id="editCover" placeholder="https://i.imgur.com/yourcover.jpg">
-                    </div>
-                    <label>Bio</label>
+                    <p class="edit-title">✏️ Edit Bio</p>
                     <input type="text" id="editBio" placeholder="Your imperial bio...">
-                    <button class="btn-primary" onclick="updateProfile()">⚔️ Save Changes</button>
+                    <button class="btn-primary" onclick="updateProfile()">Save</button>
                 </div>
             </div>
         </div>
@@ -100,8 +102,8 @@
         <div id="page-shop" class="page">
             <h1 class="page-title">⚔️ IMPERIAL SHOP</h1>
             <div class="wallet-bar">
-                <span>💰 Wallet: <b id="shopWallet">0</b></span>
-                <span>🏦 Vault: <b id="shopVault">0</b></span>
+                <div class="wallet-item">💰 <span id="shopWallet">0</span> <small>Wallet</small></div>
+                <div class="wallet-item">🏦 <span id="shopVault">0</span> <small>Vault</small></div>
             </div>
             <div class="shop-grid" id="shopGrid"></div>
         </div>
@@ -120,4 +122,4 @@
 
     <script src="/js/app.js"></script>
 </body>
-</html>
+    </html>

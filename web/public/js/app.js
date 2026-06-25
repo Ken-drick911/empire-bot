@@ -84,13 +84,15 @@ async function logout() {
 function onLoggedIn() {
     document.getElementById('loginBtn').style.display = 'none'
     document.getElementById('logoutBtn').style.display = 'block'
-    document.getElementById('profileLink').style.display = 'block'
+    document.getElementById('navShop').style.display = 'block'
+    document.getElementById('navProfile').style.display = 'block'
 }
 
 function onLoggedOut() {
     document.getElementById('loginBtn').style.display = 'block'
     document.getElementById('logoutBtn').style.display = 'none'
-    document.getElementById('profileLink').style.display = 'none'
+    document.getElementById('navShop').style.display = 'none'
+    document.getElementById('navProfile').style.display = 'none'
 }
 
 // Profile

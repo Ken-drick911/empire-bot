@@ -471,6 +471,36 @@ async function tagAdmins(sock, msg, args) {
     }
 }
 
+async function tagMods(sock, msg, args) {
+    const chatId = msg.key.remoteJid
+    const text = args.join(' ') || '🛡️ Moderator assistance needed!'
+    try {
+        const { isModerator } = require('./moderator')
+        const meta = await sock.groupMetadata(chatId)
+        const members = meta.participants
+
+        const mods = []
+        for (const p of members) {
+            if (await isModerator(p.id)) mods.push(p.id)
+        }
+
+        if (!mods.length) return await sock.sendMessage(chatId, {
+            text: '⚔️ No moderators found in this group.',
+            quoted: msg
+        })
+
+        const mentionLines = mods.map((id, i) => `${i + 1}. ⚔️ @${id.split('@')[0]}`).join('\n')
+
+        await sock.sendMessage(chatId, {
+            text: `╭───⚔️ 𝗠𝗢𝗗 𝗔𝗟𝗘𝗥𝗧 ⚔️───╮\n│ ${text}\n╰─────────────────╯\n\n${mentionLines}\n\n_Moderators have been summoned._`,
+            mentions: mods,
+            quoted: msg
+        })
+    } catch (err) {
+        await sock.sendMessage(chatId, { text: '❌ Failed to tag mods: ' + err.message, quoted: msg })
+    }
+}
+
 async function groupStats(sock, msg, groupSettings) {
     const chatId = msg.key.remoteJid
     try {

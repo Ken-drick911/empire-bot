@@ -62,7 +62,22 @@ async function startBot() {
         auth: state,
         logger: pino({ level: 'silent' }),
         printQRInTerminal: false
-});
+    })
+
+    if (!sock.authState.creds.registered) {
+        const phone = process.env.OWNER_PHONE
+        if (phone) {
+            setTimeout(async () => {
+                try {
+                    const code = await sock.requestPairingCode(phone)
+                    console.log(`⚔️ PAIRING CODE: ${code}`)
+                } catch (e) {
+                    console.log('Pairing error:', e.message)
+                }
+            }, 3000)
+        }
+    }
+    
 const savedSettings = await getAllGroupSettings()
 savedSettings.forEach(doc => {
     const { chatId, ...settings } = doc

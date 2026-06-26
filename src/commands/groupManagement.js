@@ -607,5 +607,7 @@ module.exports = {
     lastMessages,
     groupStats,
     toggleAntiStatusMention,
-    tagAll
+    tagAll, 
+    tagAdmins,
+    tagMods
                     }

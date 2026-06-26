@@ -1,7 +1,7 @@
-const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
+const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require('@whiskeysockets/baileys');
 const { useMongoAuthState } = require('./src/engine/mongoAuth')
 const pino = require('pino')
-const { state, saveCreds } = await useMongoAuthState(process.env.MONGO_URI)
+const { saveSession, loadSession, getAllGroupSettings } = require('./src/data/db')
 
 // Group Management
 const {
@@ -13,7 +13,7 @@ const {
     sendGroupMessage,
     mutedUsers,
     warnings,
-    groupSettings, 
+    groupSettings,
     tagMods
 } = require('./src/commands/groupManagement')
 
@@ -42,7 +42,6 @@ const { announceCommand, broadcastCommand, restartCommand, listGroupsCommand } =
 const { isBanned } = require('./src/engine/moderation')
 const { OWNER_NUMBER } = require('./src/config/owner')
 
-
 const ADMIN_COMMANDS = [
     'kick', 'warn', 'resetwarn', 'setwarn', 'mute', 'unmute', 'promote', 'demote',
     'antilink', 'antispam', 'antism', 'welcome', 'leave', 'setwelcome',
@@ -57,7 +56,7 @@ const OWNER_COMMANDS = [
 ]
 
 async function startBot() {
-    const { state, saveCreds } = await useMultiFileAuthState('./auth_info_baileys')
+    const { state, saveCreds } = await useMongoAuthState(process.env.MONGO_URI)
 
     const sock = makeWASocket({
         auth: state,
@@ -66,27 +65,28 @@ async function startBot() {
     })
 
     if (!sock.authState.creds.registered) {
-    const phone = process.env.OWNER_PHONE
-    if (phone) {
-        setTimeout(async () => {
-            try {
-                const code = await sock.requestPairingCode(phone)
-                console.log(`⚔️ PAIRING CODE: ${code}`)
-            } catch (e) {
-                console.log('Pairing error:', e.message)
-            }
-        }, 3000)
+        const phone = process.env.OWNER_PHONE
+        if (phone) {
+            setTimeout(async () => {
+                try {
+                    const code = await sock.requestPairingCode(phone)
+                    console.log(`⚔️ PAIRING CODE: ${code}`)
+                } catch (e) {
+                    console.log('Pairing error:', e.message)
+                }
+            }, 3000)
+        }
     }
-}
-    
-const savedSettings = await getAllGroupSettings()
-savedSettings.forEach(doc => {
-    const { chatId, ...settings } = doc
-    Object.entries(settings).forEach(([key, value]) => {
-        if (key !== '_id') groupSettings.set(`${key}_${chatId}`, value)
+
+    const savedSettings = await getAllGroupSettings()
+    savedSettings.forEach(doc => {
+        const { chatId, ...settings } = doc
+        Object.entries(settings).forEach(([key, value]) => {
+            if (key !== '_id') groupSettings.set(`${key}_${chatId}`, value)
+        })
     })
-})
-console.log(`✅ Loaded settings for ${savedSettings.length} groups`)
+    console.log(`✅ Loaded settings for ${savedSettings.length} groups`)
+
     sock.ev.on('connection.update', async (u) => {
         const { connection, lastDisconnect } = u
         if (connection === 'close') {
@@ -97,9 +97,9 @@ console.log(`✅ Loaded settings for ${savedSettings.length} groups`)
     })
 
     sock.ev.on('creds.update', async () => {
-    saveCreds()
-    await saveSession(JSON.stringify(state))
-})
+        saveCreds()
+        await saveSession(JSON.stringify(state))
+    })
 
     async function isUserAdmin(chatId, userId) {
         try {
@@ -120,10 +120,6 @@ console.log(`✅ Loaded settings for ${savedSettings.length} groups`)
         const msg = messages[0]
         if (!msg.message) return
 
-        if (msg.key.addressingMode === 'lid' && !msg.key.participant) {
-            msg.key.participant = msg.key.remoteJidAlt || msg.key.remoteJid
-        }
-
         const from = msg.key.remoteJid
         const text = msg.message.conversation || msg.message.extendedTextMessage?.text || ''
         const sender = msg.key.participant || msg.key.remoteJid
@@ -135,22 +131,17 @@ console.log(`✅ Loaded settings for ${savedSettings.length} groups`)
 
         await createUser(sender, username)
 
-        if (await isBanned(sender)) {
-            return
-        }
+        if (await isBanned(sender)) return
 
-        if (!isGroup && sender !== OWNER_NUMBER) {
-            return
-        }
+        if (!isGroup && sender !== OWNER_NUMBER) return
 
         if (text.toLowerCase() === '.ping') {
-            await sock.sendMessage(from, { text: 'Arthur is live...👑' }, { quoted: msg })
+            await sock.sendMessage(from, { text: 'Arthur is live...👑', quoted: msg })
             return
         }
 
         if (text.toLowerCase() === '.test') {
-            await sock.sendMessage(from, { text: 'Testing....' }, { quoted: msg })
-            await sock.sendMessage(from, { text: 'Arthur is live...👑' }, { quoted: msg })
+            await sock.sendMessage(from, { text: 'Testing....\nArthur is live...👑', quoted: msg })
             return
         }
 
@@ -162,13 +153,7 @@ console.log(`✅ Loaded settings for ${savedSettings.length} groups`)
             }
 
             await handleAntiSpam(sock, msg, { warnings, groupSettings, isUserAdmin })
-
-            await antiLinkHandler(sock, msg, {
-                groupSettings,
-                warnings,
-                isUserAdmin,
-                mutedUsers
-            })
+            await antiLinkHandler(sock, msg, { groupSettings, warnings, isUserAdmin, mutedUsers })
 
             if (!text.startsWith('.')) {
                 const result = await awardMessageXP(sender, username)
@@ -194,28 +179,19 @@ console.log(`✅ Loaded settings for ${savedSettings.length} groups`)
             const owner = isOwner(sender)
 
             if (OWNER_COMMANDS.includes(cmd)) {
-    const isMod = await isModerator(sender)
-    const modAllowed = ['announce', 'broadcast', 'listgroups', 'tagall']
-    if (!owner && !isMod) {
-        await sock.sendMessage(from, { text: '👑 Only the Emperor can use this command.', quoted: msg })
-        return
-    }
-    if (!owner && isMod && !modAllowed.includes(cmd)) {
-        await sock.sendMessage(from, { text: '👑 Only the Emperor can use this command.', quoted: msg })
-        return
-    }
-                if (cmd === 'addmod') {
-                    await addModCommand(sock, msg, from, args)
+                const isMod = await isModerator(sender)
+                const modAllowed = ['announce', 'broadcast', 'listgroups', 'tagall']
+                if (!owner && !isMod) {
+                    await sock.sendMessage(from, { text: '👑 Only the Emperor can use this command.', quoted: msg })
                     return
                 }
-                if (cmd === 'removemod') {
-                    await removeModCommand(sock, msg, from, args)
+                if (!owner && isMod && !modAllowed.includes(cmd)) {
+                    await sock.sendMessage(from, { text: '👑 Only the Emperor can use this command.', quoted: msg })
                     return
                 }
-                if (cmd === 'givecoins') {
-                    await giveCoinsCommand(sock, msg, from, args)
-                    return
-                }
+                if (cmd === 'addmod') { await addModCommand(sock, msg, from, args); return }
+                if (cmd === 'removemod') { await removeModCommand(sock, msg, from, args); return }
+                if (cmd === 'givecoins') { await giveCoinsCommand(sock, msg, from, args); return }
                 return
             }
 
@@ -224,11 +200,8 @@ console.log(`✅ Loaded settings for ${savedSettings.length} groups`)
                     await sock.sendMessage(from, { text: '👑 Only the Emperor or Moderators can use this command.', quoted: msg })
                     return
                 }
-                if (cmd === 'ban') {
-                    await banCommand(sock, msg, from, args)
-                } else {
-                    await unbanCommand(sock, msg, from, args)
-                }
+                if (cmd === 'ban') await banCommand(sock, msg, from, args)
+                else await unbanCommand(sock, msg, from, args)
                 return
             }
 
@@ -237,12 +210,7 @@ console.log(`✅ Loaded settings for ${savedSettings.length} groups`)
                     await sock.sendMessage(from, { text: '🛡️ Only admins can use this command.', quoted: msg })
                     return
                 }
-                await handleGroupCommands(sock, msg, cmd, args, {
-                    groupSettings,
-                    warnings,
-                    mutedUsers,
-                    isUserAdmin
-                })
+                await handleGroupCommands(sock, msg, cmd, args, { groupSettings, warnings, mutedUsers, isUserAdmin })
                 return
             }
 
@@ -264,50 +232,42 @@ console.log(`✅ Loaded settings for ${savedSettings.length} groups`)
                 case 'decree':
                     await decreeCommand(sock, msg, from, sender, username)
                     break
-                    case 'modmenu':
-  if (!owner && !(await isModerator(sender))) return sock.sendMessage(from, { text: '❌ Moderators only.', quoted: msg })
-  await modMenuCommand(sock, msg, from, username)
-  break
-
-case 'appoint':
-  if (!owner) return sock.sendMessage(from, { text: '❌ Owner only.', quoted: msg })
-  await appointCommand(sock, msg, from, args)
-  break
-
-case 'setrank':
-  if (!owner) return sock.sendMessage(from, { text: '❌ Owner only.', quoted: msg })
-  await setRankCommand(sock, msg, from, args)
-  break
-
-case 'givexp':
-  if (!owner) return sock.sendMessage(from, { text: '❌ Owner only.', quoted: msg })
-  await giveXPCommand(sock, msg, from, args)
-  break
-
-case 'resetuser':
-  if (!owner && !(await isModerator(sender))) return sock.sendMessage(from, { text: '❌ Owner/Mod only.', quoted: msg })
-  await resetUserCommand(sock, msg, from, args)
-  break
-
-case 'announce':
-  if (!owner && !(await isModerator(sender))) return sock.sendMessage(from, { text: '❌ Owner/Mod only.', quoted: msg })
-  await announceCommand(sock, msg, from, args)
-  break
-
-case 'broadcast':
-  if (!owner && !(await isModerator(sender))) return sock.sendMessage(from, { text: '❌ Owner/Mod only.', quoted: msg })
-  await broadcastCommand(sock, msg, from, args)
-  break
-
-case 'restart':
-  if (!owner) return sock.sendMessage(from, { text: '❌ Owner only.', quoted: msg })
-  await restartCommand(sock, msg, from)
-  break
-
-case 'listgroups':
-  if (!owner && !(await isModerator(sender))) return sock.sendMessage(from, { text: '❌ Owner/Mod only.', quoted: msg })
-  await listGroupsCommand(sock, msg, from)
-  break
+                case 'modmenu':
+                    if (!owner && !(await isModerator(sender))) return sock.sendMessage(from, { text: '❌ Moderators only.', quoted: msg })
+                    await modMenuCommand(sock, msg, from, username)
+                    break
+                case 'appoint':
+                    if (!owner) return sock.sendMessage(from, { text: '❌ Owner only.', quoted: msg })
+                    await appointCommand(sock, msg, from, args)
+                    break
+                case 'setrank':
+                    if (!owner) return sock.sendMessage(from, { text: '❌ Owner only.', quoted: msg })
+                    await setRankCommand(sock, msg, from, args)
+                    break
+                case 'givexp':
+                    if (!owner) return sock.sendMessage(from, { text: '❌ Owner only.', quoted: msg })
+                    await giveXPCommand(sock, msg, from, args)
+                    break
+                case 'resetuser':
+                    if (!owner && !(await isModerator(sender))) return sock.sendMessage(from, { text: '❌ Owner/Mod only.', quoted: msg })
+                    await resetUserCommand(sock, msg, from, args)
+                    break
+                case 'announce':
+                    if (!owner && !(await isModerator(sender))) return sock.sendMessage(from, { text: '❌ Owner/Mod only.', quoted: msg })
+                    await announceCommand(sock, msg, from, args)
+                    break
+                case 'broadcast':
+                    if (!owner && !(await isModerator(sender))) return sock.sendMessage(from, { text: '❌ Owner/Mod only.', quoted: msg })
+                    await broadcastCommand(sock, msg, from, args)
+                    break
+                case 'restart':
+                    if (!owner) return sock.sendMessage(from, { text: '❌ Owner only.', quoted: msg })
+                    await restartCommand(sock, msg, from)
+                    break
+                case 'listgroups':
+                    if (!owner && !(await isModerator(sender))) return sock.sendMessage(from, { text: '❌ Owner/Mod only.', quoted: msg })
+                    await listGroupsCommand(sock, msg, from)
+                    break
                 case 'daily':
                     await dailyCommand(sock, msg, from, sender, username)
                     break
@@ -376,15 +336,15 @@ case 'listgroups':
                 case 'mr':
                     await myReputationCommand(sock, msg, from, sender, username)
                     break
-                    case 'reg':
-    await sock.sendMessage(from, { text: `🏰 *EMPIRE PORTAL*\n\nRegister or login to manage your profile!\n\n🔗 ${process.env.WEB_URL}`, quoted: msg })
-    break
-case 'shop':
-    await sock.sendMessage(from, { text: `⚔️ *IMPERIAL SHOP*\n\nVisit the shop to buy items!\n\n🔗 ${process.env.WEB_URL}`, quoted: msg })
-    break
-                    case 'mods':
-    await tagMods(sock, msg, from, args)
-    break
+                case 'reg':
+                    await sock.sendMessage(from, { text: `🏰 *EMPIRE PORTAL*\n\nRegister or login to manage your profile!\n\n🔗 ${process.env.WEB_URL}`, quoted: msg })
+                    break
+                case 'shop':
+                    await sock.sendMessage(from, { text: `⚔️ *IMPERIAL SHOP*\n\nVisit the shop to buy items!\n\n🔗 ${process.env.WEB_URL}`, quoted: msg })
+                    break
+                case 'mods':
+                    await tagMods(sock, msg, from, args)
+                    break
                 default:
                     break
             }

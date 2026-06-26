@@ -64,19 +64,6 @@ async function startBot() {
         printQRInTerminal: false
     })
 
-    if (!sock.authState.creds.registered) {
-    const phone = process.env.OWNER_PHONE
-    if (phone) {
-        try {
-            const code = await sock.requestPairingCode(phone)
-            console.log(`⚔️ PAIRING CODE: ${code}`)
-        } catch (e) {
-            console.log('Pairing error:', e.message)
-            setTimeout(startBot, 5000)
-        }
-    }
-}
-
     const savedSettings = await getAllGroupSettings()
     savedSettings.forEach(doc => {
         const { chatId, ...settings } = doc
@@ -89,8 +76,12 @@ async function startBot() {
     sock.ev.on('connection.update', async (u) => {
         const { connection, lastDisconnect } = u
         if (connection === 'close') {
-            const r = lastDisconnect?.error?.output?.statusCode !== DisconnectReason.loggedOut
-            if (r) setTimeout(startBot, 5000)
+    const code = lastDisconnect?.error?.output?.statusCode
+    if (code === DisconnectReason.loggedOut) {
+        console.log('❌ Logged out. Visit /pair to re-pair.')
+    } else if (code !== 401) {
+        setTimeout(startBot, 10000)
+    }
         }
         if (connection === 'open') console.log('✅ Empire Bot connected!')
     })

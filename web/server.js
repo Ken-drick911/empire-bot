@@ -42,30 +42,45 @@ app.post('/pair', express.urlencoded({ extended: true }), async (req, res) => {
     try {
         const phone = req.body.phone?.replace(/\D/g, '')
         if (!phone) return res.send('❌ No phone number provided')
-        
-        const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require('@whiskeysockets/baileys')
+
+        const { default: makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys')
         const pino = require('pino')
         const { state, saveCreds } = await useMultiFileAuthState('./auth_info_baileys')
-        
+
         const sock = makeWASocket({
             auth: state,
             logger: pino({ level: 'silent' }),
             printQRInTerminal: false,
             connectTimeoutMs: 60000
         })
-        
+
         sock.ev.on('creds.update', saveCreds)
-        
-        // Wait for connection before requesting code
-        await new Promise((resolve, reject) => {
-            sock.ev.on('connection.update', async ({ connection, lastDisconnect }) => {
-                if (connection === 'open') resolve()
+
+        let codeSent = false
+        const code = await new Promise((resolve, reject) => {
+            sock.ev.on('connection.update', async ({ connection }) => {
+                if (connection === 'open' && !codeSent) {
+                    codeSent = true
+                    try {
+                        const c = await sock.requestPairingCode(phone)
+                        resolve(c)
+                    } catch (e) { reject(e) }
+                }
                 if (connection === 'close') reject(new Error('Connection closed'))
             })
-            setTimeout(() => reject(new Error('Connection timeout')), 30000)
+            // Try requesting before connection too
+            setTimeout(async () => {
+                if (!codeSent) {
+                    try {
+                        codeSent = true
+                        const c = await sock.requestPairingCode(phone)
+                        resolve(c)
+                    } catch (e) { reject(e) }
+                }
+            }, 3000)
+            setTimeout(() => reject(new Error('Timeout')), 30000)
         })
-        
-        const code = await sock.requestPairingCode(phone)
+
         res.send(`
             <html>
             <body style="background:#111;color:#fff;font-family:sans-serif;padding:40px;text-align:center">

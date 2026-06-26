@@ -65,18 +65,17 @@ async function startBot() {
     })
 
     if (!sock.authState.creds.registered) {
-        const phone = process.env.OWNER_PHONE
-        if (phone) {
-            setTimeout(async () => {
-                try {
-                    const code = await sock.requestPairingCode(phone)
-                    console.log(`⚔️ PAIRING CODE: ${code}`)
-                } catch (e) {
-                    console.log('Pairing error:', e.message)
-                }
-            }, 8000)
+    const phone = process.env.OWNER_PHONE
+    if (phone) {
+        try {
+            const code = await sock.requestPairingCode(phone)
+            console.log(`⚔️ PAIRING CODE: ${code}`)
+        } catch (e) {
+            console.log('Pairing error:', e.message)
+            setTimeout(startBot, 5000)
         }
     }
+}
 
     const savedSettings = await getAllGroupSettings()
     savedSettings.forEach(doc => {

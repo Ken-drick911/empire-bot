@@ -74,7 +74,7 @@ async function startBot() {
                 } catch (e) {
                     console.log('Pairing error:', e.message)
                 }
-            }, 3000)
+            }, 8000)
         }
     }
 

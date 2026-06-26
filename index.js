@@ -1,6 +1,7 @@
 const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys');
+const { useMongoAuthState } = require('./src/engine/mongoAuth')
 const pino = require('pino')
-const { saveSession, loadSession, getAllGroupSettings } = require('./src/data/db')
+const { state, saveCreds } = await useMongoAuthState(process.env.MONGO_URI)
 
 // Group Management
 const {
@@ -65,18 +66,18 @@ async function startBot() {
     })
 
     if (!sock.authState.creds.registered) {
-        const phone = process.env.OWNER_PHONE
-        if (phone) {
-            setTimeout(async () => {
-                try {
-                    const code = await sock.requestPairingCode(phone)
-                    console.log(`⚔️ PAIRING CODE: ${code}`)
-                } catch (e) {
-                    console.log('Pairing error:', e.message)
-                }
-            }, 3000)
-        }
+    const phone = process.env.OWNER_PHONE
+    if (phone) {
+        setTimeout(async () => {
+            try {
+                const code = await sock.requestPairingCode(phone)
+                console.log(`⚔️ PAIRING CODE: ${code}`)
+            } catch (e) {
+                console.log('Pairing error:', e.message)
+            }
+        }, 3000)
     }
+}
     
 const savedSettings = await getAllGroupSettings()
 savedSettings.forEach(doc => {

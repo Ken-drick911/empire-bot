@@ -359,6 +359,12 @@ case 'listgroups':
                 case 'mr':
                     await myReputationCommand(sock, msg, from, sender, username)
                     break
+                    case 'reg':
+    await sock.sendMessage(from, { text: `🏰 *EMPIRE PORTAL*\n\nRegister or login to manage your profile!\n\n🔗 ${process.env.WEB_URL}`, quoted: msg })
+    break
+case 'shop':
+    await sock.sendMessage(from, { text: `⚔️ *IMPERIAL SHOP*\n\nVisit the shop to buy items!\n\n🔗 ${process.env.WEB_URL}`, quoted: msg })
+    break
                 default:
                     break
             }

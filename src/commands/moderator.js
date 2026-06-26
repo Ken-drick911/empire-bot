@@ -1,4 +1,11 @@
 const { getUser, createUser, updateUser } = require('../data/db')
+const { MongoClient } = require('mongodb')
+
+async function getModDB() {
+    const client = new MongoClient(process.env.MONGO_URI)
+    await client.connect()
+    return { client, db: client.db('empireBot') }
+}
 
 async function addModCommand(sock, msg, from, args) {
     const number = args[0]?.replace(/\D/g, '')
@@ -21,27 +28,26 @@ async function removeModCommand(sock, msg, from, args) {
     if (!user) return sock.sendMessage(from, { text: '❌ User not found.', quoted: msg })
 
     await updateUser(targetId, { isMod: false, phone: number })
-    await sock.sendMessage(from, { text: `✅ ${number} is no longer a Moderator.', quoted: msg })
+    await sock.sendMessage(from, { text: `✅ ${number} is no longer a Moderator.`, quoted: msg })
 }
 
 async function isModerator(userId) {
-    // Direct lookup
+    // Extract phone from any ID format
+    const phone = userId.replace('@s.whatsapp.net', '').replace('@lid', '')
+
+    // Try direct lookup
     const user = await getUser(userId)
     if (user?.isMod === true) return true
 
     // Try @s.whatsapp.net format
-    const phone = userId.replace('@s.whatsapp.net', '').replace('@lid', '')
-    const userByPhone = await getUser(`${phone}@s.whatsapp.net`)
-    if (userByPhone?.isMod === true) return true
+    const userByJid = await getUser(`${phone}@s.whatsapp.net`)
+    if (userByJid?.isMod === true) return true
 
-    // Try phone field lookup via db
+    // Try phone field in MongoDB directly
     try {
-        const { MongoClient } = require('mongodb')
-        const dbClient = new MongoClient(process.env.MONGO_URI)
-        await dbClient.connect()
-        const db = dbClient.db('empireBot')
+        const { client, db } = await getModDB()
         const u = await db.collection('users').findOne({ phone, isMod: true })
-        await dbClient.close()
+        await client.close()
         if (u) return true
     } catch {}
 

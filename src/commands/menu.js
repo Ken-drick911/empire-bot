@@ -44,6 +44,7 @@ function getMenuText(senderName) {
 ┣ ♤ .ping
 ┣ ♤ .menu
 ┣ ♤ .afk
+┣ ♤ .mods
 ┗━━━━━━━━━━━
 
 🛠️ 𝗜𝗠𝗣𝗘𝗥𝗜𝗔𝗟 𝗚𝗨𝗔𝗥𝗗𝗦 🛠️

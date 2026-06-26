@@ -8,10 +8,12 @@ function getMenuText(senderName) {
 │ ⚔️ Name: 𝗔𝗿𝘁𝗵𝘂𝗿
 │ 🏛️ Emperor: 𝙺𝙴𝙽♠️
 ╰─────────────────╯
+
 📜 𝗜𝗠𝗣𝗘𝗥𝗜𝗔𝗟 𝗗𝗢𝗦𝗦𝗜𝗘𝗥 📜
 ┣ ♤ .profile / .p
 ┣ ♤ .stats
 ┣ ♤ .setpic
+┣ ♤ .reg — Register on web
 ┗━━━━━━━━━━━
 
 💰 𝗜𝗠𝗣𝗘𝗥𝗜𝗔𝗟 𝗧𝗥𝗘𝗔𝗦𝗨𝗥𝗬 💰
@@ -23,9 +25,12 @@ function getMenuText(senderName) {
 ┣ ♤ .give
 ┗━━━━━━━━━━━
 
+⚜️ 𝗜𝗠𝗣𝗘𝗥𝗜𝗔𝗟 𝗦𝗛𝗢𝗣 ⚜️
+┣ ♤ .shop — Visit the Imperial Shop
+┗━━━━━━━━━━━
+
 ⚜️ 𝗜𝗠𝗣𝗘𝗥𝗜𝗔𝗟 𝗥𝗘𝗚𝗜𝗦𝗧𝗥𝗬 ⚜️
-┣ ♤ .top
-┣ ♤ .leaderboard / .lb
+┣ ♤ .top / .leaderboard / .lb
 ┣ ♤ .wealthleaderboard / .wlb
 ┣ ♤ .gr
 ┣ ♤ .gwlb
@@ -37,33 +42,30 @@ function getMenuText(senderName) {
 
 ⚙️ 𝗜𝗠𝗣𝗘𝗥𝗜𝗔𝗟 𝗛𝗘𝗥𝗔𝗟𝗗𝗥𝗬 ⚙️
 ┣ ♤ .ping
-┣ ♤ .test
 ┣ ♤ .menu
 ┣ ♤ .afk
-┣ ♤ .checkin
 ┗━━━━━━━━━━━
 
 🛠️ 𝗜𝗠𝗣𝗘𝗥𝗜𝗔𝗟 𝗚𝗨𝗔𝗥𝗗𝗦 🛠️
 ┣ ♤ .kick
-┣ ♤ .warn
-┣ ♤ .mute
-┣ ♤ .unmute
-┣ ♤ .promote
-┣ ♤ .demote
-┣ ♤ .antilink
-┣ ♤ .antispam
-┣ ♤ .antism
-┣ ♤ .welcome
-┣ ♤ .setwelcome
-┣ ♤ .setleave
-┣ ♤ .hidetag
-┣ ♤ .tagall
-┣ ♤ .tagadmins
+┣ ♤ .warn @user
+┣ ♤ .resetwarn @user
+┣ ♤ .setwarn 1-5
+┣ ♤ .mute @user [time]
+┣ ♤ .unmute @user
+┣ ♤ .promote / .demote
+┣ ♤ .antilink off/whatsapp/all
+┣ ♤ .antispam on/off
+┣ ♤ .antism on/off
+┣ ♤ .welcome on/off
+┣ ♤ .setwelcome [msg]
+┣ ♤ .setleave [msg]
+┣ ♤ .hidetag [msg]
+┣ ♤ .tagall [msg]
+┣ ♤ .tagadmins [msg]
 ┣ ♤ .groupstats / .gs
-┣ ♤ .active
-┣ ♤ .inactive
-┣ ♤ .open
-┣ ♤ .close
+┣ ♤ .active / .inactive
+┣ ♤ .open / .close
 ┗━━━━━━━━━━━`
 }
 
@@ -72,6 +74,7 @@ function getDecreeText(senderName) {
 │ Emperor Command List
 │ 𝗔𝗿𝘁𝗵𝘂𝗿
 ╰─────────────────╯
+
 👑 𝗢𝗪𝗡𝗘𝗥 𝗢𝗡𝗟𝗬 👑
 ┣ ♤ .addmod (number)
 ┣ ♤ .removemod (number)
@@ -98,13 +101,30 @@ function getModMenuText(senderName) {
 │ Moderator Command List
 │ ${senderName}
 ╰─────────────────╯
+
 🛡️ 𝗠𝗢𝗗𝗘𝗥𝗔𝗧𝗜𝗢𝗡 🛡️
 ┣ ♤ .ban (number) [time]
 ┣ ♤ .unban (number)
 ┣ ♤ .resetuser (number)
 ┣ ♤ .warn @user
+┣ ♤ .resetwarn @user
+┣ ♤ .setwarn 1-5
 ┣ ♤ .kick @user
-┣ ♤ .mute / .unmute
+┣ ♤ .mute @user [time]
+┣ ♤ .unmute @user
+┗━━━━━━━━━━━
+
+🛠️ 𝗚𝗥𝗢𝗨𝗣 𝗖𝗢𝗡𝗧𝗥𝗢𝗟 🛠️
+┣ ♤ .tagall [msg]
+┣ ♤ .tagadmins [msg]
+┣ ♤ .antilink off/whatsapp/all
+┣ ♤ .antispam on/off
+┣ ♤ .antism on/off
+┣ ♤ .welcome on/off
+┣ ♤ .setwelcome [msg]
+┣ ♤ .setleave [msg]
+┣ ♤ .open / .close
+┣ ♤ .groupstats / .gs
 ┗━━━━━━━━━━━
 
 📢 𝗕𝗥𝗢𝗔𝗗𝗖𝗔𝗦𝗧 📢

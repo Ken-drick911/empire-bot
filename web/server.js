@@ -25,14 +25,17 @@ app.use('/api/leaderboard', leaderboardRoutes)
 app.use('/api/upload', uploadRoutes)
 
 // Pairing endpoint
-app.get('/pair', async (req, res) => {
+let pairingSock = null
+
+app.get('/pair', (req, res) => {
     res.send(`
         <html>
+        <head><title>Empire Pairing</title></head>
         <body style="background:#111;color:#fff;font-family:sans-serif;padding:40px;text-align:center">
         <h2>⚔️ Empire Bot Pairing</h2>
         <form method="POST" action="/pair">
-            <input name="phone" placeholder="2348012345678" style="padding:10px;width:300px;font-size:16px">
-            <button type="submit" style="padding:10px 20px;background:#c9a84c;border:none;cursor:pointer;font-size:16px">Get Pairing Code</button>
+            <input name="phone" placeholder="2348012345678" style="padding:12px;width:300px;font-size:16px;background:#1a1a1a;color:#fff;border:1px solid #c9a84c;border-radius:8px"><br><br>
+            <button type="submit" style="padding:12px 32px;background:#c9a84c;border:none;cursor:pointer;font-size:16px;font-weight:bold;border-radius:8px">Get Pairing Code</button>
         </form>
         </body></html>
     `)
@@ -41,56 +44,63 @@ app.get('/pair', async (req, res) => {
 app.post('/pair', express.urlencoded({ extended: true }), async (req, res) => {
     try {
         const phone = req.body.phone?.replace(/\D/g, '')
-        if (!phone) return res.send('❌ No phone number provided')
+        if (!phone) return res.send('❌ No phone number')
 
         const { default: makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys')
         const pino = require('pino')
-        const { state, saveCreds } = await useMultiFileAuthState('./auth_info_baileys')
 
-        const sock = makeWASocket({
+        if (pairingSock) {
+            try { pairingSock.end() } catch {}
+            pairingSock = null
+        }
+
+        const { state, saveCreds } = await useMultiFileAuthState('./auth_info_baileys')
+        pairingSock = makeWASocket({
             auth: state,
             logger: pino({ level: 'silent' }),
             printQRInTerminal: false,
-            connectTimeoutMs: 60000
+            connectTimeoutMs: 60000,
+            defaultQueryTimeoutMs: 60000
         })
 
-        sock.ev.on('creds.update', saveCreds)
+        pairingSock.ev.on('creds.update', saveCreds)
 
-        let codeSent = false
         const code = await new Promise((resolve, reject) => {
-            sock.ev.on('connection.update', async ({ connection }) => {
-                if (connection === 'open' && !codeSent) {
-                    codeSent = true
+            const timeout = setTimeout(() => reject(new Error('Timeout - try again')), 15000)
+            
+            pairingSock.ev.on('connection.update', async ({ connection }) => {
+                if (connection === 'open') {
+                    clearTimeout(timeout)
                     try {
-                        const c = await sock.requestPairingCode(phone)
+                        const c = await pairingSock.requestPairingCode(phone)
                         resolve(c)
-                    } catch (e) { reject(e) }
+                    } catch(e) { reject(e) }
                 }
-                if (connection === 'close') reject(new Error('Connection closed'))
+                if (connection === 'close') {
+                    clearTimeout(timeout)
+                    reject(new Error('Connection closed - WhatsApp may have flagged. Wait 10 mins and retry.'))
+                }
             })
-            // Try requesting before connection too
-            setTimeout(async () => {
-                if (!codeSent) {
-                    try {
-                        codeSent = true
-                        const c = await sock.requestPairingCode(phone)
-                        resolve(c)
-                    } catch (e) { reject(e) }
-                }
-            }, 3000)
-            setTimeout(() => reject(new Error('Timeout')), 30000)
         })
 
         res.send(`
             <html>
             <body style="background:#111;color:#fff;font-family:sans-serif;padding:40px;text-align:center">
-            <h2>⚔️ Pairing Code</h2>
-            <h1 style="color:#c9a84c;font-size:3rem;letter-spacing:8px">${code}</h1>
+            <h2>⚔️ Your Pairing Code</h2>
+            <h1 style="color:#c9a84c;font-size:3rem;letter-spacing:8px;background:#1a1a1a;padding:20px;border-radius:12px">${code}</h1>
             <p>Enter this in WhatsApp → Linked Devices → Link with phone number</p>
+            <p style="color:#888">Code expires in ~60 seconds</p>
             </body></html>
         `)
     } catch (err) {
-        res.send('❌ Error: ' + err.message)
+        res.send(`
+            <html>
+            <body style="background:#111;color:#fff;font-family:sans-serif;padding:40px;text-align:center">
+            <h2>❌ Error</h2>
+            <p style="color:#f55">${err.message}</p>
+            <a href="/pair" style="color:#c9a84c">Try again</a>
+            </body></html>
+        `)
     }
 })
 

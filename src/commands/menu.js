@@ -13,7 +13,7 @@ function getMenuText(senderName) {
 ┣ ♤ .profile / .p
 ┣ ♤ .stats
 ┣ ♤ .setpic
-┣ ♤ .reg — Register on web
+┣ ♤ .reg
 ┗━━━━━━━━━━━
 
 💰 𝗜𝗠𝗣𝗘𝗥𝗜𝗔𝗟 𝗧𝗥𝗘𝗔𝗦𝗨𝗥𝗬 💰
@@ -26,7 +26,7 @@ function getMenuText(senderName) {
 ┗━━━━━━━━━━━
 
 ⚜️ 𝗜𝗠𝗣𝗘𝗥𝗜𝗔𝗟 𝗦𝗛𝗢𝗣 ⚜️
-┣ ♤ .shop — Visit the Imperial Shop
+┣ ♤ .shop
 ┗━━━━━━━━━━━
 
 ⚜️ 𝗜𝗠𝗣𝗘𝗥𝗜𝗔𝗟 𝗥𝗘𝗚𝗜𝗦𝗧𝗥𝗬 ⚜️

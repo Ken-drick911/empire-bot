@@ -12,7 +12,8 @@ const {
     sendGroupMessage,
     mutedUsers,
     warnings,
-    groupSettings
+    groupSettings, 
+    tagMods
 } = require('./src/commands/groupManagement')
 
 // Empire System

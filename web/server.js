@@ -14,7 +14,7 @@ const PORT = process.env.PORT || process.env.WEB_PORT || 3000
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
-app.use(express.static(path.join(__dirname, 'public')))
+app.use(express.static(path.join(__dirname, 'frontend/dist')))
 
 app.use('/api/auth', authRoutes)
 app.use('/api/profile', profileRoutes)
@@ -106,7 +106,7 @@ app.post('/pair', express.urlencoded({ extended: true }), async (req, res) => {
 
 // Serve frontend
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'))
+    res.sendFile(path.join(__dirname, 'frontend', 'dist', 'index.html'))
 })
 
 async function startWeb() {

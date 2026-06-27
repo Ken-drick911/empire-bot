@@ -36,7 +36,7 @@ export default function Shop() {
       <div style={{ padding: '0 0 20px' }}>
         <div style={{ position: 'relative', height: 150, marginBottom: -10, overflow: 'hidden' }}>
           <img
-            src="/images/960513.webp"
+  src="/images/file_00000000c60871f4a1ec90b2583b6757.webp"
             alt=""
             style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center' }}
           />

@@ -75,7 +75,9 @@ export default function Shop() {
                   background: activeCat === c.key ? 'rgba(201,168,76,0.1)' : 'var(--ink-card)'
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 6 }}><c.icon /></div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
+  <img src={item.image} alt={item.name} style={{ width: 56, height: 56, objectFit: 'contain', borderRadius: 8 }} />
+</div>
                 <div style={{
                   fontSize: 10, letterSpacing: '0.04em',
                   color: activeCat === c.key ? 'var(--gold-bright)' : 'var(--parchment-dim)'

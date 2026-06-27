@@ -44,7 +44,7 @@ export default function PageTransition({ children, style }) {
       initial="initial"
       animate="animate"
       exit="exit"
-      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
       style={{ minHeight: '100%', ...style }}
     >
       {children}

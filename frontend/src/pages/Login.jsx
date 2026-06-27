@@ -40,31 +40,43 @@ export default function Login() {
           pointerEvents: 'none'
         }} />
 
-        {/* Ember particles - TEST */}
-<div style={{
-  position: 'absolute', top: '50%', left: '50%',
-  width: 40, height: 40, borderRadius: '50%',
-  background: 'red', boxShadow: '0 0 30px 10px red',
-  zIndex: 999
-}} />
+        {/* Ember particles */}
+{[...Array(20)].map((_, i) => (
+  <motion.div
+    key={i}
+    initial={{ opacity: 0, top: '100%' }}
+    animate={{ opacity: [0, 1, 1, 0], top: '-5%' }}
+    transition={{
+      duration: 6 + Math.random() * 5,
+      delay: Math.random() * 5,
+      repeat: Infinity,
+      ease: 'linear'
+    }}
+    style={{
+      position: 'absolute',
+      left: `${Math.random() * 100}%`,
+      width: 4,
+      height: 4,
+      borderRadius: '50%',
+      background: 'var(--gold-bright)',
+      boxShadow: '0 0 8px 2px rgba(230,198,104,0.9)',
+      zIndex: 1
+    }}
+  />
+))}
 
         {/* Crown SVG */}
         <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          style={{ marginBottom: 6, position: 'relative', zIndex: 2 }}
-        >
-          <svg
-            width="64"
-            height="64"
-            viewBox="0 0 24 24"
-            fill="var(--gold-bright)"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path d="M5 20h14l-2-10-5 5-5-5-2 10z" />
-          </svg>
-        </motion.div>
+  initial={{ opacity: 0, y: -10 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+  style={{ marginBottom: 10, position: 'relative', zIndex: 2 }}
+>
+  <svg width="46" height="46" viewBox="0 0 24 24" fill="none">
+    <path d="M3 18l1.5-9L9 13l3-7 3 7 4.5-4L21 18H3z" stroke="var(--gold-bright)" strokeWidth="1.2" strokeLinejoin="round" fill="rgba(201,168,76,0.08)" />
+    <circle cx="12" cy="4" r="1.3" fill="var(--gold-bright)" />
+  </svg>
+</motion.div>
 
         {/* Title */}
         <motion.h1

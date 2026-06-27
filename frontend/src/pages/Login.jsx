@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import PageTransition from '../components/PageTransition.jsx'
+import PageTransition, { EmberField } from '../components/PageTransition.jsx'
 import { api } from '../api/client.js'
 
 export default function Login() {
@@ -38,12 +38,18 @@ export default function Login() {
           background: 'radial-gradient(circle, rgba(201,168,76,0.12), transparent 70%)',
           pointerEvents: 'none'
         }} />
+        <EmberField count={24} />
 
         <motion.div
-          initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          style={{ fontSize: 38, marginBottom: 6 }}
-        >👑</motion.div>
+  initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+  style={{ marginBottom: 10 }}
+>
+  <svg width="46" height="46" viewBox="0 0 24 24" fill="none">
+    <path d="M3 18l1.5-9L9 13l3-7 3 7 4.5-4L21 18H3z" stroke="var(--gold-bright)" strokeWidth="1.2" strokeLinejoin="round" fill="rgba(201,168,76,0.08)" />
+    <circle cx="12" cy="4" r="1.3" fill="var(--gold-bright)" />
+  </svg>
+</motion.div>
 
         <motion.h1
           initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}

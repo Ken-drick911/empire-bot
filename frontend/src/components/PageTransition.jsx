@@ -16,11 +16,11 @@ export function EmberField({ count = 18 }) {
       {embers.map((e) => (
         <motion.span
           key={e.id}
-          initial={{ y: '105%', x: 0, opacity: 0 }}
-          animate={{ y: '-10%', x: e.drift, opacity: [0, 0.9, 0.9, 0] }}
+          initial={{ top: '105%', x: 0, opacity: 0 }}
+          animate={{ top: '-10%', x: e.drift, opacity: [0, 0.9, 0.9, 0] }}
           transition={{ duration: e.duration, delay: e.delay, repeat: Infinity, ease: 'linear' }}
           style={{
-            position: 'absolute', left: `${e.left}%`, bottom: 0,
+            position: 'absolute', left: `${e.left}%`,
             width: e.size, height: e.size, borderRadius: '50%',
             background: 'var(--gold-bright)',
             boxShadow: '0 0 6px 1px rgba(230,198,104,0.8)'

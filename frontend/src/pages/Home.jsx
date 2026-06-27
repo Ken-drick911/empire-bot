@@ -4,9 +4,9 @@ import { useNavigate } from 'react-router-dom'
 import PageTransition from '../components/PageTransition.jsx'
 
 const stats = [
-  { label: 'CITIZENS', value: '24.4K+', icon: '👥' },
-  { label: 'LEGIONS', value: '150+', icon: '🛡️' },
-  { label: 'VICTORIES', value: '40K+', icon: '🚩' }
+  { label: 'CITIZENS', value: '24.4K+', icon: CitizensIcon },
+  { label: 'LEGIONS', value: '150+', icon: LegionsIcon },
+  { label: 'VICTORIES', value: '40K+', icon: VictoriesIcon }
 ]
 
 export default function Home() {
@@ -78,7 +78,7 @@ export default function Home() {
               className="gold-border-card"
               style={{ flex: 1, padding: '16px 8px', textAlign: 'center' }}
             >
-              <div style={{ fontSize: 20, marginBottom: 6 }}>{s.icon}</div>
+              <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'center' }}><s.icon /></div>
               <div style={{
                 fontFamily: 'var(--font-display)', color: 'var(--parchment)',
                 fontSize: 18
@@ -112,5 +112,30 @@ export default function Home() {
         </motion.div>
       </div>
     </PageTransition>
+  )
+}
+
+function CitizensIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <circle cx="9" cy="8" r="3" stroke="var(--gold)" strokeWidth="1.3" />
+      <circle cx="16" cy="9" r="2.4" stroke="var(--gold)" strokeWidth="1.3" />
+      <path d="M3 19c0-3 2.5-5 6-5s6 2 6 5M14 19c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5" stroke="var(--gold)" strokeWidth="1.3" />
+    </svg>
+  )
+}
+function LegionsIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6l7-3z" stroke="var(--gold)" strokeWidth="1.3" />
+      <path d="M9 9l3 3 3-3M9 15l3-3 3 3" stroke="var(--gold)" strokeWidth="1.1" />
+    </svg>
+  )
+}
+function VictoriesIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <path d="M6 3v18l6-4 6 4V3H6z" stroke="var(--gold)" strokeWidth="1.3" strokeLinejoin="round" />
+    </svg>
   )
 }

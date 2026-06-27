@@ -61,26 +61,18 @@ export default function AppLayout() {
                 display: 'flex', alignItems: 'center', justifyContent: 'center'
               }}
             >
-              {center && (
-                <motion.div
-                  layoutId="navCenterRing"
-                  style={{
-                    position: 'absolute', inset: 0, borderRadius: '50%',
-                    border: '1px solid var(--gold)',
-                    background: 'radial-gradient(circle, rgba(201,168,76,0.18), transparent 70%)'
-                  }}
-                />
-              )}
-              <Icon active={active} size={center ? 24 : 20} />
-              {active && !center && (
-                <motion.div
-                  layoutId="navDot"
-                  style={{
-                    position: 'absolute', bottom: 0, width: 4, height: 4,
-                    borderRadius: '50%', background: 'var(--gold-bright)'
-                  }}
-                />
-              )}
+              {active && (
+  <motion.div
+    layoutId="navActiveRing"
+    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+    style={{
+      position: 'absolute', inset: center ? 0 : -6, borderRadius: '50%',
+      border: '1px solid var(--gold)',
+      background: 'radial-gradient(circle, rgba(201,168,76,0.18), transparent 70%)'
+    }}
+  />
+)}
+<Icon active={active} size={center ? 24 : 20} />
             </button>
           )
         })}

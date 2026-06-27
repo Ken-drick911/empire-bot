@@ -75,9 +75,7 @@ export default function Shop() {
                   background: activeCat === c.key ? 'rgba(201,168,76,0.1)' : 'var(--ink-card)'
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
-  <img src={item.image} alt={item.name} style={{ width: 56, height: 56, objectFit: 'contain', borderRadius: 8 }} />
-</div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 6 }}><c.icon /></div>
                 <div style={{
                   fontSize: 10, letterSpacing: '0.04em',
                   color: activeCat === c.key ? 'var(--gold-bright)' : 'var(--parchment-dim)'
@@ -97,7 +95,9 @@ export default function Shop() {
                 className="gold-border-card"
                 style={{ flex: '0 0 132px', padding: 14, textAlign: 'center' }}
               >
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}><item.icon size={34} /></div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}>
+                  <img src={item.image} alt={item.name} style={{ width: 56, height: 56, objectFit: 'contain', borderRadius: 8 }} />
+                </div>
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: 13.5, color: 'var(--parchment)' }}>{item.name.toUpperCase()}</div>
                 <div style={{ fontSize: 11.5, color: 'var(--parchment-dim)', margin: '4px 0 10px' }}>{item.amount}</div>
                 <div style={{
@@ -239,39 +239,6 @@ function ChevronsIcon({ size = 20 }) {
     </svg>
   )
 }
-function WoodIcon({ size = 20 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <ellipse cx="8" cy="8" rx="3.4" ry="3" stroke="var(--gold)" strokeWidth="1.2" />
-      <ellipse cx="16" cy="13" rx="3.6" ry="3.2" stroke="var(--gold)" strokeWidth="1.2" />
-      <ellipse cx="9" cy="17" rx="3.2" ry="2.8" stroke="var(--gold)" strokeWidth="1.2" />
-    </svg>
-  )
-}
-function StoneIcon({ size = 20 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <path d="M4 15l3-6 5-2 6 2 2 6-3 5H7l-3-5z" stroke="var(--gold)" strokeWidth="1.3" strokeLinejoin="round" />
-      <path d="M7 9l4 2 5-2M11 11v8" stroke="var(--gold-bright)" strokeWidth="1" />
-    </svg>
-  )
-}
-function FoodIcon({ size = 20 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <path d="M7 9c-2 1-3 4-2 7s4 3 7 2 4-4 3-7-6-3-8-2z" stroke="var(--gold)" strokeWidth="1.3" strokeLinejoin="round" />
-      <path d="M9 4c2 1 2 3 1 5M13 5c1 1 1 3 0 4" stroke="var(--gold-bright)" strokeWidth="1.1" strokeLinecap="round" />
-    </svg>
-  )
-}
-function IronIcon({ size = 20 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <path d="M3 16l1-5h16l1 5-2 3H5l-2-3z" stroke="var(--gold)" strokeWidth="1.3" strokeLinejoin="round" />
-      <path d="M3 16h18" stroke="var(--gold)" strokeWidth="1.1" />
-    </svg>
-  )
-}
 function CoinIcon({ size = 14 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
@@ -279,4 +246,4 @@ function CoinIcon({ size = 14 }) {
       <path d="M9 9l6 6M9 15l6-6" stroke="var(--gold-bright)" strokeWidth="1" />
     </svg>
   )
-}
+      }

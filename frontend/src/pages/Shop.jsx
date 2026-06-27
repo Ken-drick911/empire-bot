@@ -34,14 +34,14 @@ export default function Shop() {
   return (
     <PageTransition>
       <div style={{ padding: '0 0 20px' }}>
-        <div style={{ position: 'relative', height: 150, marginBottom: -10, overflow: 'hidden' }}>
+        <div style={{ position: 'relative', height: 200, marginBottom: -10, overflow: 'hidden' }}>
           <img
   src="/images/file_00000000c60871f4a1ec90b2583b6757.webp"
             alt=""
             style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center' }}
           />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(10,9,8,0) 30%, var(--ink) 95%)' }} />
-          <div style={{ position: 'absolute', inset: 0, boxShadow: 'inset 0 0 40px 14px var(--ink)' }} />
+          <div style={{ position: 'absolute', inset: 0, boxShadow: 'inset 0 0 24px 8px var(--ink)' }} />
 
           <button onClick={() => {}} style={{
             position: 'absolute', top: 14, left: 16, width: 34, height: 34, borderRadius: '50%',
@@ -243,7 +243,8 @@ function CoinIcon({ size = 14 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
       <circle cx="12" cy="12" r="9" stroke="var(--gold-bright)" strokeWidth="1.3" />
-      <path d="M9 9l6 6M9 15l6-6" stroke="var(--gold-bright)" strokeWidth="1" />
+      <path d="M12 7v10M9.5 9c0-1.1 1-2 2.5-2s2.5.9 2.5 2-1 1.5-2.5 2-2.5.9-2.5 2 1 2 2.5 2 2.5-.9 2.5-2"
+        stroke="var(--gold-bright)" strokeWidth="1.1" strokeLinecap="round" />
     </svg>
   )
-      }
+}

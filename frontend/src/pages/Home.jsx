@@ -17,7 +17,7 @@ export default function Home() {
       <div style={{ padding: '0 20px 20px' }}>
         <div style={{ position: 'relative', height: '58vh', marginBottom: -40 }}>
           <img
-            src="/images/IMG_20260627_112347.jpg"
+            src="/images/IMG_20260627_153507.jpg"
             alt=""
             style={{
               position: 'absolute', inset: 0, width: '100%', height: '100%',

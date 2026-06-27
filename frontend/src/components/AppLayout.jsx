@@ -64,7 +64,7 @@ export default function AppLayout() {
               {active && (
   <motion.div
     layoutId="navActiveRing"
-    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+    transition={{ type: 'spring', stiffness: 500, damping: 32 }}
     style={{
       position: 'absolute', inset: center ? 0 : -6, borderRadius: '50%',
       border: '1px solid var(--gold)',

@@ -12,10 +12,10 @@ const categories = [
 ]
 
 const featured = [
-  { name: 'Wood', amount: '10,000', price: 500, icon: WoodIcon },
-  { name: 'Stone', amount: '10,000', price: 500, icon: StoneIcon },
-  { name: 'Food', amount: '10,000', price: 500, icon: FoodIcon },
-  { name: 'Iron', amount: '5,000', price: 500, icon: IronIcon }
+  { name: 'Wood', amount: '10,000', price: 500, image: '/images/IMG_20260627_194710.webp' },
+  { name: 'Stone', amount: '10,000', price: 500, image: '/images/IMG_20260627_195247.webp' },
+  { name: 'Food', amount: '10,000', price: 500, image: '/images/file_00000000462c71f498863372ba800288.webp' },
+  { name: 'Iron', amount: '5,000', price: 500, image: '/images/IMG_20260627_195405.webp' }
 ]
 
 const allItems = [

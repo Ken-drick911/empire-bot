@@ -38,18 +38,19 @@ export default function Login() {
           background: 'radial-gradient(circle, rgba(201,168,76,0.12), transparent 70%)',
           pointerEvents: 'none'
         }} />
+
         <EmberField count={24} />
 
         <motion.div
-  initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-  style={{ marginBottom: 10 }}
->
-  <svg width="46" height="46" viewBox="0 0 24 24" fill="none">
-    <path d="M3 18l1.5-9L9 13l3-7 3 7 4.5-4L21 18H3z" stroke="var(--gold-bright)" strokeWidth="1.2" strokeLinejoin="round" fill="rgba(201,168,76,0.08)" />
-    <circle cx="12" cy="4" r="1.3" fill="var(--gold-bright)" />
-  </svg>
-</motion.div>
+          initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          style={{ marginBottom: 10, position: 'relative', zIndex: 2 }}
+        >
+          <svg width="46" height="46" viewBox="0 0 24 24" fill="none">
+            <path d="M3 18l1.5-9L9 13l3-7 3 7 4.5-4L21 18H3z" stroke="var(--gold-bright)" strokeWidth="1.2" strokeLinejoin="round" fill="rgba(201,168,76,0.08)" />
+            <circle cx="12" cy="4" r="1.3" fill="var(--gold-bright)" />
+          </svg>
+        </motion.div>
 
         <motion.h1
           initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
@@ -57,7 +58,7 @@ export default function Login() {
           style={{
             fontFamily: 'var(--font-display)', color: 'var(--gold-bright)',
             fontSize: 'clamp(34px, 9vw, 46px)', letterSpacing: '0.06em',
-            margin: '4px 0 6px', textAlign: 'center'
+            margin: '4px 0 6px', textAlign: 'center', position: 'relative', zIndex: 2
           }}
         >THE EMPIRE</motion.h1>
 
@@ -66,7 +67,8 @@ export default function Login() {
           transition={{ duration: 0.6, delay: 0.2 }}
           style={{
             fontFamily: 'var(--font-body)', color: 'var(--parchment-dim)',
-            fontSize: 16, letterSpacing: '0.08em', margin: '0 0 36px', textAlign: 'center'
+            fontSize: 16, letterSpacing: '0.08em', margin: '0 0 36px', textAlign: 'center',
+            position: 'relative', zIndex: 2
           }}
         >LOYALTY. HONOR. POWER.</motion.p>
 
@@ -74,7 +76,10 @@ export default function Login() {
           onSubmit={handleSubmit}
           initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-          style={{ width: '100%', maxWidth: 340, display: 'flex', flexDirection: 'column', gap: 14 }}
+          style={{
+            width: '100%', maxWidth: 340, display: 'flex', flexDirection: 'column', gap: 14,
+            position: 'relative', zIndex: 2
+          }}
         >
           <Field label="Phone number">
             <input

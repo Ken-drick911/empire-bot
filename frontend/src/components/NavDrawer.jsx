@@ -31,7 +31,7 @@ export default function NavDrawer({ onClose }) {
       >
         <div style={{
           position: 'absolute', inset: 0,
-          backgroundImage: 'url(/images/file_00000000393871f497f5c79c1aa23d3e.png)',
+          backgroundImage: 'url(/images/file_00000000393871f497f5c79c1aa23d3e.jpg)',
           backgroundSize: 'cover', backgroundPosition: 'right center',
           opacity: 0.55
         }} />

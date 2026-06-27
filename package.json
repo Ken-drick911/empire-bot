@@ -8,8 +8,9 @@
 },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
-  },
+    "start": "node index.js",
+    "postinstall": "cd web/frontend && npm install && npm run build"
+},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Ken-drick911/empire-bot.git"

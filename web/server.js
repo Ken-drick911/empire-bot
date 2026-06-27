@@ -14,7 +14,14 @@ const PORT = process.env.PORT || process.env.WEB_PORT || 3000
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
-app.use(express.static(path.join(__dirname, '../frontend/dist')))
+app.use(express.static(path.join(__dirname, '../frontend/dist'), {
+  maxAge: '7d',
+  setHeaders: (res, filePath) => {
+    if (filePath.match(/\.(jpg|jpeg|png|webp)$/)) {
+      res.setHeader('Cache-Control', 'public, max-age=604800, immutable')
+    }
+  }
+}))
 
 app.use('/api/auth', authRoutes)
 app.use('/api/profile', profileRoutes)

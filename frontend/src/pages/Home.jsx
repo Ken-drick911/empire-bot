@@ -15,11 +15,26 @@ export default function Home() {
   return (
     <PageTransition>
       <div style={{ padding: '0 20px 20px' }}>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          style={{ textAlign: 'center', marginTop: 8 }}
-        >
+       <div style={{ position: 'relative', height: '58vh', marginBottom: -40 }}>
+  <img
+    src="/images/IMG-20260625-WA1264.jpg"
+    alt=""
+    style={{
+      position: 'absolute', inset: 0, width: '100%', height: '100%',
+      objectFit: 'cover', objectPosition: 'top center'
+    }}
+  />
+  <div style={{
+    position: 'absolute', inset: 0,
+    background: 'linear-gradient(180deg, rgba(10,9,8,0) 55%, var(--ink) 96%)'
+  }} />
+</div>
+
+<motion.div
+  initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }}
+  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+  style={{ textAlign: 'center', marginTop: 8, position: 'relative', zIndex: 2 }}
+>
           <p style={{
             fontFamily: 'var(--font-body)', color: 'var(--parchment-dim)',
             fontSize: 15, letterSpacing: '0.1em', margin: '0 0 4px'

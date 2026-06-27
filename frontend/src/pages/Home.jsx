@@ -97,13 +97,13 @@ export default function Home() {
   style={{
     position: 'relative', overflow: 'hidden',
     padding: '18px 18px', display: 'flex', alignItems: 'center',
-    justifyContent: 'space-between', gap: 12, minHeight: 86
+    justifyContent: 'space-between', gap: 12, minHeight: 110
   }}
 >
   <div style={{
     position: 'absolute', right: 0, top: 0, bottom: 0, width: '42%',
     backgroundImage: 'url(/images/IMG_20260627_112214.jpg)',
-    backgroundSize: 'cover', backgroundPosition: 'center'
+    backgroundSize: 'cover', backgroundPosition: 'center 30%'
   }} />
   <div style={{
     position: 'absolute', right: 0, top: 0, bottom: 0, width: '42%',

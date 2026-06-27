@@ -17,7 +17,7 @@ export default function Home() {
       <div style={{ padding: '0 20px 20px' }}>
        <div style={{ position: 'relative', height: '58vh', marginBottom: -40 }}>
   <img
-    src="/images/IMG-20260625-WA1264.jpg"
+    src="/images/IMG_20260627_112347.jpg"
     alt=""
     style={{
       position: 'absolute', inset: 0, width: '100%', height: '100%',
@@ -91,25 +91,38 @@ export default function Home() {
         </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.55, duration: 0.5 }}
-          className="gold-border-card"
-          style={{
-            padding: '18px 18px', display: 'flex', alignItems: 'center',
-            justifyContent: 'space-between', gap: 12
-          }}
-        >
-          <div>
-            <p style={{ fontSize: 11, color: 'var(--gold-dim)', letterSpacing: '0.08em', margin: '0 0 4px' }}>
-              GREAT EMPIRES AREN'T BORN.
-            </p>
-            <p style={{
-              fontFamily: 'var(--font-display)', color: 'var(--gold-bright)',
-              fontSize: 16, margin: 0
-            }}>THEY ARE FORGED</p>
-          </div>
-          <span style={{ color: 'var(--gold)', fontSize: 20 }}>›</span>
-        </motion.div>
+  initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: 0.55, duration: 0.5 }}
+  className="gold-border-card"
+  style={{
+    position: 'relative', overflow: 'hidden',
+    padding: '18px 18px', display: 'flex', alignItems: 'center',
+    justifyContent: 'space-between', gap: 12, minHeight: 86
+  }}
+>
+  <div style={{
+    position: 'absolute', right: 0, top: 0, bottom: 0, width: '42%',
+    backgroundImage: 'url(/images/IMG_20260627_112214.jpg)',
+    backgroundSize: 'cover', backgroundPosition: 'center'
+  }} />
+  <div style={{
+    position: 'absolute', right: 0, top: 0, bottom: 0, width: '42%',
+    background: 'linear-gradient(90deg, var(--ink-card), transparent 60%)'
+  }} />
+  <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: 12 }}>
+    <CrownMedallion />
+    <div>
+      <p style={{ fontSize: 11, color: 'var(--gold-dim)', letterSpacing: '0.08em', margin: '0 0 4px' }}>
+        GREAT EMPIRES AREN'T BORN.
+      </p>
+      <p style={{
+        fontFamily: 'var(--font-display)', color: 'var(--gold-bright)',
+        fontSize: 16, margin: 0
+      }}>THEY ARE FORGED</p>
+    </div>
+  </div>
+  <span style={{ position: 'relative', zIndex: 1, color: 'var(--gold)', fontSize: 20 }}>›</span>
+</motion.div>
       </div>
     </PageTransition>
   )
@@ -137,5 +150,17 @@ function VictoriesIcon() {
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
       <path d="M6 3v18l6-4 6 4V3H6z" stroke="var(--gold)" strokeWidth="1.3" strokeLinejoin="round" />
     </svg>
+  )
+}
+function CrownMedallion() {
+  return (
+    <div style={{
+      width: 36, height: 36, borderRadius: '50%', border: '1px solid var(--gold-dim)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+    }}>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path d="M3 18l1.5-9L9 13l3-7 3 7 4.5-4L21 18H3z" stroke="var(--gold)" strokeWidth="1.4" strokeLinejoin="round" />
+      </svg>
+    </div>
   )
 }

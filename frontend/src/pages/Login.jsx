@@ -40,25 +40,13 @@ export default function Login() {
           pointerEvents: 'none'
         }} />
 
-        {/* Ember particles */}
-        {[...Array(24)].map((_, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: [0, 0.9, 0.9, 0], y: -120 }}
-            transition={{ duration: 7 + Math.random() * 5, delay: Math.random() * 6, repeat: Infinity, ease: 'linear' }}
-            style={{
-              position: 'absolute',
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              width: 3 + Math.random() * 2,
-              height: 3 + Math.random() * 2,
-              borderRadius: '50%',
-              background: 'var(--gold-bright)',
-              boxShadow: '0 0 6px 1px rgba(230,198,104,0.7)'
-            }}
-          />
-        ))}
+        {/* Ember particles - TEST */}
+<div style={{
+  position: 'absolute', top: '50%', left: '50%',
+  width: 40, height: 40, borderRadius: '50%',
+  background: 'red', boxShadow: '0 0 30px 10px red',
+  zIndex: 999
+}} />
 
         {/* Crown SVG */}
         <motion.div

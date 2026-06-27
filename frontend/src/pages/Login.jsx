@@ -30,7 +30,7 @@ export default function Login() {
       <div style={{
         minHeight: '100vh', display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center', padding: '32px 24px',
-        position: 'relative', overflow: 'hidden'
+        position: 'relative', overflow: 'hidden', background: 'var(--ink)'
       }}>
         {/* Background glow */}
         <div style={{
@@ -40,7 +40,27 @@ export default function Login() {
           pointerEvents: 'none'
         }} />
 
-        {/* Crown SVG instead of emoji */}
+        {/* Ember particles */}
+        {[...Array(20)].map((_, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 0 }}
+            animate={{ opacity: [0, 1, 0], y: [-10, 10, -10] }}
+            transition={{ duration: 6 + i * 0.2, repeat: Infinity }}
+            style={{
+              position: 'absolute',
+              top: `${Math.random() * 100}%`,
+              left: `${Math.random() * 100}%`,
+              width: 3,
+              height: 3,
+              borderRadius: '50%',
+              background: 'var(--gold-bright)',
+              opacity: 0.6
+            }}
+          />
+        ))}
+
+        {/* Crown SVG */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -168,4 +188,4 @@ const inputStyle = {
   fontFamily: 'var(--font-ui)',
   outline: 'none',
   transition: 'box-shadow 0.3s ease'
-}
+            }

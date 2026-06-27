@@ -102,7 +102,7 @@ export default function Home() {
 >
   <div style={{
     position: 'absolute', right: 0, top: 0, bottom: 0, width: '42%',
-    backgroundImage: 'url(/images/IMG_20260627_112214.jpg)',
+    backgroundImage: 'url(/images/IMG_20260627_122607.jpg)',
     backgroundSize: 'cover', backgroundPosition: 'center 30%'
   }} />
   <div style={{

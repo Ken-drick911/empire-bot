@@ -15,26 +15,34 @@ export default function Home() {
   return (
     <PageTransition>
       <div style={{ padding: '0 20px 20px' }}>
-       <div style={{ position: 'relative', height: '58vh', marginBottom: -40 }}>
-  <img
-    src="/images/IMG_20260627_112347.jpg"
-    alt=""
-    style={{
-      position: 'absolute', inset: 0, width: '100%', height: '100%',
-      objectFit: 'cover', objectPosition: 'top center'
-    }}
-  />
-  <div style={{
-    position: 'absolute', inset: 0,
-    background: 'linear-gradient(180deg, rgba(10,9,8,0) 55%, var(--ink) 96%)'
-  }} />
-</div>
+        <div style={{ position: 'relative', height: '58vh', marginBottom: -40 }}>
+          <img
+            src="/images/IMG_20260627_112347.jpg"
+            alt=""
+            style={{
+              position: 'absolute', inset: 0, width: '100%', height: '100%',
+              objectFit: 'cover', objectPosition: 'top center'
+            }}
+          />
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: 'linear-gradient(180deg, var(--ink) 0%, rgba(10,9,8,0) 18%, rgba(10,9,8,0) 55%, var(--ink) 92%)'
+          }} />
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: 'linear-gradient(90deg, var(--ink) 0%, rgba(10,9,8,0) 14%, rgba(10,9,8,0) 86%, var(--ink) 100%)'
+          }} />
+          <div style={{
+            position: 'absolute', inset: 0,
+            boxShadow: 'inset 0 0 60px 20px var(--ink)'
+          }} />
+        </div>
 
-<motion.div
-  initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }}
-  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-  style={{ textAlign: 'center', marginTop: 8, position: 'relative', zIndex: 2 }}
->
+        <motion.div
+          initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+          style={{ textAlign: 'center', marginTop: 8, position: 'relative', zIndex: 2 }}
+        >
           <p style={{
             fontFamily: 'var(--font-body)', color: 'var(--parchment-dim)',
             fontSize: 15, letterSpacing: '0.1em', margin: '0 0 4px'
@@ -91,38 +99,39 @@ export default function Home() {
         </div>
 
         <motion.div
-  initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
-  transition={{ delay: 0.55, duration: 0.5 }}
-  className="gold-border-card"
-  style={{
-    position: 'relative', overflow: 'hidden',
-    padding: '18px 18px', display: 'flex', alignItems: 'center',
-    justifyContent: 'space-between', gap: 12, minHeight: 110
-  }}
->
-  <div style={{
-    position: 'absolute', right: 0, top: 0, bottom: 0, width: '42%',
-    backgroundImage: 'url(/images/IMG_20260627_122607.jpg)',
-    backgroundSize: 'cover', backgroundPosition: 'center 30%'
-  }} />
-  <div style={{
-    position: 'absolute', right: 0, top: 0, bottom: 0, width: '42%',
-    background: 'linear-gradient(90deg, var(--ink-card), transparent 60%)'
-  }} />
-  <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: 12 }}>
-    <CrownMedallion />
-    <div>
-      <p style={{ fontSize: 11, color: 'var(--gold-dim)', letterSpacing: '0.08em', margin: '0 0 4px' }}>
-        GREAT EMPIRES AREN'T BORN.
-      </p>
-      <p style={{
-        fontFamily: 'var(--font-display)', color: 'var(--gold-bright)',
-        fontSize: 16, margin: 0
-      }}>THEY ARE FORGED</p>
-    </div>
-  </div>
-  <span style={{ position: 'relative', zIndex: 1, color: 'var(--gold)', fontSize: 20 }}>›</span>
-</motion.div>
+          initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.55, duration: 0.5 }}
+          className="gold-border-card"
+          style={{
+            position: 'relative', overflow: 'hidden',
+            padding: '18px 18px', display: 'flex', alignItems: 'center',
+            justifyContent: 'space-between', gap: 12, minHeight: 150
+          }}
+        >
+          <div style={{
+            position: 'absolute', right: 0, top: 0, bottom: 0, width: '48%',
+            backgroundImage: 'url(/images/IMG_20260627_122607.jpg)',
+            backgroundSize: 'contain', backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'center center'
+          }} />
+          <div style={{
+            position: 'absolute', right: 0, top: 0, bottom: 0, width: '48%',
+            background: 'linear-gradient(90deg, var(--ink-card), transparent 55%)'
+          }} />
+          <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: 12 }}>
+            <CrownMedallion />
+            <div>
+              <p style={{ fontSize: 11, color: 'var(--gold-dim)', letterSpacing: '0.08em', margin: '0 0 4px' }}>
+                GREAT EMPIRES AREN'T BORN.
+              </p>
+              <p style={{
+                fontFamily: 'var(--font-display)', color: 'var(--gold-bright)',
+                fontSize: 16, margin: 0
+              }}>THEY ARE FORGED</p>
+            </div>
+          </div>
+          <span style={{ position: 'relative', zIndex: 1, color: 'var(--gold)', fontSize: 20 }}>›</span>
+        </motion.div>
       </div>
     </PageTransition>
   )

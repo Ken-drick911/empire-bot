@@ -32,6 +32,7 @@ export default function Login() {
         alignItems: 'center', justifyContent: 'center', padding: '32px 24px',
         position: 'relative', overflow: 'hidden'
       }}>
+        {/* Background glow */}
         <div style={{
           position: 'absolute', top: '-10%', left: '50%', transform: 'translateX(-50%)',
           width: 420, height: 420, borderRadius: '50%',
@@ -39,47 +40,74 @@ export default function Login() {
           pointerEvents: 'none'
         }} />
 
+        {/* Crown SVG instead of emoji */}
         <motion.div
-          initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          style={{ fontSize: 38, marginBottom: 6 }}
-        >👑</motion.div>
+          style={{ marginBottom: 6 }}
+        >
+          <svg
+            width="64"
+            height="64"
+            viewBox="0 0 24 24"
+            fill="var(--gold-bright)"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path d="M5 20h14l-2-10-5 5-5-5-2 10z" />
+          </svg>
+        </motion.div>
 
+        {/* Title */}
         <motion.h1
-          initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
           style={{
             fontFamily: 'var(--font-display)', color: 'var(--gold-bright)',
             fontSize: 'clamp(34px, 9vw, 46px)', letterSpacing: '0.06em',
             margin: '4px 0 6px', textAlign: 'center'
           }}
-        >THE EMPIRE</motion.h1>
+        >
+          THE EMPIRE
+        </motion.h1>
 
+        {/* Subtitle */}
         <motion.p
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.2 }}
           style={{
             fontFamily: 'var(--font-body)', color: 'var(--parchment-dim)',
             fontSize: 16, letterSpacing: '0.08em', margin: '0 0 36px', textAlign: 'center'
           }}
-        >LOYALTY. HONOR. POWER.</motion.p>
+        >
+          LOYALTY. HONOR. POWER.
+        </motion.p>
 
+        {/* Form */}
         <motion.form
           onSubmit={handleSubmit}
-          initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
           style={{ width: '100%', maxWidth: 340, display: 'flex', flexDirection: 'column', gap: 14 }}
         >
           <Field label="Phone number">
             <input
-              type="tel" required value={phone} placeholder="2348012345678"
+              type="tel"
+              required
+              value={phone}
+              placeholder="2348012345678"
               onChange={(e) => setPhone(e.target.value)}
               style={inputStyle}
             />
           </Field>
           <Field label="Password">
             <input
-              type="password" required value={password}
+              type="password"
+              required
+              value={password}
               onChange={(e) => setPassword(e.target.value)}
               style={inputStyle}
             />
@@ -87,18 +115,24 @@ export default function Login() {
 
           {error && (
             <motion.p
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               style={{ color: '#e07a6b', fontSize: 13, textAlign: 'center', margin: 0 }}
-            >{error}</motion.p>
+            >
+              {error}
+            </motion.p>
           )}
 
+          {/* Cinematic button */}
           <motion.button
             type="submit"
             whileTap={{ scale: 0.97 }}
+            whileHover={{ scale: 1.05, boxShadow: "0 0 20px var(--gold)" }}
             disabled={loading}
             style={{
               marginTop: 8, padding: '15px', borderRadius: 10,
-              border: '1px solid var(--gold)', background: 'linear-gradient(180deg, rgba(201,168,76,0.18), rgba(201,168,76,0.04))',
+              border: '1px solid var(--gold)',
+              background: 'linear-gradient(180deg, rgba(201,168,76,0.18), rgba(201,168,76,0.04))',
               color: 'var(--gold-bright)', fontFamily: 'var(--font-display)',
               fontSize: 14, letterSpacing: '0.1em', cursor: 'pointer',
               opacity: loading ? 0.6 : 1
@@ -125,7 +159,13 @@ function Field({ label, children }) {
 }
 
 const inputStyle = {
-  background: 'var(--ink-card)', border: '1px solid var(--ink-border)',
-  borderRadius: 10, padding: '13px 14px', color: 'var(--parchment)',
-  fontSize: 15, fontFamily: 'var(--font-ui)', outline: 'none'
-          }
+  background: 'var(--ink-card)',
+  border: '1px solid var(--ink-border)',
+  borderRadius: 10,
+  padding: '13px 14px',
+  color: 'var(--parchment)',
+  fontSize: 15,
+  fontFamily: 'var(--font-ui)',
+  outline: 'none',
+  transition: 'box-shadow 0.3s ease'
+}

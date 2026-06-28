@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import PageTransition from '../components/PageTransition.jsx'
+import PageTransition, { EmberField } from '../components/PageTransition.jsx'
 import { api } from '../api/client.js'
 
 const tabs = ['Overview', 'Army', 'Treasures', 'Holdings']
@@ -19,6 +19,7 @@ export default function Profile() {
   const [editingName, setEditingName] = useState(false)
   const [editingBio, setEditingBio] = useState(false)
   const [framePickerOpen, setFramePickerOpen] = useState(false)
+  const [uploadingCover, setUploadingCover] = useState(false)
   const [nameInput, setNameInput] = useState('')
   const [bioInput, setBioInput] = useState('')
 
@@ -69,6 +70,22 @@ export default function Profile() {
       setUser((u) => ({ ...u, frame: frameId }))
     }
   }
+  async function handleCoverUpload(e) {
+  const file = e.target.files[0]
+  if (!file) return
+  setUploadingCover(true)
+  try {
+    const formData = new FormData()
+    formData.append('cover', file)
+    const res = await fetch('/api/upload/cover', { method: 'POST', body: formData, credentials: 'include' })
+    const data = await res.json()
+    setUser((u) => ({ ...u, cover: data.url }))
+  } catch (err) {
+    console.error('Cover upload failed', err)
+  } finally {
+    setUploadingCover(false)
+  }
+  }
 
   const activeFrame = frames.find((f) => f.id === user.frame) || frames[0]
   const xpPercent = Math.min((user.xp || 0) / (user.xpToNext || 1), 1)
@@ -77,18 +94,23 @@ export default function Profile() {
   return (
     <PageTransition>
       <div style={{ position: 'relative' }}>
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: -1,
-          backgroundImage: 'url(/images/file_00000000e3b071fdb8d276f58319c6a7.webp)',
-          backgroundSize: 'cover', backgroundPosition: 'top center', opacity: 0.5
-        }} />
-        <div style={{ position: 'fixed', inset: 0, zIndex: -1, background: 'linear-gradient(180deg, rgba(10,9,8,0.4), var(--ink) 70%)' }} />
+        {user.cover && (
+  <div style={{
+    position: 'fixed', inset: 0, zIndex: -1,
+    backgroundImage: `url(${user.cover})`,
+    backgroundSize: 'cover', backgroundPosition: 'top center', opacity: 0.35
+  }} />
+)}
+<div style={{ position: 'fixed', inset: 0, zIndex: -1, background: 'linear-gradient(180deg, rgba(10,9,8,0.4), var(--ink) 70%)' }} />
+<div style={{ position: 'fixed', inset: 0, zIndex: -1, overflow: 'hidden' }}><EmberField count={10} /></div>
 
         <div style={{ padding: '0 20px 20px', position: 'relative' }}>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 18, marginBottom: 24 }}>
-            <ActionButton icon={<PencilIcon />} label="Edit name" onClick={() => setEditingName(true)} />
-            <ActionButton icon={<ImageIcon />} label="Change pfp" />
-          </div>
+  <ActionButton icon={<PencilIcon />} label="Edit name" onClick={() => setEditingName(true)} />
+  <ActionButton icon={<ImageIcon />} label="Change pfp" />
+  <input type="file" accept="image/*" id="coverInput" style={{ display: 'none' }} onChange={handleCoverUpload} />
+  <ActionButton icon={<ImageIcon />} label={uploadingCover ? 'Uploading...' : 'Change cover'} onClick={() => document.getElementById('coverInput').click()} />
+</div>
 
           <div style={{ textAlign: 'center', marginTop: -8 }}>
             <div style={{ position: 'relative', display: 'inline-block' }}>

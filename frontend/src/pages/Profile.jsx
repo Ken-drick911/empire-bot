@@ -116,12 +116,17 @@ export default function Profile() {
     <PageTransition>
       <div style={{ position: 'relative' }}>
         {user.cover && (
-          <div style={{
-            position: 'fixed', inset: 0, zIndex: -1,
-            backgroundImage: `url(${user.cover})`,
-            backgroundSize: 'cover', backgroundPosition: 'top center', opacity: 0.35
-          }} />
-        )}
+  <img
+    src={user.cover}
+    alt=""
+    onError={() => console.log('Cover failed to load:', user.cover)}
+    onLoad={() => console.log('Cover loaded successfully')}
+    style={{
+      position: 'fixed', inset: 0, zIndex: -1, width: '100%', height: '100%',
+      objectFit: 'cover', objectPosition: 'top center', opacity: 0.35
+    }}
+  />
+)}
         <div style={{ position: 'fixed', inset: 0, zIndex: -1, background: 'linear-gradient(180deg, rgba(10,9,8,0.4), var(--ink) 70%)' }} />
         <div style={{ position: 'fixed', inset: 0, zIndex: -1, overflow: 'hidden' }}><EmberField count={10} /></div>
 

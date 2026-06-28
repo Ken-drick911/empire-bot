@@ -42,6 +42,8 @@ const { announceCommand, broadcastCommand, restartCommand, listGroupsCommand } =
 const { isBanned } = require('./src/engine/moderation')
 const { OWNER_NUMBER } = require('./src/config/owner')
 
+const WEB_URL = process.env.WEB_URL || 'https://empire-bot-w94m.onrender.com'
+
 const ADMIN_COMMANDS = [
     'kick', 'warn', 'resetwarn', 'setwarn', 'mute', 'unmute', 'promote', 'demote',
     'antilink', 'antispam', 'antism', 'welcome', 'leave', 'setwelcome',
@@ -53,6 +55,14 @@ const OWNER_COMMANDS = [
     'appoint', 'setrep', 'setrank', 'givexp', 'givecoins',
     'resetuser', 'announce', 'broadcast',
     'restart', 'listgroups', 'addmod', 'removemod'
+]
+
+// Game commands that require registration
+const GAME_COMMANDS = [
+    'daily', 'profile', 'p', 'asset', 'deposit', 'dep', 'withdraw', 'wd',
+    'give', 'steal', 'top', 'leaderboard', 'lb', 'wealthleaderboard', 'wlb',
+    'gr', 'gwlb', 'stats', 'ranks', 'titles', 'reputation', 'rep',
+    'myreputation', 'mr', 'decree', 'afk'
 ]
 
 async function startBot() {
@@ -76,12 +86,12 @@ async function startBot() {
     sock.ev.on('connection.update', async (u) => {
         const { connection, lastDisconnect } = u
         if (connection === 'close') {
-    const code = lastDisconnect?.error?.output?.statusCode
-    if (code === DisconnectReason.loggedOut) {
-        console.log('❌ Logged out. Visit /pair to re-pair.')
-    } else if (code !== 401) {
-        setTimeout(startBot, 10000)
-    }
+            const code = lastDisconnect?.error?.output?.statusCode
+            if (code === DisconnectReason.loggedOut) {
+                console.log('❌ Logged out. Visit /pair to re-pair.')
+            } else if (code !== 401) {
+                setTimeout(startBot, 10000)
+            }
         }
         if (connection === 'open') console.log('✅ Empire Bot connected!')
     })
@@ -113,13 +123,20 @@ async function startBot() {
         const from = msg.key.remoteJid
         const text = msg.message.conversation || msg.message.extendedTextMessage?.text || ''
         const sender = msg.key.participant || msg.key.remoteJid
-        const username = msg.pushName || sender.split('@')[0]
+        const pushName = msg.pushName || sender.split('@')[0] // WhatsApp display name (management only)
         const isGroup = from.endsWith('@g.us')
 
         const hasRealContent = !!(msg.message.conversation || msg.message.extendedTextMessage?.text || msg.message.imageMessage || msg.message.videoMessage || msg.message.stickerMessage)
         if (!hasRealContent) return
 
-        await createUser(sender, username)
+        // Create user if not exists (uses pushName temporarily)
+        await createUser(sender, pushName)
+
+        // Fetch user from DB
+        const user = await getUser(sender)
+
+        // Use registered username for games, pushName for management
+        const username = user?.username || pushName
 
         if (await isBanned(sender)) return
 
@@ -149,7 +166,7 @@ async function startBot() {
                 const result = await awardMessageXP(sender, username)
                 if (result?.leveled) {
                     await sock.sendMessage(from, {
-                        text: `⚔️ @${username} leveled up to *${result.newRank} Lv.${result.newLevel}*!\n🎖️ Title: ${result.newTitle}`,
+                        text: `⚔️ *${username}* leveled up to *${result.newRank} Lv.${result.newLevel}*!\n🎖️ Title: ${result.newTitle}`,
                         mentions: [sender]
                     })
                 }
@@ -167,6 +184,17 @@ async function startBot() {
             const cmd = command.toLowerCase()
             const isAdmin = isGroup ? await isUserAdmin(from, sender) : false
             const owner = isOwner(sender)
+
+            // Registration gate for game commands
+            if (GAME_COMMANDS.includes(cmd) && !owner) {
+                if (!user?.registered) {
+                    await sock.sendMessage(from, {
+                        text: `⚔️ *${pushName}*, you need to register first!\n\n🏰 Create your empire account to access games, XP, gold and more.\n\n🔗 *Register here:*\n${WEB_URL}\n\n_Use the REGISTER tab on the site_`,
+                        quoted: msg
+                    })
+                    return
+                }
+            }
 
             if (OWNER_COMMANDS.includes(cmd)) {
                 const isMod = await isModerator(sender)
@@ -327,10 +355,16 @@ async function startBot() {
                     await myReputationCommand(sock, msg, from, sender, username)
                     break
                 case 'reg':
-                    await sock.sendMessage(from, { text: `🏰 *EMPIRE PORTAL*\n\nRegister or login to manage your profile!\n\n🔗 ${process.env.WEB_URL}`, quoted: msg })
+                    await sock.sendMessage(from, {
+                        text: `🏰 *EMPIRE PORTAL*\n\nRegister or login to access your profile, games, XP and economy!\n\n🔗 *${WEB_URL}*\n\n_Tap REGISTER if you're new, or LOGIN if you've registered before_`,
+                        quoted: msg
+                    })
                     break
                 case 'shop':
-                    await sock.sendMessage(from, { text: `⚔️ *IMPERIAL SHOP*\n\nVisit the shop to buy items!\n\n🔗 ${process.env.WEB_URL}`, quoted: msg })
+                    await sock.sendMessage(from, {
+                        text: `⚔️ *IMPERIAL SHOP*\n\nVisit the shop to buy items with your Gold!\n\n🔗 *${WEB_URL}*`,
+                        quoted: msg
+                    })
                     break
                 case 'mods':
                     await tagMods(sock, msg, from, args)

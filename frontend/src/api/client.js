@@ -17,10 +17,10 @@ async function request(path, options = {}) {
 export const api = {
   login: (phone, password) =>
     request('/auth/login', { method: 'POST', body: JSON.stringify({ phone, password }) }),
-  requestCode: (phone) =>
-    request('/auth/request-code', { method: 'POST', body: JSON.stringify({ phone }) }),
-  verifyCode: (phone, code) =>
-    request('/auth/verify-code', { method: 'POST', body: JSON.stringify({ phone, code }) }),
+  register: (phone, password, username) =>
+    request('/auth/register', { method: 'POST', body: JSON.stringify({ phone, password, username }) }),
+  logout: () =>
+    request('/auth/logout', { method: 'POST' }),
   me: () => request('/profile/me'),
   updateProfile: (updates) =>
     request('/profile/update', { method: 'POST', body: JSON.stringify(updates) }),

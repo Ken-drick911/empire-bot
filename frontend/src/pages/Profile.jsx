@@ -257,20 +257,37 @@ export default function Profile() {
               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
             >
               {tab === 'Overview' && (
-                <>
-                  <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
-                    <StatCard icon={<CoinIcon />} value={user.gold ?? 0} label="GOLD" sub="Available Funds" />
-                    <VaultCard gold={user.vaultGold ?? 0} diamonds={user.vaultDiamonds ?? 0} />
-                  </div>
+  <>
+    <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
+      <StatCard icon={<CoinIcon />} value={user.gold ?? 0} label="GOLD" sub="Available Funds" />
+      <VaultCard gold={user.vaultGold ?? 0} diamonds={user.vaultDiamonds ?? 0} />
+    </div>
 
-                  <BannerRow title="TITLE" value={user.title || '—'} sub={user.titleDesc || 'Begin your rise.'} />
+    <BannerRow title="TITLE" value={user.title || '—'} sub={user.titleDesc || 'Begin your rise.'} />
 
-                  <div style={{ display: 'flex', gap: 10, marginTop: 10, marginBottom: 10 }}>
-                    <StatCard icon={<SwordIcon />} value={user.xp?.toLocaleString() ?? 0} label="XP" sub="Glory Earned" />
-                    <RankLevelCard rank={user.rank || '—'} level={user.level ?? 1} progress={xpPercent} />
-                  </div>
-                </>
-              )}
+    <div style={{ display: 'flex', gap: 10, marginTop: 10, marginBottom: 10 }}>
+      <StatCard icon={<SwordIcon />} value={user.xp?.toLocaleString() ?? 0} label="XP" sub="Glory Earned" />
+      <RankLevelCard rank={user.rank || '—'} level={user.level ?? 1} progress={xpPercent} />
+    </div>
+
+    {(user.lotteryTickets > 0) && (
+      <div style={{
+        padding: '14px 18px', borderRadius: 12,
+        border: '1px solid var(--gold-dim)', background: 'var(--ink-card)',
+        display: 'flex', alignItems: 'center', gap: 12
+      }}>
+        <span style={{ fontSize: 26 }}>🎟️</span>
+        <div>
+          <div style={{ fontSize: 11, color: 'var(--gold)', letterSpacing: '0.06em' }}>LOTTERY TICKETS</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: 'var(--parchment)' }}>
+            {user.lotteryTickets} / 3
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--parchment-dim)' }}>Resets every 5 hours</div>
+        </div>
+      </div>
+    )}
+  </>
+)}
 
               {tab === 'Treasures' && (
                 <div>

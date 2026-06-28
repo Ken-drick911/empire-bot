@@ -23,7 +23,10 @@ export const api = {
     request('/auth/verify-code', { method: 'POST', body: JSON.stringify({ phone, code }) }),
   me: () => request('/profile/me'),
   updateProfile: (updates) =>
-    request('/profile/me', { method: 'PATCH', body: JSON.stringify(updates) }),
+    request('/profile/update', { method: 'POST', body: JSON.stringify(updates) }),
   shopItems: () => request('/shop/items'),
-  leaderboard: (type) => request(`/leaderboard?type=${type}`)
+  buyTicket: () =>
+    request('/shop/buy-ticket', { method: 'POST' }),
+  leaderboard: (type) => request(`/leaderboard?type=${type}`),
+  stats: () => request('/stats')
 }

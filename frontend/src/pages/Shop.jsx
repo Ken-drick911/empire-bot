@@ -36,7 +36,7 @@ export default function Shop() {
       <div style={{ padding: '0 0 20px' }}>
         <div style={{ position: 'relative', height: 200, marginBottom: 10, overflow: 'hidden' }}>
           <img
-  src="/images/file_00000000c60871f4a1ec90b2583b6757.webp"
+            src="/images/file_00000000c60871f4a1ec90b2583b6757.webp"
             alt=""
             style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top center' }}
           />
@@ -95,11 +95,11 @@ export default function Shop() {
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: 13.5, color: 'var(--parchment)' }}>{item.name.toUpperCase()}</div>
                 <div style={{ fontSize: 11.5, color: 'var(--parchment-dim)', margin: '4px 0 10px' }}>{item.amount}</div>
                 <div style={{
-  border: '1px solid var(--gold-dim)', borderRadius: 8, padding: '7px 0',
-  color: 'var(--gold-bright)', fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5
-}}>
-  {item.currency === 'diamond' ? <GemIcon size={13} /> : <CoinIcon size={13} />} {item.price}
-</div>
+                  border: '1px solid var(--gold-dim)', borderRadius: 8, padding: '7px 0',
+                  color: 'var(--gold-bright)', fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5
+                }}>
+                  {item.currency === 'diamonds' ? <GemIcon size={13} /> : <CoinIcon size={13} />} {item.price}
+                </div>
               </motion.div>
             ))}
           </div>
@@ -251,4 +251,4 @@ function GemIcon({ size = 14 }) {
       <path d="M6 9h12M9 9l3 11 3-11" stroke="var(--gold-bright)" strokeWidth="1" />
     </svg>
   )
-}
+          }

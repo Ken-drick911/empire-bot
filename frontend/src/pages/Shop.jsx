@@ -34,7 +34,7 @@ export default function Shop() {
   return (
     <PageTransition>
       <div style={{ padding: '0 0 20px' }}>
-        <div style={{ position: 'relative', height: 200, marginBottom: -10, overflow: 'hidden' }}>
+        <div style={{ position: 'relative', height: 200, marginBottom: 10, overflow: 'hidden' }}>
           <img
   src="/images/file_00000000c60871f4a1ec90b2583b6757.webp"
             alt=""

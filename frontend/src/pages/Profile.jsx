@@ -6,12 +6,11 @@ import { api } from '../api/client.js'
 const tabs = ['Overview', 'Army', 'Treasures', 'Holdings']
 
 const frames = [
-  { id: 'classic', label: 'Classic Gold', style: { border: '3px solid var(--gold)' } },
-  { id: 'ornate', label: 'Ornate', style: { border: '3px double var(--gold-bright)' } },
-  { id: 'thin', label: 'Slim Gilded', style: { border: '2px solid var(--gold-dim)' } },
-  { id: 'dual', label: 'Dual Ring', style: { border: '3px solid var(--gold-bright)', boxShadow: '0 0 0 4px var(--ink), 0 0 0 6px var(--gold-dim)' } }
+  { id: 'classic', label: 'Imperial Ring', style: { border: '3px solid var(--gold)', boxShadow: '0 0 0 5px var(--ink), 0 0 0 7px var(--gold-dim), 0 0 16px rgba(201,168,76,0.4)' } },
+  { id: 'ornate', label: 'Twin Halo', style: { border: '2px solid var(--gold-bright)', boxShadow: '0 0 0 4px var(--ink), 0 0 0 8px var(--gold-bright), 0 0 0 10px var(--ink), 0 0 0 12px var(--gold-dim)' } },
+  { id: 'thin', label: 'Slim Gilded', style: { border: '2px solid var(--gold-dim)', boxShadow: '0 0 10px rgba(201,168,76,0.3)' } },
+  { id: 'dual', label: 'Sunburst', style: { border: '3px solid var(--gold-bright)', boxShadow: '0 0 0 4px var(--ink), 0 0 0 6px var(--gold), 0 0 22px rgba(230,198,104,0.5)' } }
 ]
-
 const fallbackUser = {
   username: 'Will', bio: 'So tired', rank: 'Peasant', title: 'Village Hand',
   wallet: 0, vault: 0, xp: 1063, xpToNext: 2000, reputation: 'Village Hand', repLevel: 3,

@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import PageTransition from '../components/PageTransition.jsx'
+import { api } from '../api/client.js'
 
 const statTypes = [
   { key: 'xp', label: 'XP', icon: LaurelIcon },
@@ -8,41 +9,21 @@ const statTypes = [
   { key: 'diamonds', label: 'Diamonds', icon: GemIcon }
 ]
 
-const mockData = {
-  xp: [
-    { rank: 1, name: 'Carmilla', value: 34387 },
-    { rank: 2, name: 'Cecilion', value: 32689 },
-    { rank: 3, name: 'Bird of her...', value: 23182 },
-    { rank: 4, name: 'Mazi', value: 22840 },
-    { rank: 5, name: 'Kisenon', value: 21893 },
-    { rank: 6, name: 'Lelouch Lamperouge', value: 21842 },
-    { rank: 7, name: 'Zeroth', value: 20481 },
-    { rank: 8, name: 'Aizensama', value: 19876 },
-    { rank: 9, name: 'Draken', value: 18732 },
-    { rank: 10, name: 'Shadow Monarch', value: 17594 },
-    { rank: 11, name: 'Violet', value: 16389 },
-    { rank: 12, name: 'Arthur Leywin', value: 15782 },
-    { rank: 13, name: 'Rimuru Tempest', value: 14681 },
-    { rank: 14, name: 'Gojo Satoru', value: 13940 },
-    { rank: 15, name: 'Anos Voldigoad', value: 12854 }
-  ],
-  gold: [
-    { rank: 1, name: 'Draken', value: 98200 },
-    { rank: 2, name: 'Carmilla', value: 87650 },
-    { rank: 3, name: 'Mazi', value: 76210 }
-  ],
-  diamonds: [
-    { rank: 1, name: 'Kisenon', value: 540 },
-    { rank: 2, name: 'Zeroth', value: 410 },
-    { rank: 3, name: 'Cecilion', value: 390 }
-  ]
-}
-
 export default function Leaderboard() {
   const [active, setActive] = useState('xp')
-  const data = mockData[active] || []
-  const podium = data.slice(0, 3)
-  const rest = data.slice(3)
+  const [entries, setEntries] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    setLoading(true)
+    api.leaderboard(active)
+      .then(data => setEntries(data.users || []))
+      .catch(() => setEntries([]))
+      .finally(() => setLoading(false))
+  }, [active])
+
+  const podium = entries.slice(0, 3)
+  const rest = entries.slice(3)
 
   return (
     <PageTransition>
@@ -90,32 +71,44 @@ export default function Leaderboard() {
               initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
             >
-              <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 10, marginBottom: 22 }}>
-                {podium[1] && <PodiumPennant entry={podium[1]} size="sm" tone="silver" />}
-                {podium[0] && <PodiumPennant entry={podium[0]} size="lg" tone="gold" />}
-                {podium[2] && <PodiumPennant entry={podium[2]} size="sm" tone="bronze" />}
-              </div>
+              {loading ? (
+                <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--parchment-dim)' }}>
+                  Loading...
+                </div>
+              ) : entries.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--parchment-dim)' }}>
+                  No data yet
+                </div>
+              ) : (
+                <>
+                  <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 10, marginBottom: 22 }}>
+                    {podium[1] && <PodiumPennant entry={podium[1]} size="sm" tone="silver" type={active} />}
+                    {podium[0] && <PodiumPennant entry={podium[0]} size="lg" tone="gold" type={active} />}
+                    {podium[2] && <PodiumPennant entry={podium[2]} size="sm" tone="bronze" type={active} />}
+                  </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: '46vh', overflowY: 'auto' }}>
-                {rest.map((entry, i) => (
-                  <motion.div
-                    key={entry.name}
-                    initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.03, duration: 0.3 }}
-                    className="gold-border-card"
-                    style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px' }}
-                  >
-                    <span style={{ width: 22, textAlign: 'center', color: 'var(--gold-dim)', fontSize: 13 }}>{entry.rank}</span>
-                    <div style={{
-                      width: 34, height: 34, borderRadius: '50%', background: 'var(--ink-raised)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center'
-                    }}><UserIcon size={16} /></div>
-                    <span style={{ flex: 1, fontSize: 14, color: 'var(--parchment)' }}>{entry.name}</span>
-                    <span style={{ fontSize: 13, color: 'var(--gold-bright)' }}>{entry.value.toLocaleString()}</span>
-                    <CrownBadge size={16} />
-                  </motion.div>
-                ))}
-              </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: '46vh', overflowY: 'auto' }}>
+                    {rest.map((entry, i) => (
+                      <motion.div
+                        key={entry.name}
+                        initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: i * 0.03, duration: 0.3 }}
+                        className="gold-border-card"
+                        style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px' }}
+                      >
+                        <span style={{ width: 22, textAlign: 'center', color: 'var(--gold-dim)', fontSize: 13 }}>{entry.rank}</span>
+                        <div style={{
+                          width: 34, height: 34, borderRadius: '50%', background: 'var(--ink-raised)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center'
+                        }}><UserIcon size={16} /></div>
+                        <span style={{ flex: 1, fontSize: 14, color: 'var(--parchment)' }}>{entry.name}</span>
+                        <span style={{ fontSize: 13, color: 'var(--gold-bright)' }}>{entry.value.toLocaleString()}</span>
+                        <CrownBadge size={16} />
+                      </motion.div>
+                    ))}
+                  </div>
+                </>
+              )}
             </motion.div>
           </AnimatePresence>
 
@@ -128,10 +121,11 @@ export default function Leaderboard() {
   )
 }
 
-function PodiumPennant({ entry, size, tone }) {
+function PodiumPennant({ entry, size, tone, type }) {
   const lg = size === 'lg'
   const toneColor = tone === 'gold' ? 'var(--gold-bright)' : tone === 'silver' ? '#b9c2cc' : '#c98a4f'
   const w = lg ? 84 : 70
+  const label = type === 'gold' ? '🪙' : type === 'diamonds' ? '💎' : 'XP'
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
@@ -147,7 +141,7 @@ function PodiumPennant({ entry, size, tone }) {
         </foreignObject>
       </svg>
       <div style={{ fontSize: lg ? 14 : 12.5, color: 'var(--parchment)', margin: '6px 0 2px' }}>{entry.name}</div>
-      <div style={{ fontSize: lg ? 13 : 11.5, color: 'var(--gold-dim)' }}>{entry.value.toLocaleString()} XP</div>
+      <div style={{ fontSize: lg ? 13 : 11.5, color: 'var(--gold-dim)' }}>{entry.value.toLocaleString()} {label}</div>
     </motion.div>
   )
 }
@@ -199,4 +193,4 @@ function CrownBadge({ size = 16 }) {
       <path d="M3 18l1.5-9L9 13l3-7 3 7 4.5-4L21 18H3z" stroke="var(--gold-dim)" strokeWidth="1.3" strokeLinejoin="round" />
     </svg>
   )
-}
+                          }

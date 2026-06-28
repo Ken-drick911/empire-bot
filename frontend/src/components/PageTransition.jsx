@@ -2,6 +2,8 @@ import React, { useMemo } from 'react'
 import { motion } from 'framer-motion'
 
 export function EmberField({ count = 18 }) {
+  const [mounted, setMounted] = React.useState(false)
+  React.useEffect(() => { setMounted(true) }, [])
   const embers = useMemo(() => Array.from({ length: count }, (_, i) => ({
     id: i,
     left: Math.random() * 100,
@@ -15,9 +17,9 @@ export function EmberField({ count = 18 }) {
     <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
       {embers.map((e) => (
         <motion.span
-          key={e.id}
-          initial={{ top: '105%', x: 0, opacity: 0 }}
-          animate={{ top: '-10%', x: e.drift, opacity: [0, 0.9, 0.9, 0] }}
+  key={e.id}
+  initial={{ top: '105%', x: 0, opacity: 0 }}
+  animate={mounted ? { top: '-10%', x: e.drift, opacity: [0, 0.9, 0.9, 0] } : {}}
           transition={{ duration: e.duration, delay: e.delay, repeat: Infinity, ease: 'linear' }}
           style={{
             position: 'absolute', left: `${e.left}%`,

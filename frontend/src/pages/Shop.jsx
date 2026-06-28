@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import PageTransition from '../components/PageTransition.jsx'
+import { api } from '../api/client.js'
 
 const categories = [
   { key: 'resources', label: 'Resources', icon: LeafIcon },
@@ -30,6 +31,25 @@ const allItems = [
 export default function Shop() {
   const [activeCat, setActiveCat] = useState('resources')
   const [expanded, setExpanded] = useState(null)
+  const [tickets, setTickets] = useState(0)
+  const [buying, setBuying] = useState(false)
+
+  useEffect(() => {
+    api.me().then(u => setTickets(u.lotteryTickets || 0)).catch(() => {})
+  }, [])
+
+  async function handleBuyTicket() {
+    if (tickets >= 3 || buying) return
+    setBuying(true)
+    try {
+      const res = await api.buyTicket()
+      setTickets(res.tickets)
+    } catch (e) {
+      alert(e.message)
+    } finally {
+      setBuying(false)
+    }
+  }
 
   return (
     <PageTransition>
@@ -42,7 +62,6 @@ export default function Shop() {
           />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(10,9,8,0) 30%, var(--ink) 95%)' }} />
           <div style={{ position: 'absolute', inset: 0, boxShadow: 'inset 0 0 24px 8px var(--ink)' }} />
-
           <div style={{ position: 'absolute', top: 30, right: '38%' }}>
             <ShieldCrest />
           </div>
@@ -102,6 +121,32 @@ export default function Shop() {
                 </div>
               </motion.div>
             ))}
+
+            {/* Lottery Ticket Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: featured.length * 0.05, duration: 0.3 }}
+              whileTap={{ scale: 0.97 }}
+              className="gold-border-card"
+              style={{ flex: '0 0 132px', padding: 14, textAlign: 'center' }}
+            >
+              <div style={{ fontSize: 38, marginBottom: 8 }}>🎟️</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 13.5, color: 'var(--parchment)' }}>LOTTERY</div>
+              <div style={{ fontSize: 11.5, color: 'var(--parchment-dim)', margin: '4px 0 10px' }}>{tickets}/3 owned</div>
+              <button
+                onClick={handleBuyTicket}
+                disabled={tickets >= 3 || buying}
+                style={{
+                  width: '100%', border: '1px solid var(--gold-dim)', borderRadius: 8, padding: '7px 0',
+                  background: tickets >= 3 ? 'transparent' : 'rgba(201,168,76,0.1)',
+                  color: tickets >= 3 ? 'var(--parchment-dim)' : 'var(--gold-bright)',
+                  fontSize: 13, cursor: tickets >= 3 ? 'not-allowed' : 'pointer',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5
+                }}
+              >
+                <CoinIcon size={12} /> {tickets >= 3 ? 'MAX' : buying ? '...' : '50'}
+              </button>
+            </motion.div>
           </div>
 
           <div className="ornate-divider" style={{ marginBottom: 14 }}><span>ALL ITEMS</span></div>
@@ -251,4 +296,4 @@ function GemIcon({ size = 14 }) {
       <path d="M6 9h12M9 9l3 11 3-11" stroke="var(--gold-bright)" strokeWidth="1" />
     </svg>
   )
-          }
+                    }

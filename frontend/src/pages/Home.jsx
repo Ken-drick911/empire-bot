@@ -1,4 +1,3 @@
-import React from 'react'
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
@@ -7,20 +6,17 @@ import { api } from '../api/client.js'
 
 export default function Home() {
   const navigate = useNavigate()
-  const [stats, setStats] = useState({ citizens: '...', legions: '...', victories: 0 })
+  const [liveStats, setLiveStats] = useState({ citizens: null, legions: null, victories: 0 })
 
   useEffect(() => {
-    api.stats().then(data => setStats(data)).catch(() => {})
+    api.stats().then(data => setLiveStats(data)).catch(() => {})
   }, [])
 
-  const statCards = [
-    { label: 'CITIZENS', value: stats.citizens === '...' ? '...' : stats.citizens.toLocaleString(), icon: CitizensIcon },
-    { label: 'LEGIONS', value: stats.legions === '...' ? '...' : stats.legions.toLocaleString(), icon: LegionsIcon },
-    { label: 'VICTORIES', value: stats.victories?.toLocaleString() ?? '0', icon: VictoriesIcon }
+  const stats = [
+    { label: 'CITIZENS', value: liveStats.citizens != null ? liveStats.citizens.toLocaleString() : '...', icon: CitizensIcon },
+    { label: 'LEGIONS', value: liveStats.legions != null ? liveStats.legions.toLocaleString() : '...', icon: LegionsIcon },
+    { label: 'VICTORIES', value: liveStats.victories?.toLocaleString() ?? '0', icon: VictoriesIcon }
   ]
-
-export default function Home() {
-  const navigate = useNavigate()
 
   return (
     <PageTransition>
@@ -42,10 +38,7 @@ export default function Home() {
             position: 'absolute', inset: 0,
             background: 'linear-gradient(90deg, var(--ink) 0%, rgba(10,9,8,0) 14%, rgba(10,9,8,0) 86%, var(--ink) 100%)'
           }} />
-          <div style={{
-            position: 'absolute', inset: 0,
-            boxShadow: 'inset 0 0 60px 20px var(--ink)'
-          }} />
+          <div style={{ position: 'absolute', inset: 0, boxShadow: 'inset 0 0 60px 20px var(--ink)' }} />
         </div>
 
         <motion.div
@@ -97,13 +90,8 @@ export default function Home() {
               style={{ flex: 1, padding: '16px 8px', textAlign: 'center' }}
             >
               <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'center' }}><s.icon /></div>
-              <div style={{
-                fontFamily: 'var(--font-display)', color: 'var(--parchment)',
-                fontSize: 18
-              }}>{s.value}</div>
-              <div style={{ fontSize: 10, color: 'var(--gold-dim)', letterSpacing: '0.08em', marginTop: 2 }}>
-                {s.label}
-              </div>
+              <div style={{ fontFamily: 'var(--font-display)', color: 'var(--parchment)', fontSize: 18 }}>{s.value}</div>
+              <div style={{ fontSize: 10, color: 'var(--gold-dim)', letterSpacing: '0.08em', marginTop: 2 }}>{s.label}</div>
             </motion.div>
           ))}
         </div>
@@ -134,10 +122,9 @@ export default function Home() {
               <p style={{ fontSize: 11, color: 'var(--gold-dim)', letterSpacing: '0.08em', margin: '0 0 4px' }}>
                 GREAT EMPIRES AREN'T BORN.
               </p>
-              <p style={{
-                fontFamily: 'var(--font-display)', color: 'var(--gold-bright)',
-                fontSize: 16, margin: 0
-              }}>THEY ARE FORGED</p>
+              <p style={{ fontFamily: 'var(--font-display)', color: 'var(--gold-bright)', fontSize: 16, margin: 0 }}>
+                THEY ARE FORGED
+              </p>
             </div>
           </div>
           <span style={{ position: 'relative', zIndex: 1, color: 'var(--gold)', fontSize: 20 }}>›</span>
@@ -182,4 +169,4 @@ function CrownMedallion() {
       </svg>
     </div>
   )
-}
+          }

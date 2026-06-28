@@ -6,10 +6,10 @@ import { api } from '../api/client.js'
 const tabs = ['Overview', 'Army', 'Treasures', 'Holdings']
 
 const frames = [
-  { id: 'classic', label: 'Imperial Ring', style: { border: '3px solid var(--gold)', boxShadow: '0 0 0 5px var(--ink), 0 0 0 7px var(--gold-dim), 0 0 16px rgba(201,168,76,0.4)' } },
-  { id: 'ornate', label: 'Twin Halo', style: { border: '2px solid var(--gold-bright)', boxShadow: '0 0 0 4px var(--ink), 0 0 0 8px var(--gold-bright), 0 0 0 10px var(--ink), 0 0 0 12px var(--gold-dim)' } },
-  { id: 'thin', label: 'Slim Gilded', style: { border: '2px solid var(--gold-dim)', boxShadow: '0 0 10px rgba(201,168,76,0.3)' } },
-  { id: 'dual', label: 'Sunburst', style: { border: '3px solid var(--gold-bright)', boxShadow: '0 0 0 4px var(--ink), 0 0 0 6px var(--gold), 0 0 22px rgba(230,198,104,0.5)' } }
+  { id: 'classic', label: 'Royal Crest' },
+  { id: 'ornate', label: 'Laurel Ring' },
+  { id: 'thin', label: 'Iron Band' },
+  { id: 'dual', label: 'Sunburst Crown' }
 ]
 
 export default function Profile() {
@@ -93,22 +93,24 @@ export default function Profile() {
           <div style={{ textAlign: 'center', marginTop: -8 }}>
             <div style={{ position: 'relative', display: 'inline-block' }}>
               <motion.div
-                initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                onClick={() => setFramePickerOpen((v) => !v)}
-                style={{
-                  width: 120, height: 120, borderRadius: '50%', padding: 4, cursor: 'pointer',
-                  background: 'radial-gradient(circle, rgba(201,168,76,0.1), transparent 70%)',
-                  overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  ...activeFrame.style
-                }}
-              >
-                {user.profilePic ? (
-                  <img src={user.profilePic} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
-                ) : (
-                  <UserIcon size={44} />
-                )}
-              </motion.div>
+  initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+  transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+  onClick={() => setFramePickerOpen((v) => !v)}
+  style={{ width: 128, height: 128, position: 'relative', cursor: 'pointer' }}
+>
+  <div style={{
+    position: 'absolute', inset: 8, borderRadius: '50%', overflow: 'hidden',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    background: 'radial-gradient(circle, rgba(201,168,76,0.1), transparent 70%)'
+  }}>
+    {user.profilePic ? (
+      <img src={user.profilePic} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+    ) : (
+      <UserIcon size={42} />
+    )}
+  </div>
+  <FrameSVG id={activeFrame.id} />
+</motion.div>
               <div style={{
                 position: 'absolute', bottom: -2, right: -2, width: 32, height: 32,
                 borderRadius: '50%', background: 'var(--ink)', border: '1px solid var(--gold)',
@@ -131,14 +133,12 @@ export default function Profile() {
                         onClick={() => selectFrame(f.id)}
                         style={{ background: 'transparent', border: 'none', cursor: 'pointer', flex: '0 0 auto', textAlign: 'center' }}
                       >
-                        <div style={{
-                          width: 52, height: 52, borderRadius: '50%', margin: '0 auto 6px',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          opacity: user.frame === f.id ? 1 : 0.6,
-                          ...f.style
-                        }}>
-                          <UserIcon size={18} />
-                        </div>
+                        <div style={{ width: 56, height: 56, position: 'relative', margin: '0 auto 6px', opacity: user.frame === f.id ? 1 : 0.55 }}>
+  <div style={{ position: 'absolute', inset: 5, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <UserIcon size={16} />
+  </div>
+  <FrameSVG id={f.id} size={56} />
+</div>
                         <span style={{ fontSize: 9.5, color: 'var(--parchment-dim)' }}>{f.label}</span>
                       </button>
                     ))}
@@ -356,6 +356,53 @@ function RankIcon({ size = 22 }) {
 function ChestIcon({ size = 20 }) {
   return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none"><path d="M3 10l1-4h16l1 4M3 10v8h18v-8M3 10h18" stroke="var(--gold)" strokeWidth="1.3" strokeLinejoin="round" /><circle cx="12" cy="13" r="1.3" stroke="var(--gold-bright)" strokeWidth="1" /></svg>)
 }
-
+function FrameSVG({ id, size = 128 }) {
+  const gold = 'var(--gold-bright)'
+  const dim = 'var(--gold-dim)'
+  if (id === 'ornate') {
+    return (
+      <svg width={size} height={size} viewBox="0 0 128 128" style={{ position: 'absolute', inset: 0 }}>
+        <circle cx="64" cy="64" r="58" fill="none" stroke={gold} strokeWidth="2" />
+        <circle cx="64" cy="64" r="52" fill="none" stroke={dim} strokeWidth="1" />
+        {[...Array(16)].map((_, i) => {
+          const a = (i / 16) * Math.PI * 2
+          const x1 = 64 + Math.cos(a) * 58, y1 = 64 + Math.sin(a) * 58
+          const x2 = 64 + Math.cos(a) * 52, y2 = 64 + Math.sin(a) * 52
+          return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke={gold} strokeWidth="1" />
+        })}
+      </svg>
+    )
+  }
+  if (id === 'thin') {
+    return (
+      <svg width={size} height={size} viewBox="0 0 128 128" style={{ position: 'absolute', inset: 0 }}>
+        <circle cx="64" cy="64" r="58" fill="none" stroke={dim} strokeWidth="2" strokeDasharray="2 4" />
+      </svg>
+    )
+  }
+  if (id === 'dual') {
+    return (
+      <svg width={size} height={size} viewBox="0 0 128 128" style={{ position: 'absolute', inset: 0 }}>
+        <circle cx="64" cy="64" r="58" fill="none" stroke={gold} strokeWidth="2" />
+        {[...Array(24)].map((_, i) => {
+          const a = (i / 24) * Math.PI * 2
+          const x = 64 + Math.cos(a) * 62, y = 64 + Math.sin(a) * 62
+          return <circle key={i} cx={x} cy={y} r="1.4" fill={gold} />
+        })}
+      </svg>
+    )
+  }
+  return (
+    <svg width={size} height={size} viewBox="0 0 128 128" style={{ position: 'absolute', inset: 0 }}>
+      <circle cx="64" cy="64" r="58" fill="none" stroke={gold} strokeWidth="3" />
+      <circle cx="64" cy="64" r="58" fill="none" stroke={dim} strokeWidth="1" strokeDasharray="1 7" />
+      {[0, 90, 180, 270].map((deg) => {
+        const a = (deg * Math.PI) / 180
+        const x = 64 + Math.cos(a) * 58, y = 64 + Math.sin(a) * 58
+        return <path key={deg} d={`M${x} ${y - 4} L${x + 4} ${y} L${x} ${y + 4} L${x - 4} ${y} Z`} fill={gold} transform={`translate(0,0)`} />
+      })}
+    </svg>
+  )
+      }
 const smallBtn = { border: '1px solid var(--gold)', background: 'rgba(201,168,76,0.12)', color: 'var(--gold-bright)', borderRadius: 8, padding: '8px 14px', fontSize: 13, cursor: 'pointer' }
 const nameInputStyle = { background: 'var(--ink-card)', border: '1px solid var(--gold-dim)', borderRadius: 8, padding: '8px 12px', color: 'var(--parchment)', fontFamily: 'var(--font-display)', fontSize: 16, textAlign: 'center', width: 180 }

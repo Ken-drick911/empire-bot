@@ -1,13 +1,23 @@
 import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import PageTransition from '../components/PageTransition.jsx'
+import { api } from '../api/client.js'
 
-const stats = [
-  { label: 'CITIZENS', value: '24.4K+', icon: CitizensIcon },
-  { label: 'LEGIONS', value: '150+', icon: LegionsIcon },
-  { label: 'VICTORIES', value: '40K+', icon: VictoriesIcon }
-]
+export default function Home() {
+  const navigate = useNavigate()
+  const [stats, setStats] = useState({ citizens: '...', legions: '...', victories: 0 })
+
+  useEffect(() => {
+    api.stats().then(data => setStats(data)).catch(() => {})
+  }, [])
+
+  const statCards = [
+    { label: 'CITIZENS', value: stats.citizens === '...' ? '...' : stats.citizens.toLocaleString(), icon: CitizensIcon },
+    { label: 'LEGIONS', value: stats.legions === '...' ? '...' : stats.legions.toLocaleString(), icon: LegionsIcon },
+    { label: 'VICTORIES', value: stats.victories?.toLocaleString() ?? '0', icon: VictoriesIcon }
+  ]
 
 export default function Home() {
   const navigate = useNavigate()

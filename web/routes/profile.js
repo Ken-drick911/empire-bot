@@ -21,21 +21,29 @@ router.get('/me', auth, async (req, res) => {
     ]
 })
 
-        res.json({
-    username: webUser.username,
-    phone,
-    avatar: webUser.avatar || null,
-    cover: webUser.cover || null,
-    bio: webUser.bio || '',
-    xp: botUser?.xp || 0,
-    level: botUser?.level || 1,
-    rank: botUser?.rank || 'Peasant',
-    wallet: botUser?.wallet || 0,
-    vault: botUser?.vault || 0,
-    reputation: botUser?.reputation || null,
-    title: botUser?.title || '',
-    inventory: webUser.inventory || []
-})
+      const now = Date.now()
+const lastReset = botUser?.ticketResetAt
+  ? new Date(botUser.ticketResetAt).getTime() : 0
+const tickets = (now - lastReset) >= 5 * 60 * 60 * 1000
+  ? 0 : (botUser?.lotteryTickets || 0)
+
+res.json({
+  username: webUser.username,
+  phone,
+  avatar: webUser.avatar || null,
+  cover: webUser.cover || null,
+  bio: webUser.bio || '',
+  xp: botUser?.xp || 0,
+  level: botUser?.level || 1,
+  rank: botUser?.rank || 'Peasant',
+  wallet: botUser?.wallet || 0,
+  vault: botUser?.vault || 0,
+  diamonds: botUser?.diamonds || 0,
+  reputation: botUser?.reputation || null,
+  title: botUser?.title || '',
+  lotteryTickets: tickets,
+  inventory: webUser.inventory || []
+})  
     } catch (err) {
         res.status(500).json({ error: 'Server error' })
     }

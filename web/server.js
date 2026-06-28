@@ -30,6 +30,8 @@ const leaderboardRoutes = require('./routes/leaderboard')
 const uploadRoutes = require('./routes/upload')
 app.use('/api/leaderboard', leaderboardRoutes)
 app.use('/api/upload', uploadRoutes)
+const statsRoutes = require('./routes/stats')
+app.use('/api/stats', statsRoutes)
 
 // Pairing endpoint
 let pairingSock = null

@@ -23,7 +23,7 @@ export const api = {
     request('/auth/logout', { method: 'POST' }),
   me: () => request('/profile/me'),
   updateProfile: (updates) =>
-    request('/profile/update', { method: 'POST', body: JSON.stringify(updates) }),
+  request('/profile/update', { method: 'POST', body: JSON.stringify(updates) }),
   shopItems: () => request('/shop/items'),
   buyTicket: () =>
     request('/shop/buy-ticket', { method: 'POST' }),

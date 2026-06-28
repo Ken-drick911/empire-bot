@@ -20,6 +20,7 @@ export default function Profile() {
   const [editingBio, setEditingBio] = useState(false)
   const [framePickerOpen, setFramePickerOpen] = useState(false)
   const [uploadingCover, setUploadingCover] = useState(false)
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [nameInput, setNameInput] = useState('')
   const [bioInput, setBioInput] = useState('')
 
@@ -70,21 +71,41 @@ export default function Profile() {
       setUser((u) => ({ ...u, frame: frameId }))
     }
   }
+
   async function handleCoverUpload(e) {
-  const file = e.target.files[0]
-  if (!file) return
-  setUploadingCover(true)
-  try {
-    const formData = new FormData()
-    formData.append('cover', file)
-    const res = await fetch('/api/upload/cover', { method: 'POST', body: formData, credentials: 'include' })
-    const data = await res.json()
-    setUser((u) => ({ ...u, cover: data.url }))
-  } catch (err) {
-    console.error('Cover upload failed', err)
-  } finally {
-    setUploadingCover(false)
+    const file = e.target.files[0]
+    if (!file) return
+    setUploadingCover(true)
+    try {
+      const formData = new FormData()
+      formData.append('cover', file)
+      const res = await fetch('/api/upload/cover', { method: 'POST', body: formData, credentials: 'include' })
+      const data = await res.json()
+      alert(JSON.stringify(data))
+      if (data.url) setUser((u) => ({ ...u, cover: data.url }))
+    } catch (err) {
+      alert('Upload error: ' + err.message)
+    } finally {
+      setUploadingCover(false)
+    }
   }
+
+  async function handleAvatarUpload(e) {
+    const file = e.target.files[0]
+    if (!file) return
+    setUploadingAvatar(true)
+    try {
+      const formData = new FormData()
+      formData.append('avatar', file)
+      const res = await fetch('/api/upload/avatar', { method: 'POST', body: formData, credentials: 'include' })
+      const data = await res.json()
+      alert(JSON.stringify(data))
+      if (data.url) setUser((u) => ({ ...u, avatar: data.url }))
+    } catch (err) {
+      alert('Upload error: ' + err.message)
+    } finally {
+      setUploadingAvatar(false)
+    }
   }
 
   const activeFrame = frames.find((f) => f.id === user.frame) || frames[0]
@@ -95,44 +116,45 @@ export default function Profile() {
     <PageTransition>
       <div style={{ position: 'relative' }}>
         {user.cover && (
-  <div style={{
-    position: 'fixed', inset: 0, zIndex: -1,
-    backgroundImage: `url(${user.cover})`,
-    backgroundSize: 'cover', backgroundPosition: 'top center', opacity: 0.35
-  }} />
-)}
-<div style={{ position: 'fixed', inset: 0, zIndex: -1, background: 'linear-gradient(180deg, rgba(10,9,8,0.4), var(--ink) 70%)' }} />
-<div style={{ position: 'fixed', inset: 0, zIndex: -1, overflow: 'hidden' }}><EmberField count={10} /></div>
+          <div style={{
+            position: 'fixed', inset: 0, zIndex: -1,
+            backgroundImage: `url(${user.cover})`,
+            backgroundSize: 'cover', backgroundPosition: 'top center', opacity: 0.35
+          }} />
+        )}
+        <div style={{ position: 'fixed', inset: 0, zIndex: -1, background: 'linear-gradient(180deg, rgba(10,9,8,0.4), var(--ink) 70%)' }} />
+        <div style={{ position: 'fixed', inset: 0, zIndex: -1, overflow: 'hidden' }}><EmberField count={10} /></div>
 
         <div style={{ padding: '0 20px 20px', position: 'relative' }}>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 18, marginBottom: 24 }}>
-  <ActionButton icon={<PencilIcon />} label="Edit name" onClick={() => setEditingName(true)} />
-  <ActionButton icon={<ImageIcon />} label="Change pfp" />
-  <input type="file" accept="image/*" id="coverInput" style={{ display: 'none' }} onChange={handleCoverUpload} />
-  <ActionButton icon={<ImageIcon />} label={uploadingCover ? 'Uploading...' : 'Change cover'} onClick={() => document.getElementById('coverInput').click()} />
-</div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 14, marginBottom: 24, flexWrap: 'wrap' }}>
+            <ActionButton icon={<PencilIcon />} label="Edit name" onClick={() => setEditingName(true)} />
+            <input type="file" accept="image/*" id="avatarInput" style={{ display: 'none' }} onChange={handleAvatarUpload} />
+            <ActionButton icon={<ImageIcon />} label={uploadingAvatar ? 'Uploading...' : 'Change pfp'} onClick={() => document.getElementById('avatarInput').click()} />
+            <input type="file" accept="image/*" id="coverInput" style={{ display: 'none' }} onChange={handleCoverUpload} />
+            <ActionButton icon={<ImageIcon />} label={uploadingCover ? 'Uploading...' : 'Change cover'} onClick={() => document.getElementById('coverInput').click()} />
+          </div>
 
           <div style={{ textAlign: 'center', marginTop: -8 }}>
             <div style={{ position: 'relative', display: 'inline-block' }}>
               <motion.div
-  initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-  transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-  onClick={() => setFramePickerOpen((v) => !v)}
-  style={{ width: 128, height: 128, position: 'relative', cursor: 'pointer' }}
->
-  <div style={{
-    position: 'absolute', inset: 8, borderRadius: '50%', overflow: 'hidden',
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    background: 'radial-gradient(circle, rgba(201,168,76,0.1), transparent 70%)'
-  }}>
-    {user.profilePic ? (
-      <img src={user.profilePic} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
-    ) : (
-      <UserIcon size={42} />
-    )}
-  </div>
-  <FrameSVG id={activeFrame.id} />
-</motion.div>
+                initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                onClick={() => setFramePickerOpen((v) => !v)}
+                style={{ width: 128, height: 128, position: 'relative', cursor: 'pointer' }}
+              >
+                <div style={{
+                  position: 'absolute', inset: 8, borderRadius: '50%', overflow: 'hidden',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: 'radial-gradient(circle, rgba(201,168,76,0.1), transparent 70%)'
+                }}>
+                  {user.avatar ? (
+                    <img src={user.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                  ) : (
+                    <UserIcon size={42} />
+                  )}
+                </div>
+                <FrameSVG id={activeFrame.id} />
+              </motion.div>
               <div style={{
                 position: 'absolute', bottom: -2, right: -2, width: 32, height: 32,
                 borderRadius: '50%', background: 'var(--ink)', border: '1px solid var(--gold)',
@@ -156,11 +178,11 @@ export default function Profile() {
                         style={{ background: 'transparent', border: 'none', cursor: 'pointer', flex: '0 0 auto', textAlign: 'center' }}
                       >
                         <div style={{ width: 56, height: 56, position: 'relative', margin: '0 auto 6px', opacity: user.frame === f.id ? 1 : 0.55 }}>
-  <div style={{ position: 'absolute', inset: 5, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-    <UserIcon size={16} />
-  </div>
-  <FrameSVG id={f.id} size={56} />
-</div>
+                          <div style={{ position: 'absolute', inset: 5, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <UserIcon size={16} />
+                          </div>
+                          <FrameSVG id={f.id} size={56} />
+                        </div>
                         <span style={{ fontSize: 9.5, color: 'var(--parchment-dim)' }}>{f.label}</span>
                       </button>
                     ))}
@@ -180,17 +202,17 @@ export default function Profile() {
                 </motion.div>
               ) : (
                 <motion.h1
-  key="view" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-  style={{
-    fontFamily: 'var(--font-display)', color: 'var(--parchment)', fontSize: 30,
-    letterSpacing: '0.08em', margin: '14px 0 2px',
-    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12
-  }}
->
-  <span style={{ color: 'var(--gold-dim)', fontSize: 16 }}>‹</span>
-  {user.username?.toUpperCase()}
-  <span style={{ color: 'var(--gold-dim)', fontSize: 16 }}>›</span>
-</motion.h1>
+                  key="view" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  style={{
+                    fontFamily: 'var(--font-display)', color: 'var(--parchment)', fontSize: 30,
+                    letterSpacing: '0.08em', margin: '14px 0 2px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12
+                  }}
+                >
+                  <span style={{ color: 'var(--gold-dim)', fontSize: 16 }}>‹</span>
+                  {user.username?.toUpperCase()}
+                  <span style={{ color: 'var(--gold-dim)', fontSize: 16 }}>›</span>
+                </motion.h1>
               )}
             </AnimatePresence>
 
@@ -291,7 +313,7 @@ function ActionButton({ icon, label, onClick }) {
   return (
     <button onClick={onClick} style={{ background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
       <span style={{ width: 36, height: 36, borderRadius: 8, border: '1px solid var(--ink-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--gold)' }}>{icon}</span>
-      <span style={{ fontSize: 9.5, color: 'var(--parchment-dim)', letterSpacing: '0.05em' }}>{label}</span>
+      <span style={{ fontSize: 9, color: 'var(--parchment-dim)', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{label}</span>
     </button>
   )
 }
@@ -356,36 +378,6 @@ function RankLevelCard({ rank, level, progress }) {
   )
 }
 
-function UserIcon({ size = 24 }) {
-  return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="var(--gold)" strokeWidth="1.4" /><path d="M4 20c0-4 3.5-6 8-6s8 2 8 6" stroke="var(--gold)" strokeWidth="1.4" /></svg>)
-}
-function CrownIcon({ size = 16 }) {
-  return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none"><path d="M3 18l1.5-9L9 13l3-7 3 7 4.5-4L21 18H3z" stroke="var(--gold)" strokeWidth="1.4" strokeLinejoin="round" /></svg>)
-}
-function PencilIcon({ size = 17 }) {
-  return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none"><path d="M4 20l1-4 11-11 3 3-11 11-4 1z" stroke="var(--gold)" strokeWidth="1.3" strokeLinejoin="round" /><path d="M14 6l3 3" stroke="var(--gold)" strokeWidth="1.3" /></svg>)
-}
-function ImageIcon({ size = 17 }) {
-  return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="var(--gold)" strokeWidth="1.3" /><circle cx="9" cy="10" r="1.6" stroke="var(--gold)" strokeWidth="1.1" /><path d="M4 17l5-5 4 4 3-3 4 4" stroke="var(--gold)" strokeWidth="1.2" strokeLinejoin="round" /></svg>)
-}
-function CoinIcon({ size = 22 }) {
-  return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="var(--gold-bright)" strokeWidth="1.3" /><path d="M12 7v10M9.5 9c0-1.1 1-2 2.5-2s2.5.9 2.5 2-1 1.5-2.5 2-2.5.9-2.5 2 1 2 2.5 2 2.5-.9 2.5-2" stroke="var(--gold-bright)" strokeWidth="1.1" strokeLinecap="round" /></svg>)
-}
-function GemIcon({ size = 22 }) {
-  return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none"><path d="M6 9l6-6 6 6-6 11-6-11z" stroke="var(--gold-bright)" strokeWidth="1.2" strokeLinejoin="round" /><path d="M6 9h12M9 9l3 11 3-11" stroke="var(--gold-bright)" strokeWidth="1" /></svg>)
-}
-function VaultIcon({ size = 22 }) {
-  return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="var(--gold)" strokeWidth="1.3" /><circle cx="12" cy="12" r="4" stroke="var(--gold-bright)" strokeWidth="1.2" /><path d="M12 9v3l2 2" stroke="var(--gold-bright)" strokeWidth="1" /></svg>)
-}
-function SwordIcon({ size = 22 }) {
-  return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none"><path d="M14 4l6 6-8.5 8.5-3-3M14 4l-9 9v3h3l9-9" stroke="var(--gold)" strokeWidth="1.3" strokeLinejoin="round" /><path d="M5 19l-1.5 1.5" stroke="var(--gold)" strokeWidth="1.3" strokeLinecap="round" /></svg>)
-}
-function RankIcon({ size = 22 }) {
-  return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none"><path d="M12 2.5l7.5 2.7v5.8c0 5-3.2 8.6-7.5 10.5-4.3-1.9-7.5-5.5-7.5-10.5V5.2L12 2.5z" stroke="var(--gold)" strokeWidth="1.3" strokeLinejoin="round" /><path d="M9 11l3-3 3 3M12 8v6" stroke="var(--gold-bright)" strokeWidth="1.2" strokeLinecap="round" /></svg>)
-}
-function ChestIcon({ size = 20 }) {
-  return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none"><path d="M3 10l1-4h16l1 4M3 10v8h18v-8M3 10h18" stroke="var(--gold)" strokeWidth="1.3" strokeLinejoin="round" /><circle cx="12" cy="13" r="1.3" stroke="var(--gold-bright)" strokeWidth="1" /></svg>)
-}
 function FrameSVG({ id, size = 128 }) {
   const gold = 'var(--gold-bright)'
   const dim = 'var(--gold-dim)'
@@ -429,10 +421,42 @@ function FrameSVG({ id, size = 128 }) {
       {[0, 90, 180, 270].map((deg) => {
         const a = (deg * Math.PI) / 180
         const x = 64 + Math.cos(a) * 58, y = 64 + Math.sin(a) * 58
-        return <path key={deg} d={`M${x} ${y - 4} L${x + 4} ${y} L${x} ${y + 4} L${x - 4} ${y} Z`} fill={gold} transform={`translate(0,0)`} />
+        return <path key={deg} d={`M${x} ${y - 4} L${x + 4} ${y} L${x} ${y + 4} L${x - 4} ${y} Z`} fill={gold} />
       })}
     </svg>
   )
-      }
+}
+
+function UserIcon({ size = 24 }) {
+  return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="var(--gold)" strokeWidth="1.4" /><path d="M4 20c0-4 3.5-6 8-6s8 2 8 6" stroke="var(--gold)" strokeWidth="1.4" /></svg>)
+}
+function CrownIcon({ size = 16 }) {
+  return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none"><path d="M3 18l1.5-9L9 13l3-7 3 7 4.5-4L21 18H3z" stroke="var(--gold)" strokeWidth="1.4" strokeLinejoin="round" /></svg>)
+}
+function PencilIcon({ size = 17 }) {
+  return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none"><path d="M4 20l1-4 11-11 3 3-11 11-4 1z" stroke="var(--gold)" strokeWidth="1.3" strokeLinejoin="round" /><path d="M14 6l3 3" stroke="var(--gold)" strokeWidth="1.3" /></svg>)
+}
+function ImageIcon({ size = 17 }) {
+  return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="var(--gold)" strokeWidth="1.3" /><circle cx="9" cy="10" r="1.6" stroke="var(--gold)" strokeWidth="1.1" /><path d="M4 17l5-5 4 4 3-3 4 4" stroke="var(--gold)" strokeWidth="1.2" strokeLinejoin="round" /></svg>)
+}
+function CoinIcon({ size = 22 }) {
+  return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="var(--gold-bright)" strokeWidth="1.3" /><path d="M12 7v10M9.5 9c0-1.1 1-2 2.5-2s2.5.9 2.5 2-1 1.5-2.5 2-2.5.9-2.5 2 1 2 2.5 2 2.5-.9 2.5-2" stroke="var(--gold-bright)" strokeWidth="1.1" strokeLinecap="round" /></svg>)
+}
+function GemIcon({ size = 22 }) {
+  return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none"><path d="M6 9l6-6 6 6-6 11-6-11z" stroke="var(--gold-bright)" strokeWidth="1.2" strokeLinejoin="round" /><path d="M6 9h12M9 9l3 11 3-11" stroke="var(--gold-bright)" strokeWidth="1" /></svg>)
+}
+function VaultIcon({ size = 22 }) {
+  return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="var(--gold)" strokeWidth="1.3" /><circle cx="12" cy="12" r="4" stroke="var(--gold-bright)" strokeWidth="1.2" /><path d="M12 9v3l2 2" stroke="var(--gold-bright)" strokeWidth="1" /></svg>)
+}
+function SwordIcon({ size = 22 }) {
+  return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none"><path d="M14 4l6 6-8.5 8.5-3-3M14 4l-9 9v3h3l9-9" stroke="var(--gold)" strokeWidth="1.3" strokeLinejoin="round" /><path d="M5 19l-1.5 1.5" stroke="var(--gold)" strokeWidth="1.3" strokeLinecap="round" /></svg>)
+}
+function RankIcon({ size = 22 }) {
+  return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none"><path d="M12 2.5l7.5 2.7v5.8c0 5-3.2 8.6-7.5 10.5-4.3-1.9-7.5-5.5-7.5-10.5V5.2L12 2.5z" stroke="var(--gold)" strokeWidth="1.3" strokeLinejoin="round" /><path d="M9 11l3-3 3 3M12 8v6" stroke="var(--gold-bright)" strokeWidth="1.2" strokeLinecap="round" /></svg>)
+}
+function ChestIcon({ size = 20 }) {
+  return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none"><path d="M3 10l1-4h16l1 4M3 10v8h18v-8M3 10h18" stroke="var(--gold)" strokeWidth="1.3" strokeLinejoin="round" /><circle cx="12" cy="13" r="1.3" stroke="var(--gold-bright)" strokeWidth="1" /></svg>)
+}
+
 const smallBtn = { border: '1px solid var(--gold)', background: 'rgba(201,168,76,0.12)', color: 'var(--gold-bright)', borderRadius: 8, padding: '8px 14px', fontSize: 13, cursor: 'pointer' }
 const nameInputStyle = { background: 'var(--ink-card)', border: '1px solid var(--gold-dim)', borderRadius: 8, padding: '8px 12px', color: 'var(--parchment)', fontFamily: 'var(--font-display)', fontSize: 16, textAlign: 'center', width: 180 }

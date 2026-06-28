@@ -12,14 +12,18 @@ router.get('/', async (req, res) => {
       : 'xp'
 
     const users = await db.collection('users')
-      .find({ id: { $regex: '@s.whatsapp.net' } })
+      .find({
+        id: { $regex: '@s.whatsapp.net|@lid' },
+        username: { $exists: true, $ne: null },
+        [sortField]: { $gt: 0 }
+      })
       .sort({ [sortField]: -1 })
       .limit(20)
       .toArray()
 
     const result = users.map((u, i) => ({
       rank: i + 1,
-      name: u.username || u.id.replace('@s.whatsapp.net', ''),
+      name: u.username,
       value: u[sortField] || 0,
       empireRank: u.rank || 'Peasant',
       level: u.level || 1

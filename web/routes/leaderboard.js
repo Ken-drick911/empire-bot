@@ -13,7 +13,7 @@ router.get('/', async (req, res) => {
 
     const users = await db.collection('users')
       .find({
-        id: { $regex: '@s.whatsapp.net|@lid' },
+        registered: true,
         username: { $exists: true, $ne: null },
         [sortField]: { $gt: 0 }
       })

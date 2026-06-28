@@ -28,9 +28,9 @@ app.use('/api/profile', profileRoutes)
 app.use('/api/shop', shopRoutes)
 const leaderboardRoutes = require('./routes/leaderboard')
 const uploadRoutes = require('./routes/upload')
+const statsRoutes = require('./routes/stats')
 app.use('/api/leaderboard', leaderboardRoutes)
 app.use('/api/upload', uploadRoutes)
-const statsRoutes = require('./routes/stats')
 app.use('/api/stats', statsRoutes)
 
 // Pairing endpoint

@@ -11,13 +11,11 @@ const shopRoutes = require('./routes/shop')
 const app = express()
 const PORT = process.env.PORT || process.env.WEB_PORT || 3000
 
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
-app.use(cookieParser())
 app.use(express.static(path.join(__dirname, '../frontend/dist'), {
-  maxAge: '7d',
   setHeaders: (res, filePath) => {
-    if (filePath.match(/\.(jpg|jpeg|png|webp)$/)) {
+    if (filePath.endsWith('index.html')) {
+      res.setHeader('Cache-Control', 'no-cache')
+    } else if (filePath.match(/\.(jpg|jpeg|png|webp|js|css)$/)) {
       res.setHeader('Cache-Control', 'public, max-age=604800, immutable')
     }
   }

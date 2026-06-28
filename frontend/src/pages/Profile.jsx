@@ -11,28 +11,35 @@ const frames = [
   { id: 'thin', label: 'Slim Gilded', style: { border: '2px solid var(--gold-dim)', boxShadow: '0 0 10px rgba(201,168,76,0.3)' } },
   { id: 'dual', label: 'Sunburst', style: { border: '3px solid var(--gold-bright)', boxShadow: '0 0 0 4px var(--ink), 0 0 0 6px var(--gold), 0 0 22px rgba(230,198,104,0.5)' } }
 ]
-const fallbackUser = {
-  username: 'Will', bio: 'So tired', rank: 'Peasant', title: 'Village Hand',
-  wallet: 0, vault: 0, xp: 1063, xpToNext: 2000, reputation: 'Village Hand', repLevel: 3,
-  profilePic: null, frame: 'classic'
-}
 
 export default function Profile() {
   const [tab, setTab] = useState('Overview')
-  const [user, setUser] = useState(fallbackUser)
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
   const [editingName, setEditingName] = useState(false)
   const [editingBio, setEditingBio] = useState(false)
   const [framePickerOpen, setFramePickerOpen] = useState(false)
-  const [nameInput, setNameInput] = useState(fallbackUser.username)
-  const [bioInput, setBioInput] = useState(fallbackUser.bio)
+  const [nameInput, setNameInput] = useState('')
+  const [bioInput, setBioInput] = useState('')
 
   useEffect(() => {
-    api.me().then((u) => {
-      setUser(u)
-      setNameInput(u.username)
-      setBioInput(u.bio || '')
-    }).catch(() => {})
+    api.me()
+      .then((u) => {
+        setUser(u)
+        setNameInput(u.username || '')
+        setBioInput(u.bio || '')
+      })
+      .catch(() => { window.location.href = '/' })
+      .finally(() => setLoading(false))
   }, [])
+
+  if (loading || !user) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p style={{ color: 'var(--gold-dim)', fontFamily: 'var(--font-body)' }}>Loading your empire...</p>
+      </div>
+    )
+  }
 
   async function saveName() {
     try {
@@ -64,6 +71,8 @@ export default function Profile() {
   }
 
   const activeFrame = frames.find((f) => f.id === user.frame) || frames[0]
+  const xpPercent = Math.min((user.xp || 0) / (user.xpToNext || 1), 1)
+  const inventory = user.inventory || []
 
   return (
     <PageTransition>
@@ -144,20 +153,13 @@ export default function Profile() {
                   key="edit" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                   style={{ marginTop: 14, display: 'flex', gap: 8, justifyContent: 'center' }}
                 >
-                  <input
-                    value={nameInput} onChange={(e) => setNameInput(e.target.value)}
-                    style={nameInputStyle}
-                    autoFocus
-                  />
+                  <input value={nameInput} onChange={(e) => setNameInput(e.target.value)} style={nameInputStyle} autoFocus />
                   <button onClick={saveName} style={smallBtn}>Save</button>
                 </motion.div>
               ) : (
                 <motion.h1
                   key="view" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                  style={{
-                    fontFamily: 'var(--font-display)', color: 'var(--parchment)',
-                    fontSize: 30, letterSpacing: '0.08em', margin: '14px 0 2px'
-                  }}
+                  style={{ fontFamily: 'var(--font-display)', color: 'var(--parchment)', fontSize: 30, letterSpacing: '0.08em', margin: '14px 0 2px' }}
                 >{user.username?.toUpperCase()}</motion.h1>
               )}
             </AnimatePresence>
@@ -168,30 +170,20 @@ export default function Profile() {
                   key="edit-bio" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                   style={{ marginBottom: 18, display: 'flex', gap: 8, justifyContent: 'center' }}
                 >
-                  <input
-                    value={bioInput} onChange={(e) => setBioInput(e.target.value)}
-                    placeholder="Write a short bio..."
-                    style={nameInputStyle}
-                    autoFocus
-                  />
+                  <input value={bioInput} onChange={(e) => setBioInput(e.target.value)} placeholder="Write a short bio..." style={nameInputStyle} autoFocus />
                   <button onClick={saveBio} style={smallBtn}>Save</button>
                 </motion.div>
               ) : (
                 <motion.p
                   key="view-bio" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                   onClick={() => setEditingBio(true)}
-                  style={{
-                    fontFamily: 'var(--font-body)', fontStyle: 'italic', color: 'var(--gold-dim)',
-                    fontSize: 14, letterSpacing: '0.04em', margin: '0 0 18px', cursor: 'pointer'
-                  }}
+                  style={{ fontFamily: 'var(--font-body)', fontStyle: 'italic', color: 'var(--gold-dim)', fontSize: 14, letterSpacing: '0.04em', margin: '0 0 18px', cursor: 'pointer' }}
                 >· {user.bio || 'Tap to add a bio'} ·</motion.p>
               )}
             </AnimatePresence>
           </div>
 
-          <div className="hide-scrollbar" style={{
-            display: 'flex', gap: 6, overflowX: 'auto', padding: '4px 0 16px', marginBottom: 6
-          }}>
+          <div className="hide-scrollbar" style={{ display: 'flex', gap: 6, overflowX: 'auto', padding: '4px 0 16px', marginBottom: 6 }}>
             {tabs.map((t) => (
               <button
                 key={t} onClick={() => setTab(t)}
@@ -200,8 +192,7 @@ export default function Profile() {
                   border: t === tab ? '1px solid var(--gold)' : '1px solid var(--ink-border)',
                   background: t === tab ? 'rgba(201,168,76,0.12)' : 'transparent',
                   color: t === tab ? 'var(--gold-bright)' : 'var(--parchment-dim)',
-                  fontFamily: 'var(--font-ui)', fontSize: 12.5, letterSpacing: '0.05em',
-                  whiteSpace: 'nowrap'
+                  fontFamily: 'var(--font-ui)', fontSize: 12.5, letterSpacing: '0.05em', whiteSpace: 'nowrap'
                 }}
               >{t.toUpperCase()}</button>
             ))}
@@ -216,25 +207,45 @@ export default function Profile() {
               {tab === 'Overview' && (
                 <>
                   <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
-                    <StatCard icon={<WalletIcon />} value={`$${user.wallet ?? 0}`} label="TREASURY" sub="Available Funds" />
-                    <StatCard icon={<VaultIcon />} value={`$${user.vault ?? 0}`} label="VAULT" sub="Secured Assets" />
+                    <StatCard icon={<CoinIcon />} value={user.gold ?? 0} label="GOLD" sub="Available Funds" />
+                    <VaultCard gold={user.vaultGold ?? 0} diamonds={user.vaultDiamonds ?? 0} />
                   </div>
-                  <BannerRow title="TITLE" value={user.title} sub="Begin your rise." />
-                  <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
-                    <StatCard icon={<SwordIcon />} value={user.xp?.toLocaleString()} label="XP" sub="Glory Earned" />
-                    <ProgressCard
-                      icon={<MaskIcon />} label="REPUTATION" value={user.reputation}
-                      sub={`LEVEL ${user.repLevel ?? 1}`}
-                      progress={(user.xp || 0) / (user.xpToNext || 1)}
-                    />
+
+                  <BannerRow title="TITLE" value={user.title || '—'} sub={user.titleDesc || 'Begin your rise.'} />
+
+                  <div style={{ display: 'flex', gap: 10, marginTop: 10, marginBottom: 10 }}>
+                    <StatCard icon={<SwordIcon />} value={user.xp?.toLocaleString() ?? 0} label="XP" sub="Glory Earned" />
+                    <RankLevelCard rank={user.rank || '—'} level={user.level ?? 1} progress={xpPercent} />
                   </div>
                 </>
               )}
-              {tab !== 'Overview' && (
-                <div style={{
-                  textAlign: 'center', padding: '60px 0', color: 'var(--parchment-dim)',
-                  fontFamily: 'var(--font-body)', fontSize: 15
-                }}>
+
+              {tab === 'Treasures' && (
+                <div>
+                  <p style={{ fontSize: 11, color: 'var(--gold-dim)', letterSpacing: '0.08em', margin: '0 0 14px' }}>INVENTORY</p>
+                  {inventory.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '50px 0', color: 'var(--parchment-dim)', fontFamily: 'var(--font-body)', fontSize: 15 }}>
+                      Your inventory is empty. Visit the Shop to acquire items.
+                    </div>
+                  ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+                      {inventory.map((item) => (
+                        <div key={item.id} className="gold-border-card" style={{ padding: 12, textAlign: 'center' }}>
+                          <div style={{
+                            width: 36, height: 36, borderRadius: 8, background: 'var(--ink-raised)', margin: '0 auto 8px',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center'
+                          }}><ChestIcon size={18} /></div>
+                          <div style={{ fontSize: 12, color: 'var(--parchment)' }}>{item.name}</div>
+                          <div style={{ fontSize: 11, color: 'var(--gold-dim)' }}>x{item.qty}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {(tab === 'Army' || tab === 'Holdings') && (
+                <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--parchment-dim)', fontFamily: 'var(--font-body)', fontSize: 15 }}>
                   {tab} — coming soon
                 </div>
               )}
@@ -248,14 +259,8 @@ export default function Profile() {
 
 function ActionButton({ icon, label, onClick }) {
   return (
-    <button onClick={onClick} style={{
-      background: 'transparent', border: 'none', cursor: 'pointer',
-      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4
-    }}>
-      <span style={{
-        width: 36, height: 36, borderRadius: 8, border: '1px solid var(--ink-border)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--gold)'
-      }}>{icon}</span>
+    <button onClick={onClick} style={{ background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+      <span style={{ width: 36, height: 36, borderRadius: 8, border: '1px solid var(--ink-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--gold)' }}>{icon}</span>
       <span style={{ fontSize: 9.5, color: 'var(--parchment-dim)', letterSpacing: '0.05em' }}>{label}</span>
     </button>
   )
@@ -272,11 +277,27 @@ function StatCard({ icon, value, label, sub }) {
   )
 }
 
+function VaultCard({ gold, diamonds }) {
+  return (
+    <motion.div whileTap={{ scale: 0.98 }} className="gold-border-card" style={{ flex: 1, padding: '16px' }}>
+      <div style={{ marginBottom: 8 }}><VaultIcon /></div>
+      <div style={{ fontSize: 11, color: 'var(--gold)', letterSpacing: '0.06em', marginBottom: 6 }}>VAULT</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+        <CoinIcon size={13} />
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: 15, color: 'var(--parchment)' }}>{gold}</span>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <GemIcon size={13} />
+        <span style={{ fontFamily: 'var(--font-display)', fontSize: 15, color: 'var(--parchment)' }}>{diamonds}</span>
+      </div>
+      <div style={{ fontSize: 10.5, color: 'var(--parchment-dim)', marginTop: 6 }}>Secured Assets</div>
+    </motion.div>
+  )
+}
+
 function BannerRow({ title, value, sub }) {
   return (
-    <motion.div whileTap={{ scale: 0.98 }} className="gold-border-card" style={{
-      padding: '16px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between'
-    }}>
+    <motion.div whileTap={{ scale: 0.98 }} className="gold-border-card" style={{ padding: '16px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
       <div>
         <div style={{ fontSize: 11, color: 'var(--gold-dim)', letterSpacing: '0.08em' }}>{title}</div>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 19, color: 'var(--parchment)', margin: '2px 0' }}>{value}</div>
@@ -287,16 +308,16 @@ function BannerRow({ title, value, sub }) {
   )
 }
 
-function ProgressCard({ icon, label, value, sub, progress }) {
+function RankLevelCard({ rank, level, progress }) {
   return (
     <motion.div whileTap={{ scale: 0.98 }} className="gold-border-card" style={{ flex: 1, padding: '16px' }}>
-      <div style={{ marginBottom: 8 }}>{icon}</div>
-      <div style={{ fontSize: 11, color: 'var(--gold)', letterSpacing: '0.06em' }}>{label}</div>
-      <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--parchment)', margin: '2px 0 6px' }}>{value}</div>
-      <div style={{ fontSize: 10, color: 'var(--parchment-dim)', marginBottom: 6 }}>{sub}</div>
+      <div style={{ marginBottom: 8 }}><RankIcon /></div>
+      <div style={{ fontSize: 11, color: 'var(--gold)', letterSpacing: '0.06em' }}>RANK</div>
+      <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--parchment)', margin: '2px 0 6px' }}>{rank}</div>
+      <div style={{ fontSize: 10, color: 'var(--parchment-dim)', marginBottom: 6 }}>Level {level}</div>
       <div style={{ height: 4, borderRadius: 4, background: 'var(--ink-border)', overflow: 'hidden' }}>
         <motion.div
-          initial={{ width: 0 }} animate={{ width: `${Math.min(progress, 1) * 100}%` }}
+          initial={{ width: 0 }} animate={{ width: `${progress * 100}%` }}
           transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
           style={{ height: '100%', background: 'linear-gradient(90deg, var(--gold-dim), var(--gold-bright))' }}
         />
@@ -306,81 +327,35 @@ function ProgressCard({ icon, label, value, sub, progress }) {
 }
 
 function UserIcon({ size = 24 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <circle cx="12" cy="8" r="4" stroke="var(--gold)" strokeWidth="1.4" />
-      <path d="M4 20c0-4 3.5-6 8-6s8 2 8 6" stroke="var(--gold)" strokeWidth="1.4" />
-    </svg>
-  )
+  return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="var(--gold)" strokeWidth="1.4" /><path d="M4 20c0-4 3.5-6 8-6s8 2 8 6" stroke="var(--gold)" strokeWidth="1.4" /></svg>)
 }
 function CrownIcon({ size = 16 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <path d="M3 18l1.5-9L9 13l3-7 3 7 4.5-4L21 18H3z" stroke="var(--gold)" strokeWidth="1.4" strokeLinejoin="round" />
-    </svg>
-  )
+  return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none"><path d="M3 18l1.5-9L9 13l3-7 3 7 4.5-4L21 18H3z" stroke="var(--gold)" strokeWidth="1.4" strokeLinejoin="round" /></svg>)
 }
 function PencilIcon({ size = 17 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <path d="M4 20l1-4 11-11 3 3-11 11-4 1z" stroke="var(--gold)" strokeWidth="1.3" strokeLinejoin="round" />
-      <path d="M14 6l3 3" stroke="var(--gold)" strokeWidth="1.3" />
-    </svg>
-  )
+  return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none"><path d="M4 20l1-4 11-11 3 3-11 11-4 1z" stroke="var(--gold)" strokeWidth="1.3" strokeLinejoin="round" /><path d="M14 6l3 3" stroke="var(--gold)" strokeWidth="1.3" /></svg>)
 }
 function ImageIcon({ size = 17 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <rect x="3" y="5" width="18" height="14" rx="2" stroke="var(--gold)" strokeWidth="1.3" />
-      <circle cx="9" cy="10" r="1.6" stroke="var(--gold)" strokeWidth="1.1" />
-      <path d="M4 17l5-5 4 4 3-3 4 4" stroke="var(--gold)" strokeWidth="1.2" strokeLinejoin="round" />
-    </svg>
-  )
+  return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="var(--gold)" strokeWidth="1.3" /><circle cx="9" cy="10" r="1.6" stroke="var(--gold)" strokeWidth="1.1" /><path d="M4 17l5-5 4 4 3-3 4 4" stroke="var(--gold)" strokeWidth="1.2" strokeLinejoin="round" /></svg>)
 }
-function WalletIcon({ size = 22 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <path d="M3 8h16a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" stroke="var(--gold)" strokeWidth="1.3" strokeLinejoin="round" />
-      <path d="M3 8V6a2 2 0 012-2h10" stroke="var(--gold)" strokeWidth="1.3" />
-      <circle cx="16" cy="14" r="1.4" stroke="var(--gold-bright)" strokeWidth="1" />
-    </svg>
-  )
+function CoinIcon({ size = 22 }) {
+  return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="var(--gold-bright)" strokeWidth="1.3" /><path d="M12 7v10M9.5 9c0-1.1 1-2 2.5-2s2.5.9 2.5 2-1 1.5-2.5 2-2.5.9-2.5 2 1 2 2.5 2 2.5-.9 2.5-2" stroke="var(--gold-bright)" strokeWidth="1.1" strokeLinecap="round" /></svg>)
+}
+function GemIcon({ size = 22 }) {
+  return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none"><path d="M6 9l6-6 6 6-6 11-6-11z" stroke="var(--gold-bright)" strokeWidth="1.2" strokeLinejoin="round" /><path d="M6 9h12M9 9l3 11 3-11" stroke="var(--gold-bright)" strokeWidth="1" /></svg>)
 }
 function VaultIcon({ size = 22 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <rect x="3" y="4" width="18" height="16" rx="2" stroke="var(--gold)" strokeWidth="1.3" />
-      <circle cx="12" cy="12" r="4" stroke="var(--gold-bright)" strokeWidth="1.2" />
-      <path d="M12 9v3l2 2" stroke="var(--gold-bright)" strokeWidth="1" />
-    </svg>
-  )
+  return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="var(--gold)" strokeWidth="1.3" /><circle cx="12" cy="12" r="4" stroke="var(--gold-bright)" strokeWidth="1.2" /><path d="M12 9v3l2 2" stroke="var(--gold-bright)" strokeWidth="1" /></svg>)
 }
 function SwordIcon({ size = 22 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <path d="M14 4l6 6-8.5 8.5-3-3M14 4l-9 9v3h3l9-9" stroke="var(--gold)" strokeWidth="1.3" strokeLinejoin="round" />
-      <path d="M5 19l-1.5 1.5" stroke="var(--gold)" strokeWidth="1.3" strokeLinecap="round" />
-    </svg>
-  )
+  return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none"><path d="M14 4l6 6-8.5 8.5-3-3M14 4l-9 9v3h3l9-9" stroke="var(--gold)" strokeWidth="1.3" strokeLinejoin="round" /><path d="M5 19l-1.5 1.5" stroke="var(--gold)" strokeWidth="1.3" strokeLinecap="round" /></svg>)
 }
-function MaskIcon({ size = 22 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <path d="M4 9c2-2 5-3 8-3s6 1 8 3c0 6-3.5 10-8 11-4.5-1-8-5-8-11z" stroke="var(--gold)" strokeWidth="1.3" strokeLinejoin="round" />
-      <circle cx="9" cy="11" r="1" fill="var(--gold-bright)" />
-      <circle cx="15" cy="11" r="1" fill="var(--gold-bright)" />
-    </svg>
-  )
+function RankIcon({ size = 22 }) {
+  return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none"><path d="M12 2.5l7.5 2.7v5.8c0 5-3.2 8.6-7.5 10.5-4.3-1.9-7.5-5.5-7.5-10.5V5.2L12 2.5z" stroke="var(--gold)" strokeWidth="1.3" strokeLinejoin="round" /><path d="M9 11l3-3 3 3M12 8v6" stroke="var(--gold-bright)" strokeWidth="1.2" strokeLinecap="round" /></svg>)
+}
+function ChestIcon({ size = 20 }) {
+  return (<svg width={size} height={size} viewBox="0 0 24 24" fill="none"><path d="M3 10l1-4h16l1 4M3 10v8h18v-8M3 10h18" stroke="var(--gold)" strokeWidth="1.3" strokeLinejoin="round" /><circle cx="12" cy="13" r="1.3" stroke="var(--gold-bright)" strokeWidth="1" /></svg>)
 }
 
-const smallBtn = {
-  border: '1px solid var(--gold)', background: 'rgba(201,168,76,0.12)',
-  color: 'var(--gold-bright)', borderRadius: 8, padding: '8px 14px',
-  fontSize: 13, cursor: 'pointer'
-}
-
-const nameInputStyle = {
-  background: 'var(--ink-card)', border: '1px solid var(--gold-dim)',
-  borderRadius: 8, padding: '8px 12px', color: 'var(--parchment)',
-  fontFamily: 'var(--font-display)', fontSize: 16, textAlign: 'center', width: 180
-  }
+const smallBtn = { border: '1px solid var(--gold)', background: 'rgba(201,168,76,0.12)', color: 'var(--gold-bright)', borderRadius: 8, padding: '8px 14px', fontSize: 13, cursor: 'pointer' }
+const nameInputStyle = { background: 'var(--ink-card)', border: '1px solid var(--gold-dim)', borderRadius: 8, padding: '8px 12px', color: 'var(--parchment)', fontFamily: 'var(--font-display)', fontSize: 16, textAlign: 'center', width: 180 }

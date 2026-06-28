@@ -112,7 +112,8 @@ app.post('/pair', express.urlencoded({ extended: true }), async (req, res) => {
 })
 
 // Serve frontend
-app.get('/', (req, res) => {
+app.get('*', (req, res) => {
+    if (req.path.startsWith('/api')) return res.status(404).json({ error: 'Not found' })
     res.sendFile(path.join(__dirname, '..', 'frontend', 'dist', 'index.html'))
 })
 

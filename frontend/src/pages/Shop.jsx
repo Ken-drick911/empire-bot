@@ -43,12 +43,6 @@ export default function Shop() {
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(10,9,8,0) 30%, var(--ink) 95%)' }} />
           <div style={{ position: 'absolute', inset: 0, boxShadow: 'inset 0 0 24px 8px var(--ink)' }} />
 
-          <button onClick={() => {}} style={{
-            position: 'absolute', top: 14, left: 16, width: 34, height: 34, borderRadius: '50%',
-            border: '1px solid rgba(201,168,76,0.4)', background: 'rgba(0,0,0,0.35)',
-            color: 'var(--parchment)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer'
-          }}>×</button>
-
           <div style={{ position: 'absolute', top: 30, right: '38%' }}>
             <ShieldCrest />
           </div>
@@ -56,7 +50,7 @@ export default function Shop() {
 
         <div style={{ padding: '0 20px' }}>
           <h1 style={{
-            fontFamily: 'var(--font-display)', color: 'var(--parchment)',
+            fontFamily: 'var(--font-display)', color: 'var(--gold-bright)',
             fontSize: 30, letterSpacing: '0.08em', margin: '0 0 6px'
           }}>SHOP</h1>
           <p style={{ color: 'var(--parchment-dim)', fontSize: 13.5, margin: '0 0 18px', fontFamily: 'var(--font-body)' }}>

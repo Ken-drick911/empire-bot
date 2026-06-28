@@ -131,26 +131,21 @@ export default function Leaderboard() {
 function PodiumPennant({ entry, size, tone }) {
   const lg = size === 'lg'
   const toneColor = tone === 'gold' ? 'var(--gold-bright)' : tone === 'silver' ? '#b9c2cc' : '#c98a4f'
+  const w = lg ? 84 : 70
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-      style={{ textAlign: 'center', width: lg ? 104 : 88 }}
+      style={{ textAlign: 'center', width: w + 16 }}
     >
-      <div style={{ fontSize: 11, color: toneColor, marginBottom: 4 }}>{entry.rank}</div>
-      <div style={{
-        width: lg ? 70 : 56, height: lg ? 70 : 56, borderRadius: '50%', margin: '0 auto 0',
-        border: `2px solid ${toneColor}`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: 'var(--ink-raised)'
-      }}>
-        <UserIcon size={lg ? 30 : 22} />
-      </div>
-      <div style={{
-        width: lg ? 70 : 56, margin: '0 auto', clipPath: 'polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%)',
-        background: `linear-gradient(180deg, ${toneColor}33, transparent)`,
-        border: `1px solid ${toneColor}55`, borderTop: 'none', height: 26
-      }} />
+      <svg width={w} height={w * 1.35} viewBox="0 0 100 135" style={{ margin: '0 auto', display: 'block' }}>
+        <path d="M50 0 L90 14 V80 Q90 110 50 135 Q10 110 10 80 V14 Z" fill="rgba(0,0,0,0.3)" stroke={toneColor} strokeWidth="2" />
+        <text x="50" y="22" textAnchor="middle" fill={toneColor} fontSize="14" fontFamily="var(--font-display)">{entry.rank}</text>
+        <circle cx="50" cy="58" r={lg ? 26 : 22} fill="var(--ink-raised)" stroke={toneColor} strokeWidth="2" />
+        <foreignObject x={50 - (lg ? 16 : 13)} y={58 - (lg ? 16 : 13)} width={lg ? 32 : 26} height={lg ? 32 : 26}>
+          <UserIcon size={lg ? 32 : 26} />
+        </foreignObject>
+      </svg>
       <div style={{ fontSize: lg ? 14 : 12.5, color: 'var(--parchment)', margin: '6px 0 2px' }}>{entry.name}</div>
       <div style={{ fontSize: lg ? 13 : 11.5, color: 'var(--gold-dim)' }}>{entry.value.toLocaleString()} XP</div>
     </motion.div>

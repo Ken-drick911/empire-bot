@@ -158,9 +158,17 @@ export default function Profile() {
                 </motion.div>
               ) : (
                 <motion.h1
-                  key="view" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                  style={{ fontFamily: 'var(--font-display)', color: 'var(--parchment)', fontSize: 30, letterSpacing: '0.08em', margin: '14px 0 2px' }}
-                >{user.username?.toUpperCase()}</motion.h1>
+  key="view" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+  style={{
+    fontFamily: 'var(--font-display)', color: 'var(--parchment)', fontSize: 30,
+    letterSpacing: '0.08em', margin: '14px 0 2px',
+    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12
+  }}
+>
+  <span style={{ color: 'var(--gold-dim)', fontSize: 16 }}>‹</span>
+  {user.username?.toUpperCase()}
+  <span style={{ color: 'var(--gold-dim)', fontSize: 16 }}>›</span>
+</motion.h1>
               )}
             </AnimatePresence>
 

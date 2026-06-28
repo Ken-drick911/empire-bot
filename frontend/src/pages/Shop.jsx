@@ -12,10 +12,10 @@ const categories = [
 ]
 
 const featured = [
-  { name: 'Wood', amount: '10,000', price: 500, image: '/images/IMG_20260627_194710.webp' },
-  { name: 'Stone', amount: '10,000', price: 500, image: '/images/IMG_20260627_195247.webp' },
-  { name: 'Food', amount: '10,000', price: 500, image: '/images/file_00000000462c71f498863372ba800288.webp' },
-  { name: 'Iron', amount: '5,000', price: 500, image: '/images/IMG_20260627_195405.webp' }
+  { name: 'Wood', amount: '10,000', price: 3, currency: 'diamonds', image: '/images/IMG_20260627_194710.webp' },
+  { name: 'Stone', amount: '10,000', price: 3, currency: 'diamonds', image: '/images/IMG_20260627_195247.webp' },
+  { name: 'Food', amount: '10,000', price: 3, currency: 'diamonds', image: '/images/file_00000000462c71f498863372ba800288.webp' },
+  { name: 'Iron', amount: '5,000', price: 3, currency: 'diamonds', image: '/images/IMG_20260627_195405.webp' }
 ]
 
 const allItems = [
@@ -95,9 +95,11 @@ export default function Shop() {
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: 13.5, color: 'var(--parchment)' }}>{item.name.toUpperCase()}</div>
                 <div style={{ fontSize: 11.5, color: 'var(--parchment-dim)', margin: '4px 0 10px' }}>{item.amount}</div>
                 <div style={{
-                  border: '1px solid var(--gold-dim)', borderRadius: 8, padding: '7px 0',
-                  color: 'var(--gold-bright)', fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5
-                }}><CoinIcon size={13} /> {item.price}</div>
+  border: '1px solid var(--gold-dim)', borderRadius: 8, padding: '7px 0',
+  color: 'var(--gold-bright)', fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5
+}}>
+  {item.currency === 'diamond' ? <GemIcon size={13} /> : <CoinIcon size={13} />} {item.price}
+</div>
               </motion.div>
             ))}
           </div>
@@ -239,6 +241,14 @@ function CoinIcon({ size = 14 }) {
       <circle cx="12" cy="12" r="9" stroke="var(--gold-bright)" strokeWidth="1.3" />
       <path d="M12 7v10M9.5 9c0-1.1 1-2 2.5-2s2.5.9 2.5 2-1 1.5-2.5 2-2.5.9-2.5 2 1 2 2.5 2 2.5-.9 2.5-2"
         stroke="var(--gold-bright)" strokeWidth="1.1" strokeLinecap="round" />
+    </svg>
+  )
+}
+function GemIcon({ size = 14 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path d="M6 9l6-6 6 6-6 11-6-11z" stroke="var(--gold-bright)" strokeWidth="1.2" strokeLinejoin="round" />
+      <path d="M6 9h12M9 9l3 11 3-11" stroke="var(--gold-bright)" strokeWidth="1" />
     </svg>
   )
 }

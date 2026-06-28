@@ -3,6 +3,11 @@ const router = express.Router()
 const auth = require('../middleware/authMiddleware')
 const getDB = () => global._db
 
+function getXPToNextLevel(level) {
+  const levelXP = [0, 100, 150, 220, 310, 420, 550, 700, 870, 1060]
+  return levelXP[level] || 1060
+}
+
 router.get('/me', auth, async (req, res) => {
   try {
     const db = getDB()
@@ -12,12 +17,11 @@ router.get('/me', auth, async (req, res) => {
     const webUser = await db.collection('users').findOne({ phone })
     if (!webUser) return res.status(404).json({ error: 'User not found' })
 
-    // Search all possible ID formats including LID
     const botUser = await db.collection('users').findOne({
       $or: [
         { id: jid },
         { phone: phone },
-        { id: { $regex: phone } }  // catches LID format which contains the phone number
+        { id: { $regex: phone } }
       ]
     })
 
@@ -27,14 +31,19 @@ router.get('/me', auth, async (req, res) => {
     const tickets = (now - lastReset) >= 5 * 60 * 60 * 1000
       ? 0 : (botUser?.lotteryTickets || 0)
 
+    const level = botUser?.level || 1
+    const xp = botUser?.xp || 0
+    const xpToNext = botUser?.xpToNext || getXPToNextLevel(level)
+
     res.json({
       username: webUser.username,
       phone,
       avatar: webUser.avatar || null,
       cover: webUser.cover || null,
       bio: webUser.bio || '',
-      xp: botUser?.xp || 0,
-      level: botUser?.level || 1,
+      xp,
+      level,
+      xpToNext,
       rank: botUser?.rank || 'Peasant',
       gold: botUser?.wallet || 0,
       vaultGold: botUser?.vault || 0,
@@ -42,7 +51,6 @@ router.get('/me', auth, async (req, res) => {
       reputation: botUser?.reputation || null,
       title: botUser?.title || '',
       titleDesc: botUser?.titleDesc || 'Begin your rise.',
-      xpToNext: botUser?.xpToNext || 2000,
       lotteryTickets: tickets,
       frame: webUser.frame || 'classic',
       inventory: webUser.inventory || []

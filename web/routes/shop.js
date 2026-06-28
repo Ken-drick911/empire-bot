@@ -3,70 +3,59 @@ const router = express.Router()
 const auth = require('../middleware/authMiddleware')
 const getDB = () => global._db
 
-const SHOP_ITEMS = [
-    { id: 'pistol', name: 'Pistol', category: 'WEAPON', price: 2500, description: 'Required to steal coins from others.', emoji: '🔫' },
-    { id: 'guard_shield', name: 'Guard Shield', category: 'EQUIPMENT', price: 50000, description: 'Defends against steal attempts.', emoji: '🛡️' },
-    { id: 'fishing_rod', name: 'Fishing Rod', category: 'EQUIPMENT', price: 1000, description: 'Unlocks the .fish command.', emoji: '🎣' },
-    { id: 'pickaxe', name: 'Pickaxe', category: 'EQUIPMENT', price: 1500, description: 'Unlocks the .dig command.', emoji: '⛏️' },
-    { id: 'dungeon_map', name: 'Dungeon Map', category: 'EQUIPMENT', price: 5000, description: 'Unlocks the .dungeon command.', emoji: '🗺️' },
-    { id: 'xp_potion', name: 'XP Potion', category: 'CONSUMABLE', price: 3000, description: 'Grants 2x XP for 1 hour.', emoji: '⚗️' },
-    { id: 'time_token', name: 'Time Token', category: 'CONSUMABLE', price: 100000, description: 'Reverses a robbery within 5 minutes.', emoji: '⏰' },
-    { id: 'heist_kit', name: 'Heist Kit', category: 'EQUIPMENT', price: 10000, description: 'Required to pull a group heist.', emoji: '🧰' },
-]
+const TICKET_PRICE = 50
+const MAX_TICKETS = 3
+const RESET_MS = 5 * 60 * 60 * 1000 // 5 hours
 
-// Get all shop items
-router.get('/items', auth, async (req, res) => {
-    try {
-        const db = getDB()
-        const user = await db.collection('users').findOne({ phone: req.user.phone })
-        const inventory = user?.inventory || []
-
-        const items = SHOP_ITEMS.map(item => ({
-            ...item,
-            owned: inventory.includes(item.id)
-        }))
-
-        res.json({ items })
-    } catch (err) {
-        res.status(500).json({ error: 'Server error' })
-    }
+router.get('/items', async (req, res) => {
+  res.json({ items: [] })
 })
 
-// Buy item
-router.post('/buy', auth, async (req, res) => {
-    try {
-        const { itemId } = req.body
-        const item = SHOP_ITEMS.find(i => i.id === itemId)
-        if (!item) return res.status(404).json({ error: 'Item not found' })
+router.post('/buy-ticket', auth, async (req, res) => {
+  try {
+    const db = getDB()
+    const phone = req.user.phone
+    const jid = phone + '@s.whatsapp.net'
 
-        const db = getDB()
-        const phone = req.user.phone
-        const jid = phone + '@s.whatsapp.net'
+    const user = await db.collection('users').findOne({
+      $or: [{ id: jid }, { phone }]
+    })
 
-        const user = await db.collection('users').findOne({ phone })
-        const stats = await db.collection('userStats').findOne({ userId: jid })
+    if (!user) return res.status(404).json({ error: 'User not found' })
 
-        const inventory = user?.inventory || []
-        if (inventory.includes(itemId))
-            return res.status(400).json({ error: 'You already own this item' })
+    // Check ticket reset
+    const now = Date.now()
+    const lastReset = user.ticketResetAt ? new Date(user.ticketResetAt).getTime() : 0
+    const ticketCount = (now - lastReset) >= RESET_MS ? 0 : (user.lotteryTickets || 0)
 
-        const wallet = stats?.wallet || 0
-        if (wallet < item.price)
-            return res.status(400).json({ error: 'Not enough coins' })
+    if (ticketCount >= MAX_TICKETS)
+      return res.status(400).json({ error: 'Max 3 tickets per 5 hours' })
 
-        await db.collection('userStats').updateOne(
-            { userId: jid },
-            { $inc: { wallet: -item.price } }
-        )
-        await db.collection('users').updateOne(
-            { phone },
-            { $addToSet: { inventory: itemId } }
-        )
+    if ((user.wallet || 0) < TICKET_PRICE)
+      return res.status(400).json({ error: 'Not enough Gold' })
 
-        res.json({ success: true, message: `${item.emoji} ${item.name} purchased!` })
-    } catch (err) {
-        res.status(500).json({ error: 'Server error' })
-    }
+    const newTickets = ticketCount + 1
+    const resetAt = ticketCount === 0 ? new Date() : (user.ticketResetAt || new Date())
+
+    await db.collection('users').updateOne(
+      { $or: [{ id: jid }, { phone }] },
+      {
+        $inc: { wallet: -TICKET_PRICE },
+        $set: {
+          lotteryTickets: newTickets,
+          ticketResetAt: resetAt
+        }
+      }
+    )
+
+    res.json({
+      success: true,
+      tickets: newTickets,
+      wallet: (user.wallet || 0) - TICKET_PRICE
+    })
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' })
+  }
 })
 
 module.exports = router

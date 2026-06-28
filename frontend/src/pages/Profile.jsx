@@ -85,7 +85,7 @@ export default function Profile() {
         <div style={{ position: 'fixed', inset: 0, zIndex: -1, background: 'linear-gradient(180deg, rgba(10,9,8,0.4), var(--ink) 70%)' }} />
 
         <div style={{ padding: '0 20px 20px', position: 'relative' }}>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 18, marginBottom: 6 }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 18, marginBottom: 24 }}>
             <ActionButton icon={<PencilIcon />} label="Edit name" onClick={() => setEditingName(true)} />
             <ActionButton icon={<ImageIcon />} label="Change pfp" />
           </div>

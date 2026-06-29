@@ -1,6 +1,7 @@
 import React from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
+import { api } from '../api/client.js'
 
 const items = [
   { label: 'Home', path: '/home', icon: CastleIcon },
@@ -12,56 +13,71 @@ const items = [
 export default function NavDrawer({ onClose }) {
   const navigate = useNavigate()
 
+  async function handleLogout() {
+    try {
+      await api.logout()
+    } catch {}
+    window.location.href = '/'
+  }
+
   return (
     <>
+      {/* Tap outside to close */}
       <motion.div
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.25 }}
         onClick={onClose}
-        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 40 }}
+        style={{ position: 'fixed', inset: 0, zIndex: 40 }}
       />
+
+      {/* Drawer panel */}
       <motion.div
         initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }}
-        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         style={{
           position: 'fixed', top: 0, left: 0, bottom: 0, width: 'min(86vw, 360px)',
           background: '#070605', zIndex: 41, overflow: 'hidden',
           display: 'flex', flexDirection: 'column', padding: '24px 22px'
         }}
       >
+        {/* Background image */}
         <div style={{
           position: 'absolute', inset: 0,
           backgroundImage: 'url(/images/file_00000000393871f497f5c79c1aa23d3e.webp)',
           backgroundSize: 'cover', backgroundPosition: 'right center',
-          opacity: 0.55
+          opacity: 0.45
         }} />
+        {/* Gradient overlay */}
         <div style={{
           position: 'absolute', inset: 0,
-          background: 'linear-gradient(90deg, #070605 35%, rgba(7,6,5,0.2) 75%, rgba(7,6,5,0.5))'
+          background: 'linear-gradient(90deg, #070605 40%, rgba(7,6,5,0.15) 80%, rgba(7,6,5,0.5))'
         }} />
 
+        {/* Close button */}
         <button
           onClick={onClose} aria-label="Close menu"
           style={{
             width: 36, height: 36, borderRadius: '50%', border: '1px solid var(--ink-border)',
             background: 'rgba(0,0,0,0.3)', color: 'var(--parchment)', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16,
-            position: 'relative', zIndex: 1
+            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18,
+            position: 'relative', zIndex: 1, flexShrink: 0
           }}
         >×</button>
 
+        {/* Crest */}
         <div style={{ textAlign: 'center', margin: '20px 0 18px', position: 'relative', zIndex: 1 }}>
           <CrestIcon />
           <div className="ornate-divider" style={{ marginTop: 10 }}><span>◆</span></div>
         </div>
 
+        {/* Nav items */}
         <div style={{ flex: 1, position: 'relative', zIndex: 1 }}>
           {items.map((item, i) => (
             <motion.button
               key={item.path}
               initial={{ opacity: 0, x: -16 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.1 + i * 0.06, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ delay: 0.08 + i * 0.05, duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               onClick={() => { navigate(item.path); onClose() }}
               style={{
                 width: '100%', background: 'transparent', border: 'none', cursor: 'pointer',
@@ -78,14 +94,21 @@ export default function NavDrawer({ onClose }) {
           ))}
         </div>
 
-        <button
+        {/* Logout */}
+        <motion.button
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+          transition={{ delay: 0.35 }}
+          onClick={handleLogout}
           style={{
             position: 'relative', zIndex: 1,
-            border: '1px solid var(--gold-dim)', borderRadius: 10, background: 'rgba(0,0,0,0.3)',
-            color: 'var(--gold)', padding: '14px', fontFamily: 'var(--font-display)',
-            fontSize: 14, letterSpacing: '0.08em', cursor: 'pointer'
+            border: '1px solid var(--gold-dim)', borderRadius: 10,
+            background: 'rgba(0,0,0,0.3)',
+            color: 'var(--gold)', padding: '14px',
+            fontFamily: 'var(--font-display)',
+            fontSize: 14, letterSpacing: '0.08em', cursor: 'pointer',
+            marginTop: 12
           }}
-        >LOGOUT</button>
+        >LOGOUT</motion.button>
       </motion.div>
     </>
   )
@@ -105,7 +128,6 @@ function CastleIcon() {
       <path d="M4 21V9l2-1.5V10l1.5-2v2.5L9 9v12M9 21h6M15 9l1.5 1.5V10L18 11v10M18 21V7.5l2 1.5v12"
         stroke="var(--gold)" strokeWidth="1.3" strokeLinejoin="round" />
       <path d="M6 7.5V5M9 9V6M15 9V6M18 7.5V5" stroke="var(--gold)" strokeWidth="1.3" strokeLinecap="round" />
-      <path d="M9 5l2 1-2 1M15 5l2 1-2 1" stroke="var(--gold)" strokeWidth="1" />
     </svg>
   )
 }
@@ -133,9 +155,8 @@ function ColumnIcon() {
   return (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
       <path d="M9 3l3-1.4L15 3" stroke="var(--gold)" strokeWidth="1.2" strokeLinejoin="round" />
-      <circle cx="12" cy="1.8" r="0" />
       <path d="M7 5h10M8 5v13M16 5v13M6 18h12M5 21h14M9 9h6M9 13h6" stroke="var(--gold)" strokeWidth="1.3" strokeLinecap="round" />
       <path d="M10.5 2.2l1.5-1 1.5 1-.4 1.3h-2.2z" fill="var(--gold)" />
     </svg>
   )
-}
+        }

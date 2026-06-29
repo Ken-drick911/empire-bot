@@ -5,12 +5,12 @@
   "main": "index.js",
   "engines": {
     "node": ">=20"
-},
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
     "postinstall": "cd frontend && npm install && npm run build"
-},
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Ken-drick911/empire-bot.git"
@@ -26,6 +26,7 @@
   "dependencies": {
     "@whiskeysockets/baileys": "^7.0.0-rc13",
     "bcryptjs": "^2.4.3",
+    "canvas": "^2.11.2",
     "cloudinary": "^1.41.3",
     "cookie-parser": "^1.4.6",
     "dotenv": "^17.4.2",

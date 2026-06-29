@@ -186,7 +186,7 @@ async function generateProfileCard(user, displayRank, xpPercent, xpToNext) {
     ctx.textAlign = 'center'
     ctx.fillText('⚔️  T H E  E M P I R E  ⚔️', W / 2, H - 28)
 
-    return canvas.toBuffer('image/jpeg', { quality: 0.92 })
+    return await canvas.encode('jpeg')
 }
 
 function drawDefaultAvatar(ctx, x, y, r) {

@@ -112,18 +112,20 @@ export default function Profile() {
 
   return (
     <>
-      {user.cover && (
-        <img
-          src={user.cover}
-          alt=""
-          style={{
-            position: 'fixed', inset: 0, zIndex: -2, width: '100%', height: '100%',
-            objectFit: 'cover', objectPosition: 'top center', opacity: 0.35
-          }}
-        />
-      )}
-      <div style={{ position: 'fixed', inset: 0, zIndex: -2, background: 'linear-gradient(180deg, rgba(10,9,8,0.4), var(--ink) 70%)' }} />
-      <div style={{ position: 'fixed', inset: 0, zIndex: -1, overflow: 'hidden', pointerEvents: 'none' }}><EmberField count={10} /></div>
+      <div style={{ position: 'fixed', inset: 0, zIndex: -1 }}>
+        {user.cover ? (
+          <img
+            src={user.cover}
+            alt=""
+            style={{
+              position: 'absolute', inset: 0, width: '100%', height: '100%',
+              objectFit: 'cover', objectPosition: 'top center', opacity: 0.35
+            }}
+          />
+        ) : null}
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(10,9,8,0.4), var(--ink) 70%)' }} />
+        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}><EmberField count={10} /></div>
+      </div>
 
       <PageTransition>
         <div style={{ padding: '0 20px 20px', position: 'relative' }}>

@@ -383,5 +383,5 @@ async function startBot() {
     })
 }
 
-// startBot()
+startBot()
 require('./web/server.js')

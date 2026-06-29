@@ -73,20 +73,27 @@ export default function Profile() {
   }
 
   async function handleCoverUpload(e) {
-    const file = e.target.files[0]
-    if (!file) return
-    setUploadingCover(true)
-    try {
-      const formData = new FormData()
-      formData.append('cover', file)
-      const res = await fetch('/api/upload/cover', { method: 'POST', body: formData, credentials: 'include' })
-      const data = await res.json()
-      if (data.url) setUser((u) => ({ ...u, cover: data.url }))
-    } catch (err) {
-      console.error('Upload error:', err)
-    } finally {
-      setUploadingCover(false)
-    }
+  const file = e.target.files[0]
+  if (!file) return
+  setUploadingCover(true)
+  try {
+    const formData = new FormData()
+    formData.append('cover', file)
+    const res = await fetch('/api/upload/cover', { 
+      method: 'POST', 
+      body: formData, 
+      credentials: 'include' 
+    })
+    alert('Status: ' + res.status)
+    const text = await res.text()
+    alert('Response: ' + text)
+    const data = JSON.parse(text)
+    if (data.url) setUser((u) => ({ ...u, cover: data.url }))
+  } catch (err) {
+    alert('Error: ' + err.message)
+  } finally {
+    setUploadingCover(false)
+  }
   }
 
   async function handleAvatarUpload(e) {

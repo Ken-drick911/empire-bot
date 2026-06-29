@@ -20,12 +20,12 @@ const featured = [
 ]
 
 const allItems = [
-  { name: '5 Min Speed Up', desc: 'Reduces any timer by 5 minutes.', owned: 12, price: 150, icon: ChevronsIcon },
-  { name: 'Attack Boost (8h)', desc: "Increases your troops' attack by 20% for 8 hours.", owned: 3, price: 1500, icon: BoostShieldIcon },
-  { name: 'Defense Boost (8h)', desc: "Increases your troops' defense by 20% for 8 hours.", owned: 4, price: 1500, icon: BoostShieldIcon },
-  { name: 'Common Chest', desc: 'Grants a random reward.', owned: 7, price: 300, icon: ChestIcon },
-  { name: 'Veteran Sword', desc: 'A reliable sword used by seasoned warriors.', owned: 1, price: 2000, icon: SwordIcon },
-  { name: 'Knight Armor', desc: 'Sturdy armor that offers great protection.', owned: 1, price: 2500, icon: ArmorIcon }
+  { name: '5 Min Speed Up', desc: 'Reduces any timer by 5 minutes.', owned: 12, price: 150, icon: TimerIcon },
+  { name: 'Attack Boost (8h)', desc: "Increases your troops' attack by 20% for 8 hours.", owned: 3, price: 1500, icon: FlameIcon },
+  { name: 'Defense Boost (8h)', desc: "Increases your troops' defense by 20% for 8 hours.", owned: 4, price: 1500, icon: WallIcon },
+  { name: 'Common Chest', desc: 'Grants a random reward.', owned: 7, price: 300, icon: TreasureIcon },
+  { name: 'Veteran Sword', desc: 'A reliable sword used by seasoned warriors.', owned: 1, price: 2000, icon: BladeIcon },
+  { name: 'Knight Armor', desc: 'Sturdy armor that offers great protection.', owned: 1, price: 2500, icon: ArmorPlateIcon }
 ]
 
 export default function Shop() {
@@ -121,36 +121,46 @@ export default function Shop() {
                 </div>
               </motion.div>
             ))}
-
-            {/* Lottery Ticket Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: featured.length * 0.05, duration: 0.3 }}
-              whileTap={{ scale: 0.97 }}
-              className="gold-border-card"
-              style={{ flex: '0 0 132px', padding: 14, textAlign: 'center' }}
-            >
-              <div style={{ fontSize: 38, marginBottom: 8 }}>🎟️</div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 13.5, color: 'var(--parchment)' }}>LOTTERY</div>
-              <div style={{ fontSize: 11.5, color: 'var(--parchment-dim)', margin: '4px 0 10px' }}>{tickets}/3 owned</div>
-              <button
-                onClick={handleBuyTicket}
-                disabled={tickets >= 3 || buying}
-                style={{
-                  width: '100%', border: '1px solid var(--gold-dim)', borderRadius: 8, padding: '7px 0',
-                  background: tickets >= 3 ? 'transparent' : 'rgba(201,168,76,0.1)',
-                  color: tickets >= 3 ? 'var(--parchment-dim)' : 'var(--gold-bright)',
-                  fontSize: 13, cursor: tickets >= 3 ? 'not-allowed' : 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5
-                }}
-              >
-                <CoinIcon size={12} /> {tickets >= 3 ? 'MAX' : buying ? '...' : '50'}
-              </button>
-            </motion.div>
           </div>
 
           <div className="ornate-divider" style={{ marginBottom: 14 }}><span>ALL ITEMS</span></div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+
+            {/* Lottery Ticket — moved here */}
+            <motion.div
+              layout
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+              className="gold-border-card"
+              style={{ padding: '14px 16px', cursor: 'pointer' }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <div style={{
+                  width: 38, height: 38, borderRadius: 8, background: 'var(--ink-raised)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                }}>
+                  <TicketIcon />
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 14.5, color: 'var(--parchment)' }}>Lottery Ticket</div>
+                  <div style={{ fontSize: 11.5, color: 'var(--parchment-dim)' }}>{tickets}/3 owned · resets every 5 hours</div>
+                </div>
+                <button
+                  onClick={handleBuyTicket}
+                  disabled={tickets >= 3 || buying}
+                  style={{
+                    border: '1px solid var(--gold-dim)', borderRadius: 8, padding: '7px 12px',
+                    background: tickets >= 3 ? 'transparent' : 'rgba(201,168,76,0.1)',
+                    color: tickets >= 3 ? 'var(--parchment-dim)' : 'var(--gold-bright)',
+                    fontSize: 12.5, flexShrink: 0, cursor: tickets >= 3 ? 'not-allowed' : 'pointer',
+                    display: 'flex', alignItems: 'center', gap: 5
+                  }}
+                >
+                  <CoinIcon size={12} /> {tickets >= 3 ? 'MAX' : buying ? '...' : '50'}
+                </button>
+              </div>
+            </motion.div>
+
             {allItems.map((item, i) => {
               const isOpen = expanded === item.name
               return (
@@ -250,14 +260,6 @@ function SwordIcon({ size = 20 }) {
     </svg>
   )
 }
-function ArmorIcon({ size = 20 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <path d="M12 2l6 2v5c0 6-3 9.5-6 11-3-1.5-6-5-6-11V4l6-2z" stroke="var(--gold)" strokeWidth="1.3" strokeLinejoin="round" />
-      <path d="M9 9l3 2 3-2" stroke="var(--gold-bright)" strokeWidth="1.1" />
-    </svg>
-  )
-}
 function ChestIcon({ size = 20 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
@@ -273,10 +275,79 @@ function DotsIcon({ size = 20 }) {
     </svg>
   )
 }
-function ChevronsIcon({ size = 20 }) {
+
+/* Premium item icons */
+function TicketIcon({ size = 18 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <path d="M7 6l5 6-5 6M13 6l5 6-5 6" stroke="var(--gold)" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M2 9a2 2 0 0 1 0-4h20a2 2 0 0 1 0 4v1a2 2 0 0 1 0 4v1a2 2 0 0 1 0 4H2a2 2 0 0 1 0-4v-1a2 2 0 0 1 0-4V9z" stroke="var(--gold-bright)" strokeWidth="1.3" strokeLinejoin="round"/>
+      <path d="M9 5v14M7 9h2M7 12h2M7 15h2" stroke="var(--gold)" strokeWidth="1.1" strokeLinecap="round"/>
+      <circle cx="16" cy="12" r="2.5" stroke="var(--gold-bright)" strokeWidth="1.1"/>
+      <path d="M16 9.5v1M16 14.5v1M13.5 12h1M18.5 12h-1" stroke="var(--gold-bright)" strokeWidth="1" strokeLinecap="round"/>
+    </svg>
+  )
+}
+function TimerIcon({ size = 18 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="13" r="8" stroke="var(--gold-bright)" strokeWidth="1.3"/>
+      <path d="M12 9v4l3 2" stroke="var(--gold-bright)" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M9 2h6M12 2v3" stroke="var(--gold)" strokeWidth="1.3" strokeLinecap="round"/>
+      <path d="M5 5l1.5 1.5M19 5l-1.5 1.5" stroke="var(--gold)" strokeWidth="1.2" strokeLinecap="round"/>
+    </svg>
+  )
+}
+function FlameIcon({ size = 18 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path d="M12 2c0 4-4 6-4 10a4 4 0 0 0 8 0c0-2-1-3-1-5 0 0-1 2-2 2s-2-2-1-7z" stroke="var(--gold-bright)" strokeWidth="1.3" strokeLinejoin="round"/>
+      <path d="M9 17c0-2 1.5-3 3-3s3 1 3 3" stroke="var(--gold)" strokeWidth="1.1" strokeLinecap="round"/>
+    </svg>
+  )
+}
+function WallIcon({ size = 18 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <rect x="2" y="14" width="20" height="4" rx="1" stroke="var(--gold-bright)" strokeWidth="1.3"/>
+      <rect x="2" y="10" width="20" height="4" rx="1" stroke="var(--gold-bright)" strokeWidth="1.3"/>
+      <path d="M2 14h4M8 14h4M14 14h4M4 10h4M10 10h4M16 10h4" stroke="var(--gold)" strokeWidth="1" strokeLinecap="round"/>
+      <path d="M7 10V7M12 10V7M17 10V7" stroke="var(--gold-bright)" strokeWidth="1.3" strokeLinecap="round"/>
+      <path d="M5 7h4M10 7h4M15 7h4" stroke="var(--gold)" strokeWidth="1" strokeLinecap="round"/>
+    </svg>
+  )
+}
+function TreasureIcon({ size = 18 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path d="M4 8h16v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z" stroke="var(--gold-bright)" strokeWidth="1.3" strokeLinejoin="round"/>
+      <path d="M2 8h20M8 8V5a2 2 0 0 1 4 0v3" stroke="var(--gold-bright)" strokeWidth="1.3" strokeLinecap="round"/>
+      <path d="M9 14l1.5 1.5L15 11" stroke="var(--gold)" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  )
+}
+function BladeIcon({ size = 18 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path d="M5 19L18 4l1 1-5 8 1 1-8 5-1-1 5-4-1-1-5 5-5-4z" stroke="var(--gold-bright)" strokeWidth="1.2" strokeLinejoin="round"/>
+      <path d="M5 19l2-2M14 5l3 3" stroke="var(--gold)" strokeWidth="1.1" strokeLinecap="round"/>
+      <circle cx="6.5" cy="17.5" r="1" fill="var(--gold-bright)"/>
+    </svg>
+  )
+}
+function ArmorPlateIcon({ size = 18 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path d="M12 2l7 2.5v5c0 5.5-3.5 9-7 11-3.5-2-7-5.5-7-11V4.5L12 2z" stroke="var(--gold-bright)" strokeWidth="1.3" strokeLinejoin="round"/>
+      <path d="M12 6v6M9 9h6" stroke="var(--gold)" strokeWidth="1.2" strokeLinecap="round"/>
+      <path d="M8 14c1 1.5 2.5 2.5 4 3 1.5-.5 3-1.5 4-3" stroke="var(--gold)" strokeWidth="1.1" strokeLinecap="round"/>
+    </svg>
+  )
+}
+function GemIcon({ size = 14 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <path d="M6 9l6-6 6 6-6 11-6-11z" stroke="var(--gold-bright)" strokeWidth="1.2" strokeLinejoin="round" />
+      <path d="M6 9h12M9 9l3 11 3-11" stroke="var(--gold-bright)" strokeWidth="1" />
     </svg>
   )
 }
@@ -288,12 +359,4 @@ function CoinIcon({ size = 14 }) {
         stroke="var(--gold-bright)" strokeWidth="1.1" strokeLinecap="round" />
     </svg>
   )
-}
-function GemIcon({ size = 14 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <path d="M6 9l6-6 6 6-6 11-6-11z" stroke="var(--gold-bright)" strokeWidth="1.2" strokeLinejoin="round" />
-      <path d="M6 9h12M9 9l3 11 3-11" stroke="var(--gold-bright)" strokeWidth="1" />
-    </svg>
-  )
-                    }
+         }

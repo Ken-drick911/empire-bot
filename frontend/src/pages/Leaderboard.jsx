@@ -29,11 +29,11 @@ export default function Leaderboard() {
     <PageTransition>
       <div style={{ position: 'relative' }}>
         <div style={{
-          position: 'fixed', inset: 0, zIndex: -1,
+          position: 'fixed', inset: 0, zIndex: 0,
           backgroundImage: 'url(/images/IMG_20260629_135636.webp)',
           backgroundSize: 'cover', backgroundPosition: 'top center', opacity: 0.6
         }} />
-        <div style={{ position: 'fixed', inset: 0, zIndex: -1, background: 'linear-gradient(180deg, rgba(10,9,8,0.35), var(--ink) 65%)' }} />
+        <div style={{ position: 'fixed', inset: 0, zIndex: 0, background: 'linear-gradient(180deg, rgba(10,9,8,0.35), var(--ink) 65%)' }} />
 
         <div style={{ padding: '0 20px 20px', position: 'relative' }}>
           <div style={{ textAlign: 'center', marginBottom: 8 }}>

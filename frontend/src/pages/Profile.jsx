@@ -113,27 +113,31 @@ export default function Profile() {
       <div style={{ position: 'relative', minHeight: '100vh' }}>
 
         {/* Fixed background */}
-        <div style={{ position: 'fixed', inset: 0, zIndex: 0 }}>
-          {user.cover && (
-            <img
-  key={user.cover}
-  src={user.cover}
-  alt=""
-  style={{
-    position: 'absolute', inset: 0, width: '100%', height: '100%',
-    objectFit: 'contain', objectPosition: 'center top',
-    opacity: 0.5
-  }}
-/>
-          )}
-          <div style={{
-            position: 'absolute', inset: 0,
-            background: 'linear-gradient(180deg, rgba(10,9,8,0.2) 0%, rgba(10,9,8,0.5) 60%, var(--ink) 100%)'
-          }} />
-          <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
-            <EmberField count={10} />
-          </div>
-        </div>
+        <div style={{
+  position: 'absolute', top: 0, left: 0, right: 0, height: '100vh',
+  zIndex: 0, overflow: 'hidden'
+}}>
+  {user.cover && (
+    <div
+      key={user.cover}
+      style={{
+        position: 'absolute', inset: 0,
+        backgroundImage: `url(${user.cover})`,
+        backgroundSize: 'contain',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center top',
+        opacity: 0.5
+      }}
+    />
+  )}
+  <div style={{
+    position: 'absolute', inset: 0,
+    background: 'linear-gradient(180deg, rgba(10,9,8,0.1) 0%, rgba(10,9,8,0.4) 50%, var(--ink) 80%, var(--ink) 100%)'
+  }} />
+  <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+    <EmberField count={10} />
+  </div>
+</div>
 
         {/* Content */}
         <div style={{ padding: '0 20px 20px', position: 'relative', zIndex: 1 }}>

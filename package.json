@@ -26,7 +26,7 @@
   "dependencies": {
     "@whiskeysockets/baileys": "^7.0.0-rc13",
     "bcryptjs": "^2.4.3",
-    "canvas": "^2.11.2",
+    "@napi-rs/canvas": "^0.1.53",
     "cloudinary": "^1.41.3",
     "cookie-parser": "^1.4.6",
     "dotenv": "^17.4.2",

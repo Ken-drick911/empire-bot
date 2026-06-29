@@ -12,48 +12,40 @@ router.get('/me', auth, async (req, res) => {
   try {
     const db = getDB()
     const phone = req.user.phone
-    const jid = phone + '@s.whatsapp.net'
 
-    const webUser = await db.collection('users').findOne({ phone })
-    if (!webUser) return res.status(404).json({ error: 'User not found' })
+    // Single user doc — registration merges web + bot data
+    const user = await db.collection('users').findOne({ phone })
+    if (!user) return res.status(404).json({ error: 'User not found' })
 
-    const botUser = await db.collection('users').findOne({
-      $or: [
-        { id: jid },
-        { phone: phone },
-        { id: { $regex: phone } }
-      ]
-    })
+    const level = user.level || 1
+    const xp = user.xp || 0
+    const xpToNext = user.xpToNext || getXPToNextLevel(level)
 
     const now = Date.now()
-    const lastReset = botUser?.ticketResetAt
-      ? new Date(botUser.ticketResetAt).getTime() : 0
+    const lastReset = user.ticketResetAt
+      ? new Date(user.ticketResetAt).getTime() : 0
     const tickets = (now - lastReset) >= 5 * 60 * 60 * 1000
-      ? 0 : (botUser?.lotteryTickets || 0)
-
-    const level = botUser?.level || 1
-    const xp = botUser?.xp || 0
-    const xpToNext = botUser?.xpToNext || getXPToNextLevel(level)
+      ? 0 : (user.lotteryTickets || 0)
 
     res.json({
-      username: webUser.username,
+      username: user.username,
       phone,
-      avatar: webUser.avatar || null,
-      cover: webUser.cover || null,
-      bio: webUser.bio || '',
+      avatar: user.avatar || null,
+      cover: user.cover || null,
+      bio: user.bio || '',
       xp,
       level,
       xpToNext,
-      rank: botUser?.rank || 'Peasant',
-      gold: botUser?.wallet || 0,
-      vaultGold: botUser?.vault || 0,
-      vaultDiamonds: botUser?.diamonds || 0,
-      reputation: botUser?.reputation || null,
-      title: botUser?.title || '',
-      titleDesc: botUser?.titleDesc || 'Begin your rise.',
+      rank: user.rank || 'Peasant',
+      gold: user.wallet || 0,
+      vaultGold: user.vault || 0,
+      vaultDiamonds: user.diamonds || 0,
+      reputation: user.reputation || null,
+      title: user.title || '',
+      titleDesc: user.titleDesc || 'Begin your rise.',
       lotteryTickets: tickets,
-      frame: webUser.frame || 'classic',
-      inventory: webUser.inventory || []
+      frame: user.frame || 'classic',
+      inventory: user.inventory || []
     })
   } catch (err) {
     res.status(500).json({ error: 'Server error' })

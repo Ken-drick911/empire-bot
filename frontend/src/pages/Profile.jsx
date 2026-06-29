@@ -98,7 +98,7 @@ export default function Profile() {
       formData.append('avatar', file)
       const res = await fetch('/api/upload/avatar', { method: 'POST', body: formData, credentials: 'include' })
       const data = await res.json()
-console.log('Cover upload response:', data)
+alert(JSON.stringify(data))
 if (data.url) setUser((u) => ({ ...u, cover: data.url }))
     } catch (err) {
       console.error('Upload error:', err)

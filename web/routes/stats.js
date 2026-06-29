@@ -7,7 +7,7 @@ router.get('/', async (req, res) => {
     const db = getDB()
 
     const citizens = await db.collection('users')
-      .countDocuments({ id: { $regex: '@s.whatsapp.net' } })
+      .countDocuments({ registered: true })
 
     const groups = await db.collection('groups')
       .countDocuments()

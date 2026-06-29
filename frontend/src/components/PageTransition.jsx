@@ -1,9 +1,7 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 
 export function EmberField({ count = 18 }) {
-  const [mounted, setMounted] = React.useState(false)
-  React.useEffect(() => { setMounted(true) }, [])
   const embers = useMemo(() => Array.from({ length: count }, (_, i) => ({
     id: i,
     left: Math.random() * 100,
@@ -17,9 +15,9 @@ export function EmberField({ count = 18 }) {
     <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
       {embers.map((e) => (
         <motion.span
-  key={e.id}
-  initial={{ top: '105%', x: 0, opacity: 0 }}
-  animate={mounted ? { top: '-10%', x: e.drift, opacity: [0, 0.9, 0.9, 0] } : {}}
+          key={e.id}
+          initial={{ top: '105%', x: 0, opacity: 0 }}
+          animate={{ top: '-10%', x: e.drift, opacity: [0, 0.9, 0.9, 0] }}
           transition={{ duration: e.duration, delay: e.delay, repeat: Infinity, ease: 'linear' }}
           style={{
             position: 'absolute', left: `${e.left}%`,
@@ -34,9 +32,9 @@ export function EmberField({ count = 18 }) {
 }
 
 const variants = {
-  initial: { opacity: 0, y: 14, scale: 0.99 },
-  animate: { opacity: 1, y: 0, scale: 1 },
-  exit: { opacity: 0, y: -10, scale: 0.99 }
+  initial: { opacity: 0, y: 10 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -6 }
 }
 
 export default function PageTransition({ children, style }) {
@@ -46,8 +44,8 @@ export default function PageTransition({ children, style }) {
       initial="initial"
       animate="animate"
       exit="exit"
-      transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-      style={{ minHeight: '100%', ...style }}
+      transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+      style={{ ...style }}
     >
       {children}
     </motion.div>

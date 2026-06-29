@@ -37,6 +37,8 @@ export default function NavDrawer({ onClose }) {
         style={{
           position: 'fixed', top: 0, left: 0, bottom: 0, width: 'min(86vw, 360px)',
           background: '#070605', zIndex: 41, overflow: 'hidden',
+          overflowY: 'auto', overflowX: 'hidden',
+  overscrollBehavior: 'contain',
           display: 'flex', flexDirection: 'column', padding: '24px 22px'
         }}
       >

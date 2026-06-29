@@ -30,7 +30,7 @@ export default function Leaderboard() {
       <div style={{ position: 'relative' }}>
         <div style={{
           position: 'fixed', inset: 0, zIndex: -1,
-          backgroundImage: 'url(/images/file_00000000e2e872308675e44394a8496a.webp)',
+          backgroundImage: 'url(/images/IMG_20260629_135636.webp)',
           backgroundSize: 'cover', backgroundPosition: 'top center', opacity: 0.6
         }} />
         <div style={{ position: 'fixed', inset: 0, zIndex: -1, background: 'linear-gradient(180deg, rgba(10,9,8,0.35), var(--ink) 65%)' }} />

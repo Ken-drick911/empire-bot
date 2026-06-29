@@ -116,14 +116,15 @@ export default function Profile() {
         <div style={{ position: 'fixed', inset: 0, zIndex: 0 }}>
           {user.cover && (
             <img
-              key={user.cover}
-              src={user.cover}
-              alt=""
-              style={{
-                position: 'absolute', inset: 0, width: '100%', height: '100%',
-                objectFit: 'cover', objectPosition: 'top center', opacity: 0.55
-              }}
-            />
+  key={user.cover}
+  src={user.cover}
+  alt=""
+  style={{
+    position: 'absolute', inset: 0, width: '100%', height: '100%',
+    objectFit: 'contain', objectPosition: 'center top',
+    opacity: 0.5
+  }}
+/>
           )}
           <div style={{
             position: 'absolute', inset: 0,

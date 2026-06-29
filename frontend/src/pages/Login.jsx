@@ -1,11 +1,20 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import PageTransition from '../components/PageTransition.jsx'
 import { api } from '../api/client.js'
 
+// Generate embers once outside component so they never change
+const EMBERS = Array.from({ length: 20 }, (_, i) => ({
+  id: i,
+  left: (i * 5.1) % 100,
+  delay: (i * 0.37) % 5,
+  duration: 6 + (i * 0.7) % 5,
+  size: 2 + (i * 0.3) % 2.5
+}))
+
 export default function Login() {
-  const [mode, setMode] = useState('login') // 'login' or 'register'
+  const [mode, setMode] = useState('login')
   const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const [username, setUsername] = useState('')
@@ -14,8 +23,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
-  async function handleSubmit(e) {
-    e.preventDefault()
+  async function handleSubmit() {
     setError('')
     setSuccess('')
     setLoading(true)
@@ -40,49 +48,60 @@ export default function Login() {
   const isLogin = mode === 'login'
 
   return (
-    <PageTransition>
+    <div style={{
+      minHeight: '100vh', display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center', padding: '32px 24px',
+      position: 'relative', overflow: 'hidden', background: 'var(--ink)'
+    }}>
+      {/* Background glow — static, always visible */}
       <div style={{
-        minHeight: '100vh', display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center', padding: '32px 24px',
-        position: 'relative', overflow: 'hidden', background: 'var(--ink)'
-      }}>
-        {/* Background glow */}
-        <div style={{
-          position: 'absolute', top: '-10%', left: '50%', transform: 'translateX(-50%)',
-          width: 420, height: 420, borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(201,168,76,0.12), transparent 70%)',
-          pointerEvents: 'none'
-        }} />
+        position: 'absolute', top: '-10%', left: '50%', transform: 'translateX(-50%)',
+        width: 420, height: 420, borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(201,168,76,0.14), transparent 70%)',
+        pointerEvents: 'none', zIndex: 0
+      }} />
+      <div style={{
+        position: 'absolute', bottom: '-5%', left: '50%', transform: 'translateX(-50%)',
+        width: 300, height: 300, borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(201,168,76,0.07), transparent 70%)',
+        pointerEvents: 'none', zIndex: 0
+      }} />
 
-        {/* Ember particles */}
-        {[...Array(20)].map((_, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, top: '100%' }}
-            animate={{ opacity: [0, 1, 1, 0], top: '-5%' }}
-            transition={{
-              duration: 6 + Math.random() * 5,
-              delay: Math.random() * 5,
-              repeat: Infinity,
-              ease: 'linear'
-            }}
-            style={{
-              position: 'absolute',
-              left: `${Math.random() * 100}%`,
-              width: 4, height: 4, borderRadius: '50%',
-              background: 'var(--gold-bright)',
-              boxShadow: '0 0 8px 2px rgba(230,198,104,0.9)',
-              zIndex: 1
-            }}
-          />
-        ))}
+      {/* Ember particles */}
+      {EMBERS.map((e) => (
+        <motion.div
+          key={e.id}
+          initial={{ top: '105%', opacity: 0 }}
+          animate={{ top: '-5%', opacity: [0, 0.9, 0.9, 0] }}
+          transition={{
+            duration: e.duration,
+            delay: e.delay,
+            repeat: Infinity,
+            ease: 'linear'
+          }}
+          style={{
+            position: 'absolute',
+            left: `${e.left}%`,
+            width: e.size,
+            height: e.size,
+            borderRadius: '50%',
+            background: 'var(--gold-bright)',
+            boxShadow: '0 0 8px 2px rgba(230,198,104,0.9)',
+            zIndex: 0,
+            pointerEvents: 'none'
+          }}
+        />
+      ))}
 
-        {/* Crown SVG */}
+      {/* Content */}
+      <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: 340, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+
+        {/* Crown */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          style={{ marginBottom: 10, position: 'relative', zIndex: 2 }}
+          style={{ marginBottom: 10 }}
         >
           <svg width="46" height="46" viewBox="0 0 24 24" fill="none">
             <path d="M3 18l1.5-9L9 13l3-7 3 7 4.5-4L21 18H3z" stroke="var(--gold-bright)" strokeWidth="1.2" strokeLinejoin="round" fill="rgba(201,168,76,0.08)" />
@@ -94,39 +113,32 @@ export default function Login() {
         <motion.h1
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.6, delay: 0.1 }}
           style={{
             fontFamily: 'var(--font-display)', color: 'var(--gold-bright)',
             fontSize: 'clamp(34px, 9vw, 46px)', letterSpacing: '0.06em',
-            margin: '4px 0 6px', textAlign: 'center', position: 'relative', zIndex: 2
+            margin: '4px 0 6px', textAlign: 'center'
           }}
-        >
-          THE EMPIRE
-        </motion.h1>
+        >THE EMPIRE</motion.h1>
 
-        {/* Subtitle */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.2 }}
           style={{
             fontFamily: 'var(--font-body)', color: 'var(--parchment-dim)',
-            fontSize: 16, letterSpacing: '0.08em', margin: '0 0 28px',
-            textAlign: 'center', position: 'relative', zIndex: 2
+            fontSize: 14, letterSpacing: '0.1em', margin: '0 0 28px', textAlign: 'center'
           }}
-        >
-          LOYALTY. HONOR. POWER.
-        </motion.p>
+        >LOYALTY. HONOR. POWER.</motion.p>
 
-        {/* Mode Toggle */}
+        {/* Mode toggle */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.25 }}
           style={{
-            display: 'flex', gap: 0, marginBottom: 28,
-            border: '1px solid var(--gold-dim)', borderRadius: 10,
-            overflow: 'hidden', position: 'relative', zIndex: 2
+            display: 'flex', marginBottom: 28, width: '100%',
+            border: '1px solid var(--gold-dim)', borderRadius: 10, overflow: 'hidden'
           }}
         >
           {['login', 'register'].map((m) => (
@@ -134,7 +146,7 @@ export default function Login() {
               key={m}
               onClick={() => { setMode(m); setError(''); setSuccess('') }}
               style={{
-                padding: '10px 28px', border: 'none', cursor: 'pointer',
+                flex: 1, padding: '11px 0', border: 'none', cursor: 'pointer',
                 background: mode === m ? 'rgba(201,168,76,0.15)' : 'transparent',
                 color: mode === m ? 'var(--gold-bright)' : 'var(--parchment-dim)',
                 fontFamily: 'var(--font-display)', fontSize: 12,
@@ -146,118 +158,94 @@ export default function Login() {
           ))}
         </motion.div>
 
-        {/* Form */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-          style={{ width: '100%', maxWidth: 340, position: 'relative', zIndex: 2 }}
-        >
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={mode}
-              initial={{ opacity: 0, x: mode === 'register' ? 20 : -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: mode === 'register' ? -20 : 20 }}
-              transition={{ duration: 0.25 }}
+        {/* Form fields */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={mode}
+            initial={{ opacity: 0, x: mode === 'register' ? 16 : -16 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 14 }}
+          >
+            {!isLogin && (
+              <Field label="Username">
+                <input
+                  type="text" required value={username}
+                  placeholder="Your empire name"
+                  onChange={(e) => setUsername(e.target.value)}
+                  style={inputStyle}
+                />
+              </Field>
+            )}
+
+            <Field label="Phone Number">
+              <input
+                type="tel" required value={phone}
+                placeholder="2348012345678"
+                onChange={(e) => setPhone(e.target.value)}
+                style={inputStyle}
+              />
+            </Field>
+
+            <Field label="Password">
+              <input
+                type="password" required value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                style={inputStyle}
+              />
+            </Field>
+
+            {!isLogin && (
+              <p style={{ fontSize: 12, color: 'var(--parchment-dim)', textAlign: 'center', margin: 0, lineHeight: 1.5 }}>
+                Already playing the bot? Register with your WhatsApp number to link your progress.
+              </p>
+            )}
+
+            {error && (
+              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                style={{ color: '#e07a6b', fontSize: 13, textAlign: 'center', margin: 0 }}>
+                {error}
+              </motion.p>
+            )}
+
+            {success && (
+              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                style={{ color: '#6be07a', fontSize: 13, textAlign: 'center', margin: 0 }}>
+                {success}
+              </motion.p>
+            )}
+
+            <motion.button
+              onClick={handleSubmit}
+              whileTap={{ scale: 0.97 }}
+              disabled={loading}
+              style={{
+                marginTop: 8, padding: '15px', borderRadius: 10,
+                border: '1px solid var(--gold)',
+                background: 'linear-gradient(180deg, rgba(201,168,76,0.18), rgba(201,168,76,0.04))',
+                color: 'var(--gold-bright)', fontFamily: 'var(--font-display)',
+                fontSize: 14, letterSpacing: '0.1em', cursor: 'pointer',
+                opacity: loading ? 0.6 : 1, width: '100%'
+              }}
             >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-
-                {!isLogin && (
-                  <Field label="Username">
-                    <input
-                      type="text"
-                      required
-                      value={username}
-                      placeholder="Your empire name"
-                      onChange={(e) => setUsername(e.target.value)}
-                      style={inputStyle}
-                    />
-                  </Field>
-                )}
-
-                <Field label="Phone Number">
-                  <input
-                    type="tel"
-                    required
-                    value={phone}
-                    placeholder="2348012345678"
-                    onChange={(e) => setPhone(e.target.value)}
-                    style={inputStyle}
-                  />
-                </Field>
-
-                <Field label="Password">
-                  <input
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    style={inputStyle}
-                  />
-                </Field>
-
-                {!isLogin && (
-                  <p style={{
-                    fontSize: 12, color: 'var(--parchment-dim)',
-                    textAlign: 'center', margin: '0', lineHeight: 1.5
-                  }}>
-                    Already playing the bot? Register with your WhatsApp number to link your progress.
-                  </p>
-                )}
-
-                {error && (
-                  <motion.p
-                    initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                    style={{ color: '#e07a6b', fontSize: 13, textAlign: 'center', margin: 0 }}
-                  >
-                    {error}
-                  </motion.p>
-                )}
-
-                {success && (
-                  <motion.p
-                    initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                    style={{ color: '#6be07a', fontSize: 13, textAlign: 'center', margin: 0 }}
-                  >
-                    {success}
-                  </motion.p>
-                )}
-
-                <motion.button
-                  onClick={handleSubmit}
-                  whileTap={{ scale: 0.97 }}
-                  whileHover={{ scale: 1.02, boxShadow: '0 0 20px var(--gold)' }}
-                  disabled={loading}
-                  style={{
-                    marginTop: 8, padding: '15px', borderRadius: 10,
-                    border: '1px solid var(--gold)',
-                    background: 'linear-gradient(180deg, rgba(201,168,76,0.18), rgba(201,168,76,0.04))',
-                    color: 'var(--gold-bright)', fontFamily: 'var(--font-display)',
-                    fontSize: 14, letterSpacing: '0.1em', cursor: 'pointer',
-                    opacity: loading ? 0.6 : 1, width: '100%'
-                  }}
-                >
-                  {loading
-                    ? (isLogin ? 'ENTERING...' : 'REGISTERING...')
-                    : (isLogin ? 'ENTER THE EMPIRE' : 'JOIN THE EMPIRE')}
-                </motion.button>
-              </div>
-            </motion.div>
-          </AnimatePresence>
-        </motion.div>
+              {loading
+                ? (isLogin ? 'ENTERING...' : 'REGISTERING...')
+                : (isLogin ? 'ENTER THE EMPIRE' : 'JOIN THE EMPIRE')}
+            </motion.button>
+          </motion.div>
+        </AnimatePresence>
       </div>
-    </PageTransition>
+    </div>
   )
 }
 
 function Field({ label, children }) {
   return (
     <label style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <span style={{
-        fontSize: 11, letterSpacing: '0.1em', color: 'var(--gold-dim)',
-        textTransform: 'uppercase'
-      }}>{label}</span>
+      <span style={{ fontSize: 11, letterSpacing: '0.1em', color: 'var(--gold-dim)', textTransform: 'uppercase' }}>
+        {label}
+      </span>
       {children}
     </label>
   )
@@ -272,5 +260,6 @@ const inputStyle = {
   fontSize: 15,
   fontFamily: 'var(--font-ui)',
   outline: 'none',
-  transition: 'box-shadow 0.3s ease'
-              }
+  width: '100%',
+  boxSizing: 'border-box'
+            }

@@ -98,7 +98,8 @@ export default function Profile() {
       formData.append('avatar', file)
       const res = await fetch('/api/upload/avatar', { method: 'POST', body: formData, credentials: 'include' })
       const data = await res.json()
-      if (data.url) setUser((u) => ({ ...u, avatar: data.url }))
+console.log('Cover upload response:', data)
+if (data.url) setUser((u) => ({ ...u, cover: data.url }))
     } catch (err) {
       console.error('Upload error:', err)
     } finally {
@@ -113,9 +114,10 @@ export default function Profile() {
   return (
     <>
       <div style={{ position: 'fixed', inset: 0, zIndex: -1 }}>
-        {user.cover ? (
-          <img
-            src={user.cover}
+  {user.cover ? (
+    <img
+      key={user.cover}
+      src={user.cover}
             alt=""
             style={{
               position: 'absolute', inset: 0, width: '100%', height: '100%',

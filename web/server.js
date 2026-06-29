@@ -11,15 +11,7 @@ const shopRoutes = require('./routes/shop')
 const app = express()
 const PORT = process.env.PORT || process.env.WEB_PORT || 3000
 
-app.use(express.static(path.join(__dirname, '../frontend/dist'), {
-  setHeaders: (res, filePath) => {
-    if (filePath.endsWith('index.html')) {
-      res.setHeader('Cache-Control', 'no-cache')
-    } else if (filePath.match(/\.(jpg|jpeg|png|webp|js|css)$/)) {
-      res.setHeader('Cache-Control', 'public, max-age=604800, immutable')
-    }
-  }
-}))
+app.use(express.static(path.join(__dirname, '../frontend/dist')))
 
 app.use('/api/auth', authRoutes)
 app.use('/api/profile', profileRoutes)

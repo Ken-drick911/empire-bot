@@ -96,3 +96,7 @@ button { font-family: inherit; }
   outline: 2px solid var(--gold-bright);
   outline-offset: 2px;
 }
+
+main::-webkit-scrollbar {
+  display: none;
+}

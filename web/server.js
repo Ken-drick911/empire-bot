@@ -11,8 +11,10 @@ const shopRoutes = require('./routes/shop')
 const app = express()
 const PORT = process.env.PORT || process.env.WEB_PORT || 3000
 
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+app.use(cookieParser())
 app.use(express.static(path.join(__dirname, '../frontend/dist')))
-
 app.use('/api/auth', authRoutes)
 app.use('/api/profile', profileRoutes)
 app.use('/api/shop', shopRoutes)

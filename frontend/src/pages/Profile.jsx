@@ -96,24 +96,26 @@ export default function Profile() {
   }
   }
 
-  async function handleAvatarUpload(e) {
-    const file = e.target.files[0]
-    if (!file) return
-    setUploadingAvatar(true)
-    try {
-      const formData = new FormData()
-      formData.append('avatar', file)
-      const res = await fetch('/api/upload/avatar', { method: 'POST', body: formData, credentials: 'include' })
-      const data = await res.json()
-alert(JSON.stringify(data))
-if (data.url) setUser((u) => ({ ...u, cover: data.url }))
-    } catch (err) {
-      console.error('Upload error:', err)
-    } finally {
-      setUploadingAvatar(false)
-    }
+  async function handleCoverUpload(e) {
+  const file = e.target.files[0]
+  if (!file) return
+  setUploadingCover(true)
+  try {
+    const formData = new FormData()
+    formData.append('cover', file)
+    const res = await fetch('/api/upload/cover', { 
+      method: 'POST', 
+      body: formData, 
+      credentials: 'include' 
+    })
+    const data = await res.json()
+    if (data.url) setUser((u) => ({ ...u, cover: data.url }))
+  } catch (err) {
+    console.error('Upload error:', err)
+  } finally {
+    setUploadingCover(false)
   }
-
+  }
   const activeFrame = frames.find((f) => f.id === user.frame) || frames[0]
   const xpPercent = Math.min((user.xp || 0) / (user.xpToNext || 1), 1)
   const inventory = user.inventory || []
@@ -125,16 +127,21 @@ if (data.url) setUser((u) => ({ ...u, cover: data.url }))
     <img
       key={user.cover}
       src={user.cover}
-            alt=""
-            style={{
-              position: 'absolute', inset: 0, width: '100%', height: '100%',
-              objectFit: 'cover', objectPosition: 'top center', opacity: 0.35
-            }}
-          />
-        ) : null}
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(10,9,8,0.4), var(--ink) 70%)' }} />
-        <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}><EmberField count={10} /></div>
-      </div>
+      alt=""
+      style={{
+        position: 'absolute', inset: 0, width: '100%', height: '100%',
+        objectFit: 'cover', objectPosition: 'top center', opacity: 0.55
+      }}
+    />
+  ) : null}
+  <div style={{ 
+    position: 'absolute', inset: 0, 
+    background: 'linear-gradient(180deg, rgba(10,9,8,0.2) 0%, rgba(10,9,8,0.5) 60%, var(--ink) 100%)' 
+  }} />
+  <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+    <EmberField count={10} />
+  </div>
+</div>
 
       <PageTransition>
         <div style={{ padding: '0 20px 20px', position: 'relative' }}>

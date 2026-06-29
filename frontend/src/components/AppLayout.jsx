@@ -28,7 +28,6 @@ export default function AppLayout() {
         <button
           onClick={() => setDrawerOpen(true)}
           aria-label="Open menu"
-          pointerEvents="all"
           style={{
             pointerEvents: 'all',
             background: 'rgba(10,9,8,0.6)', backdropFilter: 'blur(8px)',
@@ -43,11 +42,13 @@ export default function AppLayout() {
         </button>
       </header>
 
-      {/* Scrollable main content */}
+      {/* Scrollable main — scrollbar hidden */}
       <main style={{
         flex: 1, overflowY: 'auto', overflowX: 'hidden',
         paddingTop: 0, paddingBottom: 96,
-        WebkitOverflowScrolling: 'touch'
+        WebkitOverflowScrolling: 'touch',
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none'
       }}>
         <Outlet />
       </main>
@@ -144,4 +145,4 @@ function ShieldIcon({ active, size }) {
       <path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5l8-3z" stroke={iconColor(active)} strokeWidth="1.4" strokeLinejoin="round" />
     </svg>
   )
-      }
+                                       }

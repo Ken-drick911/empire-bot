@@ -16,16 +16,23 @@ export default function AppLayout() {
   const location = useLocation()
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+
+      {/* Fixed header */}
       <header style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 30,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '18px 20px 10px'
+        padding: '18px 20px 10px',
+        pointerEvents: 'none'
       }}>
         <button
           onClick={() => setDrawerOpen(true)}
           aria-label="Open menu"
+          pointerEvents="all"
           style={{
-            background: 'transparent', border: '1px solid var(--ink-border)',
+            pointerEvents: 'all',
+            background: 'rgba(10,9,8,0.6)', backdropFilter: 'blur(8px)',
+            border: '1px solid var(--ink-border)',
             borderRadius: '50%', width: 40, height: 40, color: 'var(--gold)',
             cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
           }}
@@ -36,10 +43,16 @@ export default function AppLayout() {
         </button>
       </header>
 
-      <main style={{ flex: 1, padding: '0 0 96px' }}>
+      {/* Scrollable main content */}
+      <main style={{
+        flex: 1, overflowY: 'auto', overflowX: 'hidden',
+        paddingTop: 0, paddingBottom: 96,
+        WebkitOverflowScrolling: 'touch'
+      }}>
         <Outlet />
       </main>
 
+      {/* Fixed bottom nav */}
       <nav style={{
         position: 'fixed', bottom: 0, left: 0, right: 0,
         display: 'flex', justifyContent: 'space-around', alignItems: 'center',
@@ -62,21 +75,38 @@ export default function AppLayout() {
               }}
             >
               {active && (
-  <motion.div
-    layoutId="navActiveRing"
-    transition={{ type: 'spring', stiffness: 500, damping: 32 }}
-    style={{
-      position: 'absolute', inset: center ? 0 : -6, borderRadius: '50%',
-      border: '1px solid var(--gold)',
-      background: 'radial-gradient(circle, rgba(201,168,76,0.18), transparent 70%)'
-    }}
-  />
-)}
-<Icon active={active} size={center ? 24 : 20} />
+                <motion.div
+                  layoutId="navActiveRing"
+                  transition={{ type: 'spring', stiffness: 500, damping: 32 }}
+                  style={{
+                    position: 'absolute', inset: center ? 0 : -6, borderRadius: '50%',
+                    border: '1px solid var(--gold)',
+                    background: 'radial-gradient(circle, rgba(201,168,76,0.18), transparent 70%)'
+                  }}
+                />
+              )}
+              <Icon active={active} size={center ? 24 : 20} />
             </button>
           )
         })}
       </nav>
+
+      {/* Blur backdrop when drawer open */}
+      <AnimatePresence>
+        {drawerOpen && (
+          <motion.div
+            initial={{ backdropFilter: 'blur(0px)', opacity: 0 }}
+            animate={{ backdropFilter: 'blur(6px)', opacity: 1 }}
+            exit={{ backdropFilter: 'blur(0px)', opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            style={{
+              position: 'fixed', inset: 0, zIndex: 39,
+              background: 'rgba(0,0,0,0.3)',
+              pointerEvents: 'none'
+            }}
+          />
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {drawerOpen && <NavDrawer onClose={() => setDrawerOpen(false)} />}
@@ -114,4 +144,4 @@ function ShieldIcon({ active, size }) {
       <path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5l8-3z" stroke={iconColor(active)} strokeWidth="1.4" strokeLinejoin="round" />
     </svg>
   )
-}
+      }

@@ -45,106 +45,97 @@ export default function Profile() {
 
   async function saveName() {
     try {
-      const updated = await api.updateProfile({ username: nameInput })
-      setUser(updated)
-    } catch {
+      await api.updateProfile({ username: nameInput })
       setUser((u) => ({ ...u, username: nameInput }))
-    }
+    } catch {}
     setEditingName(false)
   }
 
   async function saveBio() {
     try {
-      const updated = await api.updateProfile({ bio: bioInput })
-      setUser(updated)
-    } catch {
+      await api.updateProfile({ bio: bioInput })
       setUser((u) => ({ ...u, bio: bioInput }))
-    }
+    } catch {}
     setEditingBio(false)
   }
 
   async function selectFrame(frameId) {
     try {
-      const updated = await api.updateProfile({ frame: frameId })
-      setUser(updated)
-    } catch {
+      await api.updateProfile({ frame: frameId })
       setUser((u) => ({ ...u, frame: frameId }))
+    } catch {}
+  }
+
+  async function handleAvatarUpload(e) {
+    const file = e.target.files[0]
+    if (!file) return
+    setUploadingAvatar(true)
+    try {
+      const formData = new FormData()
+      formData.append('avatar', file)
+      const res = await fetch('/api/upload/avatar', {
+        method: 'POST', body: formData, credentials: 'include'
+      })
+      const data = await res.json()
+      if (data.url) setUser((u) => ({ ...u, avatar: data.url }))
+    } catch (err) {
+      console.error('Avatar upload error:', err)
+    } finally {
+      setUploadingAvatar(false)
     }
   }
 
   async function handleCoverUpload(e) {
-  const file = e.target.files[0]
-  if (!file) return
-  setUploadingCover(true)
-  try {
-    const formData = new FormData()
-    formData.append('cover', file)
-    const res = await fetch('/api/upload/cover', { 
-      method: 'POST', 
-      body: formData, 
-      credentials: 'include' 
-    })
-    alert('Status: ' + res.status)
-    const text = await res.text()
-    alert('Response: ' + text)
-    const data = JSON.parse(text)
-    if (data.url) setUser((u) => ({ ...u, cover: data.url }))
-  } catch (err) {
-    alert('Error: ' + err.message)
-  } finally {
-    setUploadingCover(false)
-  }
+    const file = e.target.files[0]
+    if (!file) return
+    setUploadingCover(true)
+    try {
+      const formData = new FormData()
+      formData.append('cover', file)
+      const res = await fetch('/api/upload/cover', {
+        method: 'POST', body: formData, credentials: 'include'
+      })
+      const data = await res.json()
+      if (data.url) setUser((u) => ({ ...u, cover: data.url }))
+    } catch (err) {
+      console.error('Cover upload error:', err)
+    } finally {
+      setUploadingCover(false)
+    }
   }
 
-  async function handleCoverUpload(e) {
-  const file = e.target.files[0]
-  if (!file) return
-  setUploadingCover(true)
-  try {
-    const formData = new FormData()
-    formData.append('cover', file)
-    const res = await fetch('/api/upload/cover', { 
-      method: 'POST', 
-      body: formData, 
-      credentials: 'include' 
-    })
-    const data = await res.json()
-    if (data.url) setUser((u) => ({ ...u, cover: data.url }))
-  } catch (err) {
-    console.error('Upload error:', err)
-  } finally {
-    setUploadingCover(false)
-  }
-  }
   const activeFrame = frames.find((f) => f.id === user.frame) || frames[0]
   const xpPercent = Math.min((user.xp || 0) / (user.xpToNext || 1), 1)
   const inventory = user.inventory || []
 
   return (
-    <>
-      <div style={{ position: 'fixed', inset: 0, zIndex: -1 }}>
-  {user.cover ? (
-    <img
-      key={user.cover}
-      src={user.cover}
-      alt=""
-      style={{
-        position: 'absolute', inset: 0, width: '100%', height: '100%',
-        objectFit: 'cover', objectPosition: 'top center', opacity: 0.55
-      }}
-    />
-  ) : null}
-  <div style={{ 
-    position: 'absolute', inset: 0, 
-    background: 'linear-gradient(180deg, rgba(10,9,8,0.2) 0%, rgba(10,9,8,0.5) 60%, var(--ink) 100%)' 
-  }} />
-  <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
-    <EmberField count={10} />
-  </div>
-</div>
+    <PageTransition>
+      <div style={{ position: 'relative', minHeight: '100vh' }}>
 
-      <PageTransition>
-        <div style={{ padding: '0 20px 20px', position: 'relative' }}>
+        {/* Fixed background */}
+        <div style={{ position: 'fixed', inset: 0, zIndex: 0 }}>
+          {user.cover && (
+            <img
+              key={user.cover}
+              src={user.cover}
+              alt=""
+              style={{
+                position: 'absolute', inset: 0, width: '100%', height: '100%',
+                objectFit: 'cover', objectPosition: 'top center', opacity: 0.55
+              }}
+            />
+          )}
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: 'linear-gradient(180deg, rgba(10,9,8,0.2) 0%, rgba(10,9,8,0.5) 60%, var(--ink) 100%)'
+          }} />
+          <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+            <EmberField count={10} />
+          </div>
+        </div>
+
+        {/* Content */}
+        <div style={{ padding: '0 20px 20px', position: 'relative', zIndex: 1 }}>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 14, marginBottom: 24, flexWrap: 'wrap' }}>
             <ActionButton icon={<PencilIcon />} label="Edit name" onClick={() => setEditingName(true)} />
             <input type="file" accept="image/*" id="avatarInput" style={{ display: 'none' }} onChange={handleAvatarUpload} />
@@ -340,8 +331,8 @@ export default function Profile() {
             </motion.div>
           </AnimatePresence>
         </div>
-      </PageTransition>
-    </>
+      </div>
+    </PageTransition>
   )
 }
 

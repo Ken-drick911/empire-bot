@@ -81,10 +81,9 @@ export default function Profile() {
       formData.append('cover', file)
       const res = await fetch('/api/upload/cover', { method: 'POST', body: formData, credentials: 'include' })
       const data = await res.json()
-      alert(JSON.stringify(data))
       if (data.url) setUser((u) => ({ ...u, cover: data.url }))
     } catch (err) {
-      alert('Upload error: ' + err.message)
+      console.error('Upload error:', err)
     } finally {
       setUploadingCover(false)
     }
@@ -99,10 +98,9 @@ export default function Profile() {
       formData.append('avatar', file)
       const res = await fetch('/api/upload/avatar', { method: 'POST', body: formData, credentials: 'include' })
       const data = await res.json()
-      alert(JSON.stringify(data))
       if (data.url) setUser((u) => ({ ...u, avatar: data.url }))
     } catch (err) {
-      alert('Upload error: ' + err.message)
+      console.error('Upload error:', err)
     } finally {
       setUploadingAvatar(false)
     }
@@ -113,23 +111,21 @@ export default function Profile() {
   const inventory = user.inventory || []
 
   return (
-    <PageTransition>
-      <div style={{ position: 'relative' }}>
-        {user.cover && (
-  <img
-    src={user.cover}
-    alt=""
-    onError={() => console.log('Cover failed to load:', user.cover)}
-    onLoad={() => console.log('Cover loaded successfully')}
-    style={{
-      position: 'fixed', inset: 0, zIndex: -1, width: '100%', height: '100%',
-      objectFit: 'cover', objectPosition: 'top center', opacity: 0.35
-    }}
-  />
-)}
-        <div style={{ position: 'fixed', inset: 0, zIndex: -1, background: 'linear-gradient(180deg, rgba(10,9,8,0.4), var(--ink) 70%)' }} />
-        <div style={{ position: 'fixed', inset: 0, zIndex: -1, overflow: 'hidden' }}><EmberField count={10} /></div>
+    <>
+      {user.cover && (
+        <img
+          src={user.cover}
+          alt=""
+          style={{
+            position: 'fixed', inset: 0, zIndex: -2, width: '100%', height: '100%',
+            objectFit: 'cover', objectPosition: 'top center', opacity: 0.35
+          }}
+        />
+      )}
+      <div style={{ position: 'fixed', inset: 0, zIndex: -2, background: 'linear-gradient(180deg, rgba(10,9,8,0.4), var(--ink) 70%)' }} />
+      <div style={{ position: 'fixed', inset: 0, zIndex: -1, overflow: 'hidden', pointerEvents: 'none' }}><EmberField count={10} /></div>
 
+      <PageTransition>
         <div style={{ padding: '0 20px 20px', position: 'relative' }}>
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 14, marginBottom: 24, flexWrap: 'wrap' }}>
             <ActionButton icon={<PencilIcon />} label="Edit name" onClick={() => setEditingName(true)} />
@@ -262,37 +258,37 @@ export default function Profile() {
               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
             >
               {tab === 'Overview' && (
-  <>
-    <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
-      <StatCard icon={<CoinIcon />} value={user.gold ?? 0} label="GOLD" sub="Available Funds" />
-      <VaultCard gold={user.vaultGold ?? 0} diamonds={user.vaultDiamonds ?? 0} />
-    </div>
+                <>
+                  <div style={{ display: 'flex', gap: 10, marginBottom: 10 }}>
+                    <StatCard icon={<CoinIcon />} value={user.gold ?? 0} label="GOLD" sub="Available Funds" />
+                    <VaultCard gold={user.vaultGold ?? 0} diamonds={user.vaultDiamonds ?? 0} />
+                  </div>
 
-    <BannerRow title="TITLE" value={user.title || '—'} sub={user.titleDesc || 'Begin your rise.'} />
+                  <BannerRow title="TITLE" value={user.title || '—'} sub={user.titleDesc || 'Begin your rise.'} />
 
-    <div style={{ display: 'flex', gap: 10, marginTop: 10, marginBottom: 10 }}>
-      <StatCard icon={<SwordIcon />} value={user.xp?.toLocaleString() ?? 0} label="XP" sub="Glory Earned" />
-      <RankLevelCard rank={user.rank || '—'} level={user.level ?? 1} progress={xpPercent} />
-    </div>
+                  <div style={{ display: 'flex', gap: 10, marginTop: 10, marginBottom: 10 }}>
+                    <StatCard icon={<SwordIcon />} value={user.xp?.toLocaleString() ?? 0} label="XP" sub="Glory Earned" />
+                    <RankLevelCard rank={user.rank || '—'} level={user.level ?? 1} progress={xpPercent} />
+                  </div>
 
-    {(user.lotteryTickets > 0) && (
-      <div style={{
-        padding: '14px 18px', borderRadius: 12,
-        border: '1px solid var(--gold-dim)', background: 'var(--ink-card)',
-        display: 'flex', alignItems: 'center', gap: 12
-      }}>
-        <span style={{ fontSize: 26 }}>🎟️</span>
-        <div>
-          <div style={{ fontSize: 11, color: 'var(--gold)', letterSpacing: '0.06em' }}>LOTTERY TICKETS</div>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: 'var(--parchment)' }}>
-            {user.lotteryTickets} / 3
-          </div>
-          <div style={{ fontSize: 11, color: 'var(--parchment-dim)' }}>Resets every 5 hours</div>
-        </div>
-      </div>
-    )}
-  </>
-)}
+                  {(user.lotteryTickets > 0) && (
+                    <div style={{
+                      padding: '14px 18px', borderRadius: 12,
+                      border: '1px solid var(--gold-dim)', background: 'var(--ink-card)',
+                      display: 'flex', alignItems: 'center', gap: 12
+                    }}>
+                      <ChestIcon size={26} />
+                      <div>
+                        <div style={{ fontSize: 11, color: 'var(--gold)', letterSpacing: '0.06em' }}>LOTTERY TICKETS</div>
+                        <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: 'var(--parchment)' }}>
+                          {user.lotteryTickets} / 3
+                        </div>
+                        <div style={{ fontSize: 11, color: 'var(--parchment-dim)' }}>Resets every 5 hours</div>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
 
               {tab === 'Treasures' && (
                 <div>
@@ -326,8 +322,8 @@ export default function Profile() {
             </motion.div>
           </AnimatePresence>
         </div>
-      </div>
-    </PageTransition>
+      </PageTransition>
+    </>
   )
 }
 

@@ -49,7 +49,7 @@ app.post('/pair', express.urlencoded({ extended: true }), async (req, res) => {
         const phone = req.body.phone?.replace(/\D/g, '')
         if (!phone) return res.send('❌ No phone number')
 
-        const { default: makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys')
+        const { default: makeWASocket, useMultiFileAuthState } = await import('@whiskeysockets/baileys')
         const pino = require('pino')
 
         if (pairingSock) {

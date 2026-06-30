@@ -85,4 +85,20 @@ router.get('/check-user', async (req, res) => {
   }
 })
 
+router.get('/find-by-username', async (req, res) => {
+  try {
+    if (req.query.key !== ADMIN_KEY) {
+      return res.status(403).json({ error: 'Unauthorized' })
+    }
+    const db = getDB()
+    const username = req.query.username
+    const matches = await db.collection('users').find({
+      username: { $regex: username, $options: 'i' }
+    }).toArray()
+    res.json(matches)
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
 module.exports = router

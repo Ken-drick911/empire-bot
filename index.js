@@ -1,4 +1,3 @@
-const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require('@whiskeysockets/baileys');
 const { useMongoAuthState } = require('./src/engine/mongoAuth')
 const pino = require('pino')
 const { saveSession, loadSession, getAllGroupSettings } = require('./src/data/db')
@@ -65,7 +64,17 @@ const GAME_COMMANDS = [
     'myreputation', 'mr', 'decree', 'afk'
 ]
 
+let makeWASocket, DisconnectReason
+
+async function loadBaileys() {
+    const baileys = await import('@whiskeysockets/baileys')
+    makeWASocket = baileys.default
+    DisconnectReason = baileys.DisconnectReason
+}
+
 async function startBot() {
+    if (!makeWASocket) await loadBaileys()
+
     const { state, saveCreds } = await useMongoAuthState(process.env.MONGO_URI)
 
     const sock = makeWASocket({

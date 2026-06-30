@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import PageTransition from '../components/PageTransition.jsx'
+import PageTransition, { EmberField } from '../components/PageTransition.jsx'
 import { api } from '../api/client.js'
 
 export default function Home() {
@@ -35,6 +35,7 @@ export default function Home() {
             <div className="empire-light-left" />
             <div className="empire-light-right" />
           </div>
+          <EmberField count={14} />
           <div style={{
             position: 'absolute', inset: 0,
             background: 'linear-gradient(180deg, var(--ink) 0%, rgba(10,9,8,0) 18%, rgba(10,9,8,0) 55%, var(--ink) 92%)'
@@ -91,15 +92,22 @@ export default function Home() {
             boxShadow: { delay: 1.2, duration: 6, repeat: Infinity, ease: 'easeInOut' }
           }}
           style={{
+            position: 'relative', overflow: 'hidden',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             width: '100%', padding: '16px 22px', borderRadius: 12,
-            border: '1px solid var(--gold)', background: 'linear-gradient(180deg, rgba(201,168,76,0.14), transparent)',
+            border: '1px solid var(--gold)',
+            background: 'linear-gradient(180deg, rgba(230,198,104,0.18), rgba(201,168,76,0.06) 40%, transparent)',
             color: 'var(--gold-bright)', fontFamily: 'var(--font-display)',
             fontSize: 14, letterSpacing: '0.1em', cursor: 'pointer', marginBottom: 28
           }}
         >
-          <span style={{ margin: '0 auto' }}>ENTER THE EMPIRE</span>
-          <span>›</span>
+          <span style={{
+            position: 'absolute', top: 0, left: 0, right: 0, height: '50%',
+            background: 'linear-gradient(180deg, rgba(255,255,255,0.06), transparent)',
+            pointerEvents: 'none'
+          }} />
+          <span style={{ margin: '0 auto', position: 'relative' }}>ENTER THE EMPIRE</span>
+          <span style={{ position: 'relative' }}>›</span>
         </motion.button>
 
         <div style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
@@ -121,9 +129,14 @@ export default function Home() {
               <span className="plaque-corner plaque-corner-tr" />
               <span className="plaque-corner plaque-corner-bl" />
               <span className="plaque-corner plaque-corner-br" />
-              <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'center' }}><s.icon /></div>
-              <div style={{ fontFamily: 'var(--font-display)', color: 'var(--parchment)', fontSize: 18 }}>{s.value}</div>
-              <div style={{ fontSize: 10, color: 'var(--gold-dim)', letterSpacing: '0.08em', marginTop: 2 }}>{s.label}</div>
+              <div style={{
+                width: 38, height: 38, borderRadius: '50%', margin: '0 auto 10px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                border: '1px solid var(--gold-dim)',
+                background: 'radial-gradient(circle, rgba(201,168,76,0.16), transparent 75%)'
+              }}><s.icon /></div>
+              <div style={{ fontFamily: 'var(--font-display)', color: 'var(--parchment)', fontSize: 19 }}>{s.value}</div>
+              <div style={{ fontSize: 9.5, color: 'var(--gold-dim)', letterSpacing: '0.1em', marginTop: 3 }}>{s.label}</div>
             </motion.div>
           ))}
         </div>
@@ -147,11 +160,17 @@ export default function Home() {
             position: 'absolute', inset: 0,
             backgroundImage: 'url(/images/IMG_20260627_122607.jpg)',
             backgroundSize: 'cover', backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'right center'
+            backgroundPosition: 'right center',
+            opacity: 0.85
           }} />
           <div style={{
             position: 'absolute', inset: 0,
-            background: 'linear-gradient(90deg, var(--ink-card) 38%, rgba(22,19,15,0.55) 65%, transparent 100%)'
+            background: 'linear-gradient(90deg, var(--ink-card) 30%, rgba(22,19,15,0.7) 55%, rgba(22,19,15,0.15) 80%, transparent 100%)'
+          }} />
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: 'radial-gradient(ellipse 70% 60% at 75% 50%, rgba(216,177,90,0.1), transparent 70%)',
+            mixBlendMode: 'screen'
           }} />
           <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: 12, width: '100%' }}>
             <CrownMedallion />
@@ -173,7 +192,7 @@ export default function Home() {
 
 function CitizensIcon() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
       <circle cx="9" cy="8" r="3" stroke="var(--gold)" strokeWidth="1.3" />
       <circle cx="16" cy="9" r="2.4" stroke="var(--gold)" strokeWidth="1.3" />
       <path d="M3 19c0-3 2.5-5 6-5s6 2 6 5M14 19c0-2 1.7-3.5 4-3.5s4 1.5 4 3.5" stroke="var(--gold)" strokeWidth="1.3" />
@@ -182,7 +201,7 @@ function CitizensIcon() {
 }
 function LegionsIcon() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
       <path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6l7-3z" stroke="var(--gold)" strokeWidth="1.3" />
       <path d="M9 9l3 3 3-3M9 15l3-3 3 3" stroke="var(--gold)" strokeWidth="1.1" />
     </svg>
@@ -190,7 +209,7 @@ function LegionsIcon() {
 }
 function VictoriesIcon() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
       <path d="M6 3v18l6-4 6 4V3H6z" stroke="var(--gold)" strokeWidth="1.3" strokeLinejoin="round" />
     </svg>
   )
@@ -207,4 +226,4 @@ function CrownMedallion() {
       </svg>
     </div>
   )
-                           }
+                        }

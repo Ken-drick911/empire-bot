@@ -100,3 +100,17 @@ button { font-family: inherit; }
 main::-webkit-scrollbar {
   display: none;
 }
+
+.empire-plaque {
+  position: relative;
+}
+.plaque-corner {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+}
+.plaque-corner-tl { top: 4px; left: 4px; border-top: 1px solid var(--gold-dim); border-left: 1px solid var(--gold-dim); }
+.plaque-corner-tr { top: 4px; right: 4px; border-top: 1px solid var(--gold-dim); border-right: 1px solid var(--gold-dim); }
+.plaque-corner-bl { bottom: 4px; left: 4px; border-bottom: 1px solid var(--gold-dim); border-left: 1px solid var(--gold-dim); }
+.plaque-corner-br { bottom: 4px; right: 4px; border-bottom: 1px solid var(--gold-dim); border-right: 1px solid var(--gold-dim); }

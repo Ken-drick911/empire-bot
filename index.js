@@ -93,7 +93,23 @@ async function startBot() {
                 setTimeout(startBot, 10000)
             }
         }
-        if (connection === 'open') console.log('✅ Empire Bot connected!')
+        if (connection === 'open') {
+            console.log('✅ Empire Bot connected!')
+            try {
+                const allGroups = await sock.groupFetchAllParticipating()
+                const ids = Object.keys(allGroups)
+                for (const id of ids) {
+                    await global._db?.collection('groups').updateOne(
+                        { groupId: id },
+                        { $set: { groupId: id, name: allGroups[id].subject, updatedAt: new Date() } },
+                        { upsert: true }
+                    )
+                }
+                console.log(`✅ Synced ${ids.length} groups`)
+            } catch (e) {
+                console.log('Group sync failed:', e.message)
+            }
+        }
     })
 
     sock.ev.on('creds.update', async () => {
@@ -123,19 +139,14 @@ async function startBot() {
         const from = msg.key.remoteJid
         const text = msg.message.conversation || msg.message.extendedTextMessage?.text || ''
         const sender = msg.key.participant || msg.key.remoteJid
-        const pushName = msg.pushName || sender.split('@')[0] // WhatsApp display name (management only)
+        const pushName = msg.pushName || sender.split('@')[0]
         const isGroup = from.endsWith('@g.us')
 
         const hasRealContent = !!(msg.message.conversation || msg.message.extendedTextMessage?.text || msg.message.imageMessage || msg.message.videoMessage || msg.message.stickerMessage)
         if (!hasRealContent) return
 
-        // Create user if not exists (uses pushName temporarily)
         await createUser(sender, pushName)
-
-        // Fetch user from DB
         const user = await getUser(sender)
-
-        // Use registered username for games, pushName for management
         const username = user?.username || pushName
 
         if (await isBanned(sender)) return
@@ -185,7 +196,6 @@ async function startBot() {
             const isAdmin = isGroup ? await isUserAdmin(from, sender) : false
             const owner = isOwner(sender)
 
-            // Registration gate for game commands
             if (GAME_COMMANDS.includes(cmd) && !owner) {
                 if (!user?.registered) {
                     await sock.sendMessage(from, {
@@ -374,16 +384,16 @@ async function startBot() {
             }
         }
     })
+
     sock.ev.on('groups.upsert', async (groups) => {
-    const db = require('./src/data/db')
-    for (const g of groups) {
-        await global._db?.collection('groups').updateOne(
-            { groupId: g.id },
-            { $set: { groupId: g.id, name: g.subject, updatedAt: new Date() } },
-            { upsert: true }
-        )
-    }
-})
+        for (const g of groups) {
+            await global._db?.collection('groups').updateOne(
+                { groupId: g.id },
+                { $set: { groupId: g.id, name: g.subject, updatedAt: new Date() } },
+                { upsert: true }
+            )
+        }
+    })
 
     sock.ev.on('group-participants.update', async (update) => {
         const { id, participants, action } = update

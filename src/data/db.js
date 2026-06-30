@@ -25,9 +25,43 @@ async function createUser(id, username) {
     const existing = await usersCollection.findOne({ id })
     if (existing) return existing
 
+    // Check if this person already registered on web first (has phone, no bot id yet)
+    const phone = id.replace('@s.whatsapp.net', '').replace('@lid', '')
+    const webUser = await usersCollection.findOne({ phone, id: { $exists: false } })
+
+    if (webUser) {
+        const botFields = {
+            id,
+            rank: webUser.rank || 'Peasant',
+            level: webUser.level || 1,
+            xp: webUser.xp || 0,
+            xpToNext: webUser.xpToNext || 100,
+            title: webUser.title || 'Village Hand',
+            reputation: webUser.reputation || null,
+            wallet: webUser.wallet || 0,
+            vault: webUser.vault || 0,
+            vaultCap: webUser.vaultCap || 5000,
+            streak: webUser.streak || 0,
+            totalMessages: webUser.totalMessages || 0,
+            recentMessages: webUser.recentMessages || 0,
+            lastMessage: webUser.lastMessage || null,
+            lastDaily: webUser.lastDaily || null,
+            lastSteal: webUser.lastSteal || null,
+            lastStolenFrom: webUser.lastStolenFrom || null,
+            timesRobbed: webUser.timesRobbed || 0,
+            timesStolen: webUser.timesStolen || 0,
+            profilePic: webUser.profilePic || null,
+            authority: webUser.authority || null,
+            isMod: webUser.isMod || false,
+            joinDate: webUser.joinDate || new Date().toISOString()
+        }
+        await usersCollection.updateOne({ _id: webUser._id }, { $set: botFields })
+        return await usersCollection.findOne({ _id: webUser._id })
+    }
+
     const newUser = {
         id,
-        phone: id.replace('@s.whatsapp.net', '').replace('@lid', ''),
+        phone,
         username,
         rank: 'Peasant',
         level: 1,

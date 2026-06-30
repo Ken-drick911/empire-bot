@@ -1,7 +1,8 @@
-const { initAuthCreds, BufferJSON, proto } = require('@whiskeysockets/baileys')
 const { MongoClient } = require('mongodb')
 
 async function useMongoAuthState(uri) {
+    const { initAuthCreds, BufferJSON, proto } = await import('@whiskeysockets/baileys')
+
     const client = new MongoClient(uri)
     await client.connect()
     const db = client.db('empireBot')

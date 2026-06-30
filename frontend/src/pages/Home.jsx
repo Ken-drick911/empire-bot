@@ -110,8 +110,13 @@ export default function Home() {
               transition={{ delay: 0.3 + i * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
               whileTap={{ scale: 0.98 }}
               className="gold-border-card empire-plaque"
-              style={{ flex: 1, padding: '16px 8px', textAlign: 'center' }}
+              style={{ flex: 1, padding: '18px 8px', textAlign: 'center', position: 'relative' }}
             >
+              <span style={{
+                position: 'absolute', top: 0, left: '15%', right: '15%', height: 1,
+                background: 'linear-gradient(90deg, transparent, var(--gold-bright), transparent)',
+                opacity: 0.6
+              }} />
               <span className="plaque-corner plaque-corner-tl" />
               <span className="plaque-corner plaque-corner-tr" />
               <span className="plaque-corner plaque-corner-bl" />
@@ -131,7 +136,7 @@ export default function Home() {
           style={{
             position: 'relative', overflow: 'hidden',
             padding: '18px 18px', display: 'flex', alignItems: 'center',
-            justifyContent: 'space-between', gap: 12, minHeight: 150
+            minHeight: 150
           }}
         >
           <span className="plaque-corner plaque-corner-tl" />
@@ -139,18 +144,18 @@ export default function Home() {
           <span className="plaque-corner plaque-corner-bl" />
           <span className="plaque-corner plaque-corner-br" />
           <div style={{
-            position: 'absolute', right: 0, top: 0, bottom: 0, width: '48%',
+            position: 'absolute', inset: 0,
             backgroundImage: 'url(/images/IMG_20260627_122607.jpg)',
-            backgroundSize: 'contain', backgroundRepeat: 'no-repeat',
-            backgroundPosition: 'center center'
+            backgroundSize: 'cover', backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'right center'
           }} />
           <div style={{
-            position: 'absolute', right: 0, top: 0, bottom: 0, width: '48%',
-            background: 'linear-gradient(90deg, var(--ink-card), transparent 55%)'
+            position: 'absolute', inset: 0,
+            background: 'linear-gradient(90deg, var(--ink-card) 38%, rgba(22,19,15,0.55) 65%, transparent 100%)'
           }} />
-          <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: 12, width: '100%' }}>
             <CrownMedallion />
-            <div>
+            <div style={{ flex: 1 }}>
               <p style={{ fontSize: 11, color: 'var(--gold-dim)', letterSpacing: '0.08em', margin: '0 0 4px' }}>
                 GREAT EMPIRES AREN'T BORN.
               </p>
@@ -158,8 +163,8 @@ export default function Home() {
                 THEY ARE FORGED
               </p>
             </div>
+            <span style={{ color: 'var(--gold)', fontSize: 20 }}>›</span>
           </div>
-          <span style={{ position: 'relative', zIndex: 1, color: 'var(--gold)', fontSize: 20 }}>›</span>
         </motion.div>
       </div>
     </PageTransition>
@@ -194,11 +199,12 @@ function CrownMedallion() {
   return (
     <div style={{
       width: 36, height: 36, borderRadius: '50%', border: '1px solid var(--gold-dim)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+      background: 'rgba(10,9,8,0.4)'
     }}>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
         <path d="M3 18l1.5-9L9 13l3-7 3 7 4.5-4L21 18H3z" stroke="var(--gold)" strokeWidth="1.4" strokeLinejoin="round" />
       </svg>
     </div>
   )
-          }
+                           }

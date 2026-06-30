@@ -374,6 +374,16 @@ async function startBot() {
             }
         }
     })
+    sock.ev.on('groups.upsert', async (groups) => {
+    const db = require('./src/data/db')
+    for (const g of groups) {
+        await global._db?.collection('groups').updateOne(
+            { groupId: g.id },
+            { $set: { groupId: g.id, name: g.subject, updatedAt: new Date() } },
+            { upsert: true }
+        )
+    }
+})
 
     sock.ev.on('group-participants.update', async (update) => {
         const { id, participants, action } = update

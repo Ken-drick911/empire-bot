@@ -226,4 +226,4 @@ function CrownMedallion() {
       </svg>
     </div>
   )
-                        }
+}

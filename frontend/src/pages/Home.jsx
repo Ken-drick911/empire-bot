@@ -30,6 +30,11 @@ export default function Home() {
               objectFit: 'cover', objectPosition: 'top center'
             }}
           />
+          <div className="empire-atmosphere">
+            <div className="empire-glow" />
+            <div className="empire-light-left" />
+            <div className="empire-light-right" />
+          </div>
           <div style={{
             position: 'absolute', inset: 0,
             background: 'linear-gradient(180deg, var(--ink) 0%, rgba(10,9,8,0) 18%, rgba(10,9,8,0) 55%, var(--ink) 92%)'
@@ -41,33 +46,50 @@ export default function Home() {
           <div style={{ position: 'absolute', inset: 0, boxShadow: 'inset 0 0 60px 20px var(--ink)' }} />
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          style={{ textAlign: 'center', marginTop: 8, position: 'relative', zIndex: 2 }}
-        >
-          <p style={{
-            fontFamily: 'var(--font-body)', color: 'var(--parchment-dim)',
-            fontSize: 15, letterSpacing: '0.1em', margin: '0 0 4px'
-          }}>WELCOME TO</p>
-          <h1 style={{
-            fontFamily: 'var(--font-display)', color: 'var(--gold-bright)',
-            fontSize: 'clamp(36px, 11vw, 54px)', margin: '0 0 10px', letterSpacing: '0.04em'
-          }}>THE EMPIRE</h1>
-          <div className="ornate-divider" style={{ maxWidth: 160, margin: '0 auto 14px' }}><span>♛</span></div>
-          <p style={{
-            fontFamily: 'var(--font-body)', fontStyle: 'italic', color: 'var(--parchment-dim)',
-            fontSize: 15, lineHeight: 1.5, margin: '0 0 28px'
-          }}>
+        <div style={{ textAlign: 'center', marginTop: 8, position: 'relative', zIndex: 2 }}>
+          <motion.p
+            initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            style={{
+              fontFamily: 'var(--font-body)', color: 'var(--parchment-dim)',
+              fontSize: 15, letterSpacing: '0.18em', margin: '0 0 4px'
+            }}>WELCOME TO</motion.p>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            style={{
+              fontFamily: 'var(--font-display)', color: 'var(--gold-bright)',
+              fontSize: 'clamp(36px, 11vw, 54px)', margin: '0 0 10px', letterSpacing: '0.04em',
+              textShadow: '0 0 24px rgba(216,177,90,0.25)'
+            }}>THE EMPIRE</motion.h1>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.45, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            className="ornate-divider" style={{ maxWidth: 160, margin: '0 auto 14px' }}><span>♛</span>
+          </motion.div>
+
+          <motion.p
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            transition={{ delay: 0.55, duration: 0.6 }}
+            style={{
+              fontFamily: 'var(--font-body)', fontStyle: 'italic', color: 'var(--parchment-dim)',
+              fontSize: 15, lineHeight: 1.5, margin: '0 0 28px'
+            }}>
             Loyalty. Honor. Power.<br />Together we build an unbreakable empire.
-          </p>
-        </motion.div>
+          </motion.p>
+        </div>
 
         <motion.button
           whileTap={{ scale: 0.97 }}
           onClick={() => navigate('/profile')}
-          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
+          initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0, boxShadow: ['0 0 0px rgba(216,177,90,0)', '0 0 18px rgba(216,177,90,0.25)', '0 0 0px rgba(216,177,90,0)'] }}
+          transition={{
+            opacity: { delay: 0.7, duration: 0.5 },
+            y: { delay: 0.7, duration: 0.5 },
+            boxShadow: { delay: 1.2, duration: 6, repeat: Infinity, ease: 'easeInOut' }
+          }}
           style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             width: '100%', padding: '16px 22px', borderRadius: 12,
@@ -86,9 +108,14 @@ export default function Home() {
               key={s.label}
               initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 + i * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="gold-border-card"
+              whileTap={{ scale: 0.98 }}
+              className="gold-border-card empire-plaque"
               style={{ flex: 1, padding: '16px 8px', textAlign: 'center' }}
             >
+              <span className="plaque-corner plaque-corner-tl" />
+              <span className="plaque-corner plaque-corner-tr" />
+              <span className="plaque-corner plaque-corner-bl" />
+              <span className="plaque-corner plaque-corner-br" />
               <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'center' }}><s.icon /></div>
               <div style={{ fontFamily: 'var(--font-display)', color: 'var(--parchment)', fontSize: 18 }}>{s.value}</div>
               <div style={{ fontSize: 10, color: 'var(--gold-dim)', letterSpacing: '0.08em', marginTop: 2 }}>{s.label}</div>
@@ -99,13 +126,18 @@ export default function Home() {
         <motion.div
           initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.55, duration: 0.5 }}
-          className="gold-border-card"
+          whileTap={{ scale: 0.99 }}
+          className="gold-border-card empire-plaque"
           style={{
             position: 'relative', overflow: 'hidden',
             padding: '18px 18px', display: 'flex', alignItems: 'center',
             justifyContent: 'space-between', gap: 12, minHeight: 150
           }}
         >
+          <span className="plaque-corner plaque-corner-tl" />
+          <span className="plaque-corner plaque-corner-tr" />
+          <span className="plaque-corner plaque-corner-bl" />
+          <span className="plaque-corner plaque-corner-br" />
           <div style={{
             position: 'absolute', right: 0, top: 0, bottom: 0, width: '48%',
             backgroundImage: 'url(/images/IMG_20260627_122607.jpg)',

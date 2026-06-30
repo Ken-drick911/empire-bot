@@ -9,19 +9,6 @@ router.get('/merge-duplicates', async (req, res) => {
     if (req.query.key !== ADMIN_KEY) {
       return res.status(403).json({ error: 'Unauthorized' })
     }
-    router.get('/check-user', async (req, res) => {
-  try {
-    if (req.query.key !== ADMIN_KEY) {
-      return res.status(403).json({ error: 'Unauthorized' })
-    }
-    const db = getDB()
-    const phone = req.query.phone
-    const user = await db.collection('users').findOne({ phone })
-    res.json(user)
-  } catch (err) {
-    res.status(500).json({ error: err.message })
-  }
-})
 
     const db = getDB()
     const users = db.collection('users')
@@ -79,6 +66,20 @@ router.get('/merge-duplicates', async (req, res) => {
     }
 
     res.json({ success: true, mergedCount: merged.length, skipped, merged })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+router.get('/check-user', async (req, res) => {
+  try {
+    if (req.query.key !== ADMIN_KEY) {
+      return res.status(403).json({ error: 'Unauthorized' })
+    }
+    const db = getDB()
+    const phone = req.query.phone
+    const user = await db.collection('users').findOne({ phone })
+    res.json(user)
   } catch (err) {
     res.status(500).json({ error: err.message })
   }

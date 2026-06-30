@@ -1,0 +1,123 @@
+/* ===========================================
+   EMPIRE ATMOSPHERE
+   =========================================== */
+
+:root{
+  --hero-glow-opacity:.22;
+  --mist-opacity:.08;
+  --vignette-opacity:.55;
+}
+
+.empire-atmosphere{
+
+    position:absolute;
+    inset:0;
+
+    pointer-events:none;
+    overflow:hidden;
+
+}
+
+.empire-glow{
+
+    position:absolute;
+    inset:0;
+
+    background:
+
+    radial-gradient(
+    circle at 50% 18%,
+    rgba(230,198,104,var(--hero-glow-opacity)) 0%,
+    rgba(230,198,104,.08) 28%,
+    transparent 70%);
+
+    mix-blend-mode:screen;
+
+}
+
+.empire-vignette{
+
+    position:absolute;
+    inset:0;
+
+    background:
+
+    radial-gradient(
+
+    ellipse at center,
+
+    transparent 50%,
+
+    rgba(0,0,0,var(--vignette-opacity))
+
+    100%);
+
+}
+
+.empire-fade{
+
+    position:absolute;
+
+    inset:0;
+
+    background:
+
+    linear-gradient(
+
+    transparent 55%,
+
+    rgba(10,9,8,.25) 72%,
+
+    rgba(10,9,8,.75) 88%,
+
+    var(--ink) 100%);
+
+}
+
+.empire-light-left{
+
+    position:absolute;
+
+    width:600px;
+    height:600px;
+
+    left:-180px;
+    top:-120px;
+
+    border-radius:50%;
+
+    background:
+
+    radial-gradient(
+
+    circle,
+
+    rgba(230,198,104,.05),
+
+    transparent 70%);
+
+}
+
+.empire-light-right{
+
+    position:absolute;
+
+    width:520px;
+    height:520px;
+
+    right:-150px;
+    top:-80px;
+
+    border-radius:50%;
+
+    background:
+
+    radial-gradient(
+
+    circle,
+
+    rgba(230,198,104,.04),
+
+    transparent 70%);
+
+}

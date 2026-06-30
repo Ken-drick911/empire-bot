@@ -45,7 +45,7 @@ export default function AppLayout() {
       {/* Scrollable main — scrollbar hidden */}
       <main style={{
         flex: 1, overflowY: 'auto', overflowX: 'hidden',
-        paddingTop: 0, paddingBottom: 96,
+        paddingTop: 0, paddingBottom: 104,
         WebkitOverflowScrolling: 'touch',
         scrollbarWidth: 'none',
         msOverflowStyle: 'none'
@@ -53,13 +53,21 @@ export default function AppLayout() {
         <Outlet />
       </main>
 
-      {/* Fixed bottom nav */}
+      {/* Fixed bottom nav — carved royal panel */}
       <nav style={{
         position: 'fixed', bottom: 0, left: 0, right: 0,
         display: 'flex', justifyContent: 'space-around', alignItems: 'center',
-        padding: '10px 12px calc(10px + env(safe-area-inset-bottom))',
-        background: 'rgba(10,9,8,0.88)', backdropFilter: 'blur(14px)',
-        borderTop: '1px solid var(--ink-border)', zIndex: 20
+        padding: '14px 12px calc(14px + env(safe-area-inset-bottom))',
+        background: 'linear-gradient(180deg, rgba(19,17,16,0.95), rgba(10,9,8,0.97))',
+        borderTop: '1px solid transparent',
+        backgroundImage: `
+          linear-gradient(180deg, rgba(19,17,16,0.95), rgba(10,9,8,0.97)),
+          linear-gradient(90deg, transparent, rgba(216,177,90,0.5), transparent)
+        `,
+        backgroundOrigin: 'border-box',
+        backgroundClip: 'padding-box, border-box',
+        boxShadow: '0 -8px 24px rgba(0,0,0,0.5)',
+        zIndex: 20
       }}>
         {tabs.map(({ path, icon: Icon, center }) => {
           const active = location.pathname === path
@@ -71,18 +79,32 @@ export default function AppLayout() {
               style={{
                 background: 'transparent', border: 'none', cursor: 'pointer',
                 padding: center ? 0 : 8, position: 'relative',
-                width: center ? 56 : 44, height: center ? 56 : 44,
+                width: center ? 58 : 46, height: center ? 58 : 46,
                 display: 'flex', alignItems: 'center', justifyContent: 'center'
               }}
             >
               {active && (
                 <motion.div
                   layoutId="navActiveRing"
-                  transition={{ type: 'spring', stiffness: 500, damping: 32 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  animate={{
+                    boxShadow: [
+                      '0 0 6px 1px rgba(216,177,90,0.25)',
+                      '0 0 14px 3px rgba(216,177,90,0.45)',
+                      '0 0 6px 1px rgba(216,177,90,0.25)'
+                    ]
+                  }}
                   style={{
-                    position: 'absolute', inset: center ? 0 : -6, borderRadius: '50%',
+                    position: 'absolute', inset: center ? 2 : -4, borderRadius: '50%',
                     border: '1px solid var(--gold)',
-                    background: 'radial-gradient(circle, rgba(201,168,76,0.18), transparent 70%)'
+                    background: 'radial-gradient(circle, rgba(201,168,76,0.16), transparent 70%)'
+                  }}
+                  transitionEnd={{}}
+                  {...{
+                    transition: {
+                      layout: { type: 'spring', stiffness: 400, damping: 30 },
+                      boxShadow: { duration: 2.4, repeat: Infinity, ease: 'easeInOut' }
+                    }
                   }}
                 />
               )}
@@ -116,7 +138,7 @@ export default function AppLayout() {
   )
 }
 
-function iconColor(active) { return active ? 'var(--gold-bright)' : 'var(--parchment-dim)' }
+function iconColor(active) { return active ? 'var(--gold-bright)' : 'rgba(163,156,140,0.7)' }
 
 function CastleIcon({ active, size }) {
   return (
@@ -145,4 +167,4 @@ function ShieldIcon({ active, size }) {
       <path d="M12 2l8 3v6c0 5-3.5 8.5-8 11-4.5-2.5-8-6-8-11V5l8-3z" stroke={iconColor(active)} strokeWidth="1.4" strokeLinejoin="round" />
     </svg>
   )
-                                       }
+}

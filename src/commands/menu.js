@@ -26,6 +26,7 @@ function getMenuText(senderName) {
 ┗━━━━━━━━━━━
 
 🎰 𝗜𝗠𝗣𝗘𝗥𝗜𝗔𝗟 𝗖𝗔𝗦𝗜𝗡𝗢 🎰
+┣ ♤ .casino — view all games
 ┣ ♤ .flip heads/tails [bet]
 ┣ ♤ .dice [bet] [1-6]
 ┣ ♤ .slots [bet]

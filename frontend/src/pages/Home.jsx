@@ -112,19 +112,8 @@ export default function Home() {
           whileTap={{ scale: 0.97 }}
           onClick={() => navigate('/profile')}
           initial={{ opacity: 0, y: 10 }}
-          animate={{
-            opacity: 1, y: 0,
-            boxShadow: [
-              '0 0 0px rgba(216,177,90,0), inset 0 1px 0 rgba(230,198,104,0.12)',
-              '0 0 22px rgba(216,177,90,0.28), inset 0 1px 0 rgba(230,198,104,0.12)',
-              '0 0 0px rgba(216,177,90,0), inset 0 1px 0 rgba(230,198,104,0.12)'
-            ]
-          }}
-          transition={{
-            opacity: { delay: 0.75, duration: 0.5 },
-            y: { delay: 0.75, duration: 0.5 },
-            boxShadow: { delay: 1.4, duration: 6, repeat: Infinity, ease: 'easeInOut' }
-          }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.75, duration: 0.5 }}
           style={{
             position: 'relative', overflow: 'hidden',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -132,15 +121,38 @@ export default function Home() {
             border: '1px solid var(--gold)',
             background: 'linear-gradient(180deg, rgba(230,198,104,0.16), rgba(201,168,76,0.05) 55%, transparent)',
             color: 'var(--gold-bright)', fontFamily: 'var(--font-display)',
-            fontSize: 14, letterSpacing: '0.12em', cursor: 'pointer', marginBottom: 32
+            fontSize: 14, letterSpacing: '0.12em', cursor: 'pointer', marginBottom: 32,
+            boxShadow: '0 0 0px rgba(216,177,90,0)',
+            animation: 'borderGlow 4s ease-in-out infinite'
           }}
         >
-          {/* Metallic top sheen */}
+          {/* Static top sheen */}
           <span style={{
             position: 'absolute', top: 0, left: 0, right: 0, height: '42%',
             background: 'linear-gradient(180deg, rgba(255,255,255,0.07), transparent)',
             pointerEvents: 'none', borderRadius: '12px 12px 0 0'
           }} />
+
+          {/* Moving light sweep — the focused glass shine */}
+          <span style={{
+            position: 'absolute', top: 0, bottom: 0,
+            width: '38%',
+            background: 'linear-gradient(90deg, transparent, rgba(230,198,104,0.18), rgba(255,240,180,0.28), rgba(230,198,104,0.18), transparent)',
+            animation: 'buttonSweep 3.2s ease-in-out infinite',
+            animationDelay: '1.5s',
+            pointerEvents: 'none'
+          }} />
+
+          {/* Moving border highlight — top edge */}
+          <span style={{
+            position: 'absolute', top: 0, left: 0, right: 0, height: 1,
+            background: 'linear-gradient(90deg, transparent 0%, rgba(255,240,160,0.9) 50%, transparent 100%)',
+            backgroundSize: '200% 100%',
+            animation: 'buttonSweep 3.2s ease-in-out infinite',
+            animationDelay: '1.5s',
+            pointerEvents: 'none'
+          }} />
+
           <span style={{
             margin: '0 auto', position: 'relative',
             textShadow: '0 0 12px rgba(230,198,104,0.4), 0 1px 2px rgba(0,0,0,0.6)'
@@ -222,12 +234,6 @@ export default function Home() {
           <div style={{
             position: 'absolute', inset: 0,
             background: 'linear-gradient(180deg, var(--ink-card) 0%, transparent 18%, transparent 82%, var(--ink-card) 100%)'
-          }} />
-          {/* Gold haze over castle — screen blend */}
-          <div style={{
-            position: 'absolute', inset: 0,
-            background: 'radial-gradient(ellipse 55% 50% at 80% 50%, rgba(216,177,90,0.14), transparent 70%)',
-            mixBlendMode: 'screen'
           }} />
 
           <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: 12, width: '100%' }}>

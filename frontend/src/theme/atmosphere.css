@@ -121,3 +121,47 @@
     transparent 70%);
 
 }
+
+/* ===========================================
+   EMPIRE DUST + MIST (Leaderboard upgrade)
+   =========================================== */
+
+.empire-mist {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(200,180,140,0.03) 40%,
+    rgba(200,180,140,0.06) 60%,
+    transparent 100%
+  );
+  animation: mistDrift 18s ease-in-out infinite alternate;
+}
+
+@keyframes mistDrift {
+  0%   { opacity: 0.5; transform: translateY(0); }
+  100% { opacity: 0.9; transform: translateY(-10px); }
+}
+
+.empire-dust {
+  position: absolute;
+  top: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(230,198,104,0.9), rgba(230,198,104,0));
+  box-shadow: 0 0 4px rgba(230,198,104,0.6);
+  animation-name: dustRise;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes dustRise {
+  0%   { transform: translateY(0) translateX(0); opacity: 0; }
+  10%  { opacity: 0.8; }
+  90%  { opacity: 0.5; }
+  100% { transform: translateY(-110vh) translateX(20px); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .empire-mist, .empire-dust { animation: none; }
+}

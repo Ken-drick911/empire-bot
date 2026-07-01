@@ -2,157 +2,84 @@
    EMPIRE ATMOSPHERE
    =========================================== */
 
-:root{
-  --hero-glow-opacity:.22;
-  --mist-opacity:.08;
-  --vignette-opacity:.55;
+:root {
+  --hero-glow-opacity: .22;
+  --vignette-opacity: .55;
 }
 
-.empire-atmosphere{
-
-    position:absolute;
-    inset:0;
-
-    pointer-events:none;
-    overflow:hidden;
-
+.empire-atmosphere {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
 }
 
-.empire-glow{
-
-    position:absolute;
-    inset:0;
-
-    background:
-
-    radial-gradient(
+.empire-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
     circle at 50% 18%,
     rgba(230,198,104,var(--hero-glow-opacity)) 0%,
     rgba(230,198,104,.08) 28%,
-    transparent 70%);
-
-    mix-blend-mode:screen;
-
+    transparent 70%
+  );
+  mix-blend-mode: screen;
 }
 
-.empire-vignette{
-
-    position:absolute;
-    inset:0;
-
-    background:
-
-    radial-gradient(
-
+.empire-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
     ellipse at center,
-
     transparent 50%,
-
-    rgba(0,0,0,var(--vignette-opacity))
-
-    100%);
-
+    rgba(0,0,0,var(--vignette-opacity)) 100%
+  );
 }
 
-.empire-fade{
-
-    position:absolute;
-
-    inset:0;
-
-    background:
-
-    linear-gradient(
-
-    transparent 55%,
-
-    rgba(10,9,8,.25) 72%,
-
-    rgba(10,9,8,.75) 88%,
-
-    var(--ink) 100%);
-
-}
-
-.empire-light-left{
-
-    position:absolute;
-
-    width:600px;
-    height:600px;
-
-    left:-180px;
-    top:-120px;
-
-    border-radius:50%;
-
-    background:
-
-    radial-gradient(
-
-    circle,
-
-    rgba(230,198,104,.05),
-
-    transparent 70%);
-
-}
-
-.empire-light-right{
-
-    position:absolute;
-
-    width:520px;
-    height:520px;
-
-    right:-150px;
-    top:-80px;
-
-    border-radius:50%;
-
-    background:
-
-    radial-gradient(
-
-    circle,
-
-    rgba(230,198,104,.04),
-
-    transparent 70%);
-
-}
-
-/* ===========================================
-   EMPIRE DUST + MIST (Leaderboard upgrade)
-   =========================================== */
-
-.empire-mist {
+.empire-fade {
   position: absolute;
   inset: 0;
   background: linear-gradient(
-    180deg,
-    transparent 0%,
-    rgba(200,180,140,0.03) 40%,
-    rgba(200,180,140,0.06) 60%,
-    transparent 100%
+    transparent 55%,
+    rgba(10,9,8,.25) 72%,
+    rgba(10,9,8,.75) 88%,
+    var(--ink) 100%
   );
-  animation: mistDrift 18s ease-in-out infinite alternate;
 }
 
-@keyframes mistDrift {
-  0%   { opacity: 0.5; transform: translateY(0); }
-  100% { opacity: 0.9; transform: translateY(-10px); }
+.empire-light-left {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  left: -180px;
+  top: -120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(230,198,104,.05), transparent 70%);
 }
+
+.empire-light-right {
+  position: absolute;
+  width: 520px;
+  height: 520px;
+  right: -150px;
+  top: -80px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(230,198,104,.04), transparent 70%);
+}
+
+/* ===========================================
+   EMPIRE DUST (Leaderboard upgrade)
+   =========================================== */
 
 .empire-dust {
   position: absolute;
   top: 100%;
   border-radius: 50%;
   background: radial-gradient(circle, rgba(230,198,104,0.9), rgba(230,198,104,0));
-  box-shadow: 0 0 4px rgba(230,198,104,0.6);
   animation-name: dustRise;
   animation-timing-function: linear;
   animation-iteration-count: infinite;
+  will-change: transform, opacity;
 }
 
 @keyframes dustRise {
@@ -162,6 +89,187 @@
   100% { transform: translateY(-110vh) translateX(20px); opacity: 0; }
 }
 
+/* ===========================================
+   EMPIRE TOKENS
+   =========================================== */
+
+:root {
+  /* Core palette */
+  --ink: #0a0908;
+  --ink-raised: #131110;
+  --ink-card: #16130f;
+  --ink-border: #2a2118;
+  --gold: #c9a84c;
+  --gold-bright: #e6c668;
+  --gold-dim: #8a703a;
+  --parchment: #e8e2d4;
+  --parchment-dim: #a39c8c;
+  --crimson: #7a1f1f;
+  --emerald: #1f5c4a;
+
+  /* Typography */
+  --font-display: 'Cinzel', serif;
+  --font-body: 'Cormorant Garamond', serif;
+  --font-ui: 'Inter', sans-serif;
+
+  /* Motion */
+  --ease-empire: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 0.22s;
+  --dur-med: 0.4s;
+  --dur-slow: 0.6s;
+
+  /* Gold text glow — metallic feel */
+  --gold-text-shadow:
+    0 0 18px rgba(230,198,104,0.35),
+    0 1px 2px rgba(0,0,0,0.8),
+    0 0 60px rgba(201,168,76,0.12);
+
+  /* Card gold glow */
+  --card-glow: 0 0 0 0px rgba(201,168,76,0);
+  --card-glow-hover: 0 0 18px rgba(201,168,76,0.12);
+}
+
+* { box-sizing: border-box; }
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background: var(--ink);
+  color: var(--parchment);
+  font-family: var(--font-ui);
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(201,168,76,0.06), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(201,168,76,0.03), transparent);
+}
+
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { scrollbar-width: none; }
+
 @media (prefers-reduced-motion: reduce) {
-  .empire-mist, .empire-dust { animation: none; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Ornate divider ── */
+.ornate-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--gold-dim);
+  font-size: 11px;
+  letter-spacing: 0.15em;
+}
+.ornate-divider::before,
+.ornate-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+}
+
+/* ── Gold border card ── */
+.gold-border-card {
+  position: relative;
+  background: var(--ink-card);
+  border: 1px solid var(--ink-border);
+  border-radius: 14px;
+  transition: box-shadow 0.3s ease;
+}
+.gold-border-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  background: linear-gradient(
+    135deg,
+    rgba(201,168,76,0.4),
+    transparent 28%,
+    transparent 72%,
+    rgba(201,168,76,0.2)
+  ) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+.gold-border-card::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 15px;
+  box-shadow:
+    0 0 10px rgba(201,168,76,0.08),
+    inset 0 1px 0 rgba(230,198,104,0.12),
+    inset 0 -1px 0 rgba(201,168,76,0.06);
+  pointer-events: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold-bright);
+  outline-offset: 2px;
+}
+
+main::-webkit-scrollbar { display: none; }
+
+/* ── Empire plaque ── */
+.empire-plaque { position: relative; }
+
+.plaque-corner {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+  z-index: 2;
+}
+.plaque-corner-tl {
+  top: 5px; left: 5px;
+  border-top: 1.5px solid var(--gold);
+  border-left: 1.5px solid var(--gold);
+  box-shadow: -1px -1px 4px rgba(201,168,76,0.2);
+}
+.plaque-corner-tr {
+  top: 5px; right: 5px;
+  border-top: 1.5px solid var(--gold);
+  border-right: 1.5px solid var(--gold);
+  box-shadow: 1px -1px 4px rgba(201,168,76,0.2);
+}
+.plaque-corner-bl {
+  bottom: 5px; left: 5px;
+  border-bottom: 1.5px solid var(--gold);
+  border-left: 1.5px solid var(--gold);
+  box-shadow: -1px 1px 4px rgba(201,168,76,0.2);
+}
+.plaque-corner-br {
+  bottom: 5px; right: 5px;
+  border-bottom: 1.5px solid var(--gold);
+  border-right: 1.5px solid var(--gold);
+  box-shadow: 1px 1px 4px rgba(201,168,76,0.2);
+}
+
+/* ── Button light sweep ── */
+@keyframes buttonSweep {
+  0%   { transform: translateX(-120%) skewX(-20deg); }
+  100% { transform: translateX(220%) skewX(-20deg); }
+}
+
+@keyframes borderGlow {
+  0%   { opacity: 0.3; }
+  50%  { opacity: 0.9; }
+  100% { opacity: 0.3; }
 }

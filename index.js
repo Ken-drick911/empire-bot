@@ -43,7 +43,7 @@ const { OWNER_NUMBER } = require('./src/config/owner')
 const { casinoCommand, coinFlipCommand, diceCommand, slotsCommand, blackjackCommand, hitCommand, standCommand, rouletteCommand } = require('./src/commands/casino')
 const { graphCommand } = require('./src/commands/graphCommands')
 const { gayCommand, lesbianCommand, simpCommand, ppCommand, shipCommand, jokeCommand, truthCommand, dareCommand, tdCommand, wyrCommand, memeCommand } = require('./src/commands/funCommands')
-const { hugCommand, kissCommand, slapCommand, waveCommand, patCommand, danceCommand, sadCommand, smileCommand, laughCommand, punchCommand, bonkCommand, tickleCommand, shrugCommand } = require('./src/commands/interactionCommands')
+const { hugCommand, kissCommand, slapCommand, waveCommand, patCommand, danceCommand, sadCommand, smileCommand, laughCommand, punchCommand, bonkCommand, tickleCommand, shrugCommand, killCommand, murderCommand, bombCommand, fuckCommand, wankCommand, goonCommand } = require('./src/commands/interactionCommands')
 
 const WEB_URL = process.env.WEB_URL || 'https://empire-bot-w94m.onrender.com'
 
@@ -74,8 +74,7 @@ const GENERAL_COMMANDS = [
     'hug', 'kiss', 'slap', 'wave', 'pat', 'dance', 'sad', 'smile',
     'laugh', 'punch', 'bonk', 'tickle', 'shrug',
     'joke', 'truth', 'dare', 'td', 'wyr', 'ship', 'simp',
-    'gay', 'lesbian', 'meme', 'pp'
-]
+    'gay', 'lesbian', 'meme' 'pp', 'kill', 'murder', 'bomb', 'fuck', 'wank', 'goon'
 
 let makeWASocket, DisconnectReason
 

@@ -20,12 +20,36 @@ async function getUser(id) {
     return await usersCollection.findOne({ id })
 }
 
+async function getUserFlexible(jid) {
+    await connectDB()
+    
+    // Try direct lookup first
+    let user = await usersCollection.findOne({ id: jid })
+    if (user) return user
+
+    // Extract phone number
+    const phone = jid.replace('@s.whatsapp.net', '').replace('@lid', '')
+
+    // Try other format
+    const altJid = jid.includes('@lid') 
+        ? `${phone}@s.whatsapp.net` 
+        : `${phone}@lid`
+    
+    user = await usersCollection.findOne({ id: altJid })
+    if (user) return user
+
+    // Try by phone field directly
+    user = await usersCollection.findOne({ phone })
+    if (user) return user
+
+    return null
+}
+
 async function createUser(id, username) {
     await connectDB()
     const existing = await usersCollection.findOne({ id })
     if (existing) return existing
 
-    // Check if this person already registered on web first (has phone, no bot id yet)
     const phone = id.replace('@s.whatsapp.net', '').replace('@lid', '')
     const webUser = await usersCollection.findOne({ phone, id: { $exists: false } })
 
@@ -145,4 +169,15 @@ async function getAllGroupSettings() {
     return await col.find({}).toArray()
 }
 
-module.exports = { getUser, createUser, updateUser, getAllUsers, saveSession, loadSession, getGroupSettings, updateGroupSettings, getAllGroupSettings }
+module.exports = { 
+    getUser, 
+    getUserFlexible,
+    createUser, 
+    updateUser, 
+    getAllUsers, 
+    saveSession, 
+    loadSession, 
+    getGroupSettings, 
+    updateGroupSettings, 
+    getAllGroupSettings 
+        }

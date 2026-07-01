@@ -37,8 +37,6 @@ export default function Leaderboard() {
         }} />
         {/* Hero light beam from above */}
         <div className="empire-glow" style={{ position: 'fixed', zIndex: 0 }} />
-        {/* Drifting fog */}
-        <div className="empire-mist" style={{ position: 'fixed', zIndex: 0 }} />
         {/* Floating gold dust */}
         <DustField />
         {/* Vignette pulls eye to center */}

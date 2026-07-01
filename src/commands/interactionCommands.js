@@ -455,6 +455,264 @@ async function shrugCommand(sock, msg, from, sender) {
         await sock.sendMessage(from, { text: caption, mentions: [sender], quoted: msg })
     }
 }
+
+async function killCommand(sock, msg, from, sender, args) {
+    const target = getTarget(msg, args)
+    if (!target) {
+        await sock.sendMessage(from, { text: '⚔️ Who are you killing?? Tag someone or reply!', quoted: msg })
+        return
+    }
+
+    const senderName = sender.split('@')[0]
+    const targetName = target.split('@')[0]
+    const targetUser = await getUserFlexible(target)
+    const senderUser = await getUserFlexible(sender)
+
+    const killGifs = [
+        'https://media.tenor.com/vMWFBWHGkMQAAAAC/anime-kill.gif',
+        'https://media.tenor.com/ozy3RMoHH3IAAAAC/anime-sword.gif',
+        'https://media.tenor.com/3e3gJJxcXM8AAAAC/anime-fight.gif'
+    ]
+    const gifUrl = killGifs[Math.floor(Math.random() * killGifs.length)]
+
+    const deathLines = [
+        'was deleted from existence 💀',
+        'has been removed from the server of life 💀',
+        'got unalived in 4K 💀',
+        'has left the kingdom permanently 💀',
+        'has been yeeted into the void 💀',
+        'just got their subscription to life cancelled 💀'
+    ]
+    const deathLine = deathLines[Math.floor(Math.random() * deathLines.length)]
+
+    let caption
+    if (targetUser?.rank && senderUser?.rank) {
+        caption = `☠️ @${senderName} (${senderUser.rank}) just KILLED @${targetName} (${targetUser.rank})!!\n\n💀 The ${targetUser.rank} ${deathLine}\n\n👑 _The Emperor watches in silence._`
+    } else {
+        caption = `☠️ @${senderName} just KILLED @${targetName}!!\n\n💀 ${targetName} ${deathLine}`
+    }
+
+    if (gifUrl) {
+        await sock.sendMessage(from, { image: { url: gifUrl }, caption, mentions: [sender, target], quoted: msg })
+    } else {
+        await sock.sendMessage(from, { text: caption, mentions: [sender, target], quoted: msg })
+    }
+}
+
+async function murderCommand(sock, msg, from, sender, args) {
+    const target = getTarget(msg, args)
+    if (!target) {
+        await sock.sendMessage(from, { text: '🔪 Murder WHO?? Tag someone or reply!', quoted: msg })
+        return
+    }
+
+    const senderName = sender.split('@')[0]
+    const targetName = target.split('@')[0]
+    const targetUser = await getUserFlexible(target)
+    const senderUser = await getUserFlexible(sender)
+
+    const murderGifs = [
+        'https://media.tenor.com/Wnbs9HNZLD4AAAAC/anime-stab.gif',
+        'https://media.tenor.com/6j1ZHqFGkkkAAAAC/anime-murder.gif',
+        'https://media.tenor.com/QmPEFoqRXTsAAAAC/kill-anime.gif'
+    ]
+    const gifUrl = murderGifs[Math.floor(Math.random() * murderGifs.length)]
+
+    const mysteryLines = [
+        'No witnesses. No evidence. Just vibes. 🔪',
+        'The royal investigators have no leads. Suspicious. 👀',
+        'The kingdom mourns. Nobody is surprised. 💀',
+        'Motive unknown. Everyone is a suspect. 🕵️',
+        'The body was found in the throne room. Awkward. 💀',
+        'It was ruled an accident. Nobody believes that. 👀'
+    ]
+    const mysteryLine = mysteryLines[Math.floor(Math.random() * mysteryLines.length)]
+
+    let caption
+    if (targetUser?.rank && senderUser?.rank) {
+        caption = `🔪 @${senderName} (${senderUser.rank}) has MURDERED @${targetName} (${targetUser.rank}) in cold blood!!\n\n🕵️ ${mysteryLine}\n\n👑 _The Emperor has been informed._`
+    } else {
+        caption = `🔪 @${senderName} has MURDERED @${targetName} in cold blood!!\n\n🕵️ ${mysteryLine}`
+    }
+
+    if (gifUrl) {
+        await sock.sendMessage(from, { image: { url: gifUrl }, caption, mentions: [sender, target], quoted: msg })
+    } else {
+        await sock.sendMessage(from, { text: caption, mentions: [sender, target], quoted: msg })
+    }
+}
+
+async function bombCommand(sock, msg, from, sender, args) {
+    const target = getTarget(msg, args)
+    if (!target) {
+        await sock.sendMessage(from, { text: '💣 Bomb WHO?? Tag someone or reply!', quoted: msg })
+        return
+    }
+
+    const senderName = sender.split('@')[0]
+    const targetName = target.split('@')[0]
+    const targetUser = await getUserFlexible(target)
+    const senderUser = await getUserFlexible(sender)
+
+    const bombGifs = [
+        'https://media.tenor.com/3e3gJJxcXM8AAAAC/anime-explosion.gif',
+        'https://media.tenor.com/L9CNXR5FXpAAAAAC/explosion-anime.gif',
+        'https://media.tenor.com/2GDMRbKOkHEAAAAC/anime-bomb.gif'
+    ]
+    const gifUrl = bombGifs[Math.floor(Math.random() * bombGifs.length)]
+
+    const explosionLines = [
+        'The crater is still smoking 💥',
+        'Imperial architects are already rebuilding 🏗️',
+        'They felt that in 3 kingdoms over 💥',
+        'The shockwave was felt in the royal palace 👑',
+        'Seismologists are confused 📊',
+        'The Emperor pretended not to notice 👀'
+    ]
+    const explosionLine = explosionLines[Math.floor(Math.random() * explosionLines.length)]
+
+    let caption
+    if (targetUser?.rank && senderUser?.rank) {
+        caption = `💣 @${senderName} (${senderUser.rank}) just BOMBED @${targetName} (${targetUser.rank})!!\n\n💥 BOOOOM!! ${explosionLine}\n\n👑 _The Emperor files a noise complaint._`
+    } else {
+        caption = `💣 @${senderName} just BOMBED @${targetName}!!\n\n💥 BOOOOM!! ${explosionLine}`
+    }
+
+    if (gifUrl) {
+        await sock.sendMessage(from, { image: { url: gifUrl }, caption, mentions: [sender, target], quoted: msg })
+    } else {
+        await sock.sendMessage(from, { text: caption, mentions: [sender, target], quoted: msg })
+    }
+}
+
+async function killCommand(sock, msg, from, sender, args) {
+    const target = getTarget(msg, args)
+    if (!target) {
+        await sock.sendMessage(from, { text: '⚔️ Who are you killing?? Tag someone or reply!', quoted: msg })
+        return
+    }
+
+    const senderName = sender.split('@')[0]
+    const targetName = target.split('@')[0]
+    const targetUser = await getUserFlexible(target)
+    const senderUser = await getUserFlexible(sender)
+
+    const killGifs = [
+        'https://media.tenor.com/vMWFBWHGkMQAAAAC/anime-kill.gif',
+        'https://media.tenor.com/ozy3RMoHH3IAAAAC/anime-sword.gif',
+        'https://media.tenor.com/3e3gJJxcXM8AAAAC/anime-fight.gif'
+    ]
+    const gifUrl = killGifs[Math.floor(Math.random() * killGifs.length)]
+
+    const deathLines = [
+        'was deleted from existence 💀',
+        'has been removed from the server of life 💀',
+        'got unalived in 4K 💀',
+        'has left the kingdom permanently 💀',
+        'has been yeeted into the void 💀',
+        'just got their subscription to life cancelled 💀'
+    ]
+    const deathLine = deathLines[Math.floor(Math.random() * deathLines.length)]
+
+    let caption
+    if (targetUser?.rank && senderUser?.rank) {
+        caption = `☠️ @${senderName} (${senderUser.rank}) just KILLED @${targetName} (${targetUser.rank})!!\n\n💀 The ${targetUser.rank} ${deathLine}\n\n👑 _The Emperor watches in silence._`
+    } else {
+        caption = `☠️ @${senderName} just KILLED @${targetName}!!\n\n💀 ${targetName} ${deathLine}`
+    }
+
+    if (gifUrl) {
+        await sock.sendMessage(from, { image: { url: gifUrl }, caption, mentions: [sender, target], quoted: msg })
+    } else {
+        await sock.sendMessage(from, { text: caption, mentions: [sender, target], quoted: msg })
+    }
+}
+
+async function murderCommand(sock, msg, from, sender, args) {
+    const target = getTarget(msg, args)
+    if (!target) {
+        await sock.sendMessage(from, { text: '🔪 Murder WHO?? Tag someone or reply!', quoted: msg })
+        return
+    }
+
+    const senderName = sender.split('@')[0]
+    const targetName = target.split('@')[0]
+    const targetUser = await getUserFlexible(target)
+    const senderUser = await getUserFlexible(sender)
+
+    const murderGifs = [
+        'https://media.tenor.com/Wnbs9HNZLD4AAAAC/anime-stab.gif',
+        'https://media.tenor.com/6j1ZHqFGkkkAAAAC/anime-murder.gif',
+        'https://media.tenor.com/QmPEFoqRXTsAAAAC/kill-anime.gif'
+    ]
+    const gifUrl = murderGifs[Math.floor(Math.random() * murderGifs.length)]
+
+    const mysteryLines = [
+        'No witnesses. No evidence. Just vibes. 🔪',
+        'The royal investigators have no leads. Suspicious. 👀',
+        'The kingdom mourns. Nobody is surprised. 💀',
+        'Motive unknown. Everyone is a suspect. 🕵️',
+        'The body was found in the throne room. Awkward. 💀',
+        'It was ruled an accident. Nobody believes that. 👀'
+    ]
+    const mysteryLine = mysteryLines[Math.floor(Math.random() * mysteryLines.length)]
+
+    let caption
+    if (targetUser?.rank && senderUser?.rank) {
+        caption = `🔪 @${senderName} (${senderUser.rank}) has MURDERED @${targetName} (${targetUser.rank}) in cold blood!!\n\n🕵️ ${mysteryLine}\n\n👑 _The Emperor has been informed._`
+    } else {
+        caption = `🔪 @${senderName} has MURDERED @${targetName} in cold blood!!\n\n🕵️ ${mysteryLine}`
+    }
+
+    if (gifUrl) {
+        await sock.sendMessage(from, { image: { url: gifUrl }, caption, mentions: [sender, target], quoted: msg })
+    } else {
+        await sock.sendMessage(from, { text: caption, mentions: [sender, target], quoted: msg })
+    }
+}
+
+async function bombCommand(sock, msg, from, sender, args) {
+    const target = getTarget(msg, args)
+    if (!target) {
+        await sock.sendMessage(from, { text: '💣 Bomb WHO?? Tag someone or reply!', quoted: msg })
+        return
+    }
+
+    const senderName = sender.split('@')[0]
+    const targetName = target.split('@')[0]
+    const targetUser = await getUserFlexible(target)
+    const senderUser = await getUserFlexible(sender)
+
+    const bombGifs = [
+        'https://media.tenor.com/3e3gJJxcXM8AAAAC/anime-explosion.gif',
+        'https://media.tenor.com/L9CNXR5FXpAAAAAC/explosion-anime.gif',
+        'https://media.tenor.com/2GDMRbKOkHEAAAAC/anime-bomb.gif'
+    ]
+    const gifUrl = bombGifs[Math.floor(Math.random() * bombGifs.length)]
+
+    const explosionLines = [
+        'The crater is still smoking 💥',
+        'Imperial architects are already rebuilding 🏗️',
+        'They felt that in 3 kingdoms over 💥',
+        'The shockwave was felt in the royal palace 👑',
+        'Seismologists are confused 📊',
+        'The Emperor pretended not to notice 👀'
+    ]
+    const explosionLine = explosionLines[Math.floor(Math.random() * explosionLines.length)]
+
+    let caption
+    if (targetUser?.rank && senderUser?.rank) {
+        caption = `💣 @${senderName} (${senderUser.rank}) just BOMBED @${targetName} (${targetUser.rank})!!\n\n💥 BOOOOM!! ${explosionLine}\n\n👑 _The Emperor files a noise complaint._`
+    } else {
+        caption = `💣 @${senderName} just BOMBED @${targetName}!!\n\n💥 BOOOOM!! ${explosionLine}`
+    }
+
+    if (gifUrl) {
+        await sock.sendMessage(from, { image: { url: gifUrl }, caption, mentions: [sender, target], quoted: msg })
+    } else {
+        await sock.sendMessage(from, { text: caption, mentions: [sender, target], quoted: msg })
+    }
+}
 module.exports = {
     hugCommand,
     kissCommand,
@@ -468,5 +726,11 @@ module.exports = {
     punchCommand,
     bonkCommand,
     tickleCommand,
-    shrugCommand
-          }
+    shrugCommand,
+    KillCommand, 
+    murderCommand, 
+    bombCommand, 
+    fuckCommand, 
+    wankCommand, 
+    goonCommand 
+    }

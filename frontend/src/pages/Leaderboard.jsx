@@ -28,26 +28,38 @@ export default function Leaderboard() {
   return (
     <PageTransition>
       <div style={{ position: 'relative' }}>
+
+        {/* ===== BACKGROUND LAYERS ===== */}
         <div style={{
           position: 'fixed', inset: 0, zIndex: 0,
           backgroundImage: 'url(/images/file_00000000765c71f488bf1537bfc3fa44.webp)',
-          backgroundSize: 'cover', backgroundPosition: 'top center', opacity: 0.6
+          backgroundSize: 'cover', backgroundPosition: 'top center', opacity: 0.75
         }} />
-        <div style={{ position: 'fixed', inset: 0, zIndex: 0, background: 'linear-gradient(180deg, rgba(10,9,8,0.35), var(--ink) 65%)' }} />
+        {/* Hero light beam from above */}
+        <div className="empire-glow" style={{ position: 'fixed', zIndex: 0 }} />
+        {/* Drifting fog */}
+        <div className="empire-mist" style={{ position: 'fixed', zIndex: 0 }} />
+        {/* Floating gold dust */}
+        <DustField />
+        {/* Vignette pulls eye to center */}
+        <div className="empire-vignette" style={{ position: 'fixed', zIndex: 0 }} />
+        {/* Fade into page ink at bottom */}
+        <div className="empire-fade" style={{ position: 'fixed', zIndex: 0 }} />
 
-        <div style={{ padding: '0 20px 20px', position: 'relative' }}>
+        <div style={{ padding: '0 20px 20px', position: 'relative', zIndex: 1 }}>
           <div style={{ textAlign: 'center', marginBottom: 8 }}>
             <CrestIcon />
             <h1 style={{
               fontFamily: 'var(--font-display)', color: 'var(--gold-bright)',
-              fontSize: 26, letterSpacing: '0.08em', margin: '10px 0 4px'
+              fontSize: 26, letterSpacing: '0.08em', margin: '10px 0 4px',
+              textShadow: 'var(--gold-text-shadow)'
             }}>EMPIRE LEGENDS</h1>
             <p style={{ fontSize: 11.5, color: 'var(--parchment-dim)', letterSpacing: '0.12em', margin: 0 }}>
               HONOR. POWER. LEGACY.
             </p>
           </div>
 
-          <div className="hide-scrollbar" style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: '16px 0' }}>
+          <div className="hide-scrollbar" style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: '16px 0', justifyContent: 'center' }}>
             {statTypes.map((s) => (
               <button
                 key={s.key} onClick={() => setActive(s.key)}
@@ -55,9 +67,11 @@ export default function Leaderboard() {
                   flex: '0 0 auto', display: 'flex', alignItems: 'center', gap: 6,
                   padding: '10px 18px', borderRadius: 999, cursor: 'pointer',
                   border: active === s.key ? '1px solid var(--gold)' : '1px solid var(--ink-border)',
-                  background: active === s.key ? 'rgba(201,168,76,0.12)' : 'transparent',
+                  background: active === s.key ? 'rgba(201,168,76,0.14)' : 'rgba(10,9,8,0.4)',
                   color: active === s.key ? 'var(--gold-bright)' : 'var(--parchment-dim)',
-                  fontSize: 13, whiteSpace: 'nowrap'
+                  fontSize: 13, whiteSpace: 'nowrap',
+                  boxShadow: active === s.key ? '0 0 14px rgba(201,168,76,0.25)' : 'none',
+                  transition: 'all 0.3s ease'
                 }}
               >
                 <s.icon size={15} />{s.label.toUpperCase()}
@@ -81,7 +95,7 @@ export default function Leaderboard() {
                 </div>
               ) : (
                 <>
-                  <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 10, marginBottom: 22 }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 10, marginBottom: 26, marginTop: 8 }}>
                     {podium[1] && <PodiumPennant entry={podium[1]} size="sm" tone="silver" type={active} />}
                     {podium[0] && <PodiumPennant entry={podium[0]} size="lg" tone="gold" type={active} />}
                     {podium[2] && <PodiumPennant entry={podium[2]} size="sm" tone="bronze" type={active} />}
@@ -99,7 +113,8 @@ export default function Leaderboard() {
                         <span style={{ width: 22, textAlign: 'center', color: 'var(--gold-dim)', fontSize: 13 }}>{entry.rank}</span>
                         <div style={{
                           width: 34, height: 34, borderRadius: '50%', background: 'var(--ink-raised)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center'
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          boxShadow: '0 0 8px rgba(201,168,76,0.15)'
                         }}><UserIcon size={16} /></div>
                         <span style={{ flex: 1, fontSize: 14, color: 'var(--parchment)' }}>{entry.name}</span>
                         <span style={{ fontSize: 13, color: 'var(--gold-bright)' }}>{entry.value.toLocaleString()}</span>
@@ -121,28 +136,97 @@ export default function Leaderboard() {
   )
 }
 
+/* ===== PODIUM SHIELD CARD ===== */
 function PodiumPennant({ entry, size, tone, type }) {
   const lg = size === 'lg'
   const toneColor = tone === 'gold' ? 'var(--gold-bright)' : tone === 'silver' ? '#b9c2cc' : '#c98a4f'
-  const w = lg ? 84 : 70
-  const label = type === 'gold' ? '🪙' : type === 'diamonds' ? '💎' : 'XP'
+  const w = lg ? 92 : 76
+  const StatIcon = type === 'gold' ? CoinIcon : type === 'diamonds' ? GemIcon : LaurelIcon
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-      style={{ textAlign: 'center', width: w + 16 }}
+      style={{ textAlign: 'center', width: w + 16, position: 'relative' }}
     >
-      <svg width={w} height={w * 1.35} viewBox="0 0 100 135" style={{ margin: '0 auto', display: 'block' }}>
-        <path d="M50 0 L90 14 V80 Q90 110 50 135 Q10 110 10 80 V14 Z" fill="rgba(0,0,0,0.3)" stroke={toneColor} strokeWidth="2" />
-        <text x="50" y="22" textAnchor="middle" fill={toneColor} fontSize="14" fontFamily="var(--font-display)">{entry.rank}</text>
-        <circle cx="50" cy="58" r={lg ? 26 : 22} fill="var(--ink-raised)" stroke={toneColor} strokeWidth="2" />
-        <foreignObject x={50 - (lg ? 16 : 13)} y={58 - (lg ? 16 : 13)} width={lg ? 32 : 26} height={lg ? 32 : 26}>
-          <UserIcon size={lg ? 32 : 26} />
-        </foreignObject>
-      </svg>
-      <div style={{ fontSize: lg ? 14 : 12.5, color: 'var(--parchment)', margin: '6px 0 2px' }}>{entry.name}</div>
-      <div style={{ fontSize: lg ? 13 : 11.5, color: 'var(--gold-dim)' }}>{entry.value.toLocaleString()} {label}</div>
+      {/* Crown above shield */}
+      <div style={{ marginBottom: -6, position: 'relative', zIndex: 2 }}>
+        <CrownBadge size={lg ? 22 : 18} color={toneColor} />
+      </div>
+
+      <div style={{ position: 'relative' }}>
+        {lg && (
+          <motion.div
+            animate={{ opacity: [0.4, 0.9, 0.4] }}
+            transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
+            style={{
+              position: 'absolute', inset: -14, borderRadius: '50%',
+              background: `radial-gradient(circle, ${toneColor}33, transparent 70%)`,
+              filter: 'blur(4px)', zIndex: 0
+            }}
+          />
+        )}
+
+        <svg width={w} height={w * 1.35} viewBox="0 0 100 135" style={{ margin: '0 auto', display: 'block', position: 'relative', zIndex: 1 }}>
+          <defs>
+            <linearGradient id={`shieldGrad-${tone}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={toneColor} stopOpacity="0.9" />
+              <stop offset="100%" stopColor={toneColor} stopOpacity="0.3" />
+            </linearGradient>
+          </defs>
+          <path d="M50 4 L90 16 V80 Q90 112 50 132 Q10 112 10 80 V16 Z"
+            fill="rgba(10,9,8,0.55)" stroke={`url(#shieldGrad-${tone})`} strokeWidth="2" />
+          <text x="50" y="26" textAnchor="middle" fill={toneColor} fontSize="15"
+            fontFamily="var(--font-display)" fontWeight="700">{entry.rank}</text>
+          <circle cx="50" cy="62" r={lg ? 27 : 23} fill="var(--ink-raised)" stroke={toneColor} strokeWidth="2" />
+          <foreignObject x={50 - (lg ? 16 : 13)} y={62 - (lg ? 16 : 13)} width={lg ? 32 : 26} height={lg ? 32 : 26}>
+            <UserIcon size={lg ? 32 : 26} />
+          </foreignObject>
+        </svg>
+      </div>
+
+      <div style={{
+        fontSize: lg ? 14.5 : 12.5, color: 'var(--parchment)', margin: '6px 0 2px',
+        fontFamily: 'var(--font-body)', fontWeight: 600, whiteSpace: 'nowrap',
+        overflow: 'hidden', textOverflow: 'ellipsis'
+      }}>{entry.name}</div>
+      <div style={{
+  fontSize: lg ? 13 : 11.5, color: toneColor,
+  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4
+}}>
+  {entry.value.toLocaleString()}
+  <StatIcon size={lg ? 13 : 11} />
+</div>
     </motion.div>
+  )
+}
+
+/* ===== FLOATING GOLD DUST ===== */
+function DustField() {
+  const particles = React.useMemo(() =>
+    Array.from({ length: 14 }, (_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      delay: Math.random() * 8,
+      duration: 8 + Math.random() * 6,
+      size: 1.5 + Math.random() * 2
+    })), [])
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', overflow: 'hidden' }}>
+      {particles.map(p => (
+        <span
+          key={p.id}
+          className="empire-dust"
+          style={{
+            left: `${p.left}%`,
+            width: p.size, height: p.size,
+            animationDelay: `${p.delay}s`,
+            animationDuration: `${p.duration}s`
+          }}
+        />
+      ))}
+    </div>
   )
 }
 
@@ -187,10 +271,10 @@ function UserIcon({ size = 18 }) {
     </svg>
   )
 }
-function CrownBadge({ size = 16 }) {
+function CrownBadge({ size = 16, color = 'var(--gold-dim)' }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <path d="M3 18l1.5-9L9 13l3-7 3 7 4.5-4L21 18H3z" stroke="var(--gold-dim)" strokeWidth="1.3" strokeLinejoin="round" />
+      <path d="M3 18l1.5-9L9 13l3-7 3 7 4.5-4L21 18H3z" stroke={color} strokeWidth="1.3" strokeLinejoin="round" />
     </svg>
   )
-                          }
+}

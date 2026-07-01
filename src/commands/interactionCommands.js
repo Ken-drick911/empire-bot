@@ -727,7 +727,7 @@ module.exports = {
     bonkCommand,
     tickleCommand,
     shrugCommand,
-    KillCommand, 
+    killCommand, 
     murderCommand, 
     bombCommand, 
     fuckCommand, 

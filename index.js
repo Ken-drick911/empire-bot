@@ -40,6 +40,7 @@ const { appointCommand, setRankCommand, giveXPCommand, resetUserCommand } = requ
 const { announceCommand, broadcastCommand, restartCommand, listGroupsCommand } = require('./src/commands/ownerCommands3')
 const { isBanned } = require('./src/engine/moderation')
 const { OWNER_NUMBER } = require('./src/config/owner')
+const { coinFlipCommand, diceCommand, slotsCommand, blackjackCommand, hitCommand, standCommand, rouletteCommand } = require('./src/commands/casino')
 
 const WEB_URL = process.env.WEB_URL || 'https://empire-bot-w94m.onrender.com'
 
@@ -61,7 +62,7 @@ const GAME_COMMANDS = [
     'daily', 'profile', 'p', 'asset', 'deposit', 'dep', 'withdraw', 'wd',
     'give', 'steal', 'top', 'leaderboard', 'lb', 'wealthleaderboard', 'wlb',
     'gr', 'gwlb', 'stats', 'ranks', 'titles', 'reputation', 'rep',
-    'myreputation', 'mr', 'decree', 'afk'
+    'myreputation', 'mr', 'decree', 'afk', 'flip', 'dice', 'slots', 'bj', 'blackjack', 'hit', 'stand', 'roulette', 'rou' 
 ]
 
 let makeWASocket, DisconnectReason
@@ -251,7 +252,7 @@ async function startBot() {
                 return
             }
 
-            const noCooldownCommands = ['daily', 'steal']
+            const noCooldownCommands = ['daily', 'steal', 'hit', 'stand']
             if (!noCooldownCommands.includes(cmd)) {
                 if (isOnCooldown(sender, cmd)) {
                     const remaining = getRemainingTime(sender, cmd)
@@ -388,6 +389,29 @@ async function startBot() {
                 case 'mods':
                     await tagMods(sock, msg, from, args)
                     break
+                    case 'flip':
+    await coinFlipCommand(sock, msg, from, sender, args)
+    break
+case 'dice':
+    await diceCommand(sock, msg, from, sender, args)
+    break
+case 'slots':
+    await slotsCommand(sock, msg, from, sender, args)
+    break
+case 'bj':
+case 'blackjack':
+    await blackjackCommand(sock, msg, from, sender, args)
+    break
+case 'hit':
+    await hitCommand(sock, msg, from, sender)
+    break
+case 'stand':
+    await standCommand(sock, msg, from, sender)
+    break
+case 'roulette':
+case 'rou':
+    await rouletteCommand(sock, msg, from, sender, args)
+    break
                 default:
                     break
             }

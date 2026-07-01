@@ -241,3 +241,14 @@ main::-webkit-scrollbar { display: none; }
   border-right: 1.5px solid var(--gold);
   box-shadow: 1px 1px 4px rgba(201,168,76,0.2);
 }
+/* ── Button light sweep ── */
+@keyframes buttonSweep {
+  0%   { transform: translateX(-120%) skewX(-20deg); }
+  100% { transform: translateX(220%) skewX(-20deg); }
+}
+
+@keyframes borderGlow {
+  0%   { opacity: 0.3; }
+  50%  { opacity: 0.9; }
+  100% { opacity: 0.3; }
+     }

@@ -74,8 +74,8 @@ const GENERAL_COMMANDS = [
     'hug', 'kiss', 'slap', 'wave', 'pat', 'dance', 'sad', 'smile',
     'laugh', 'punch', 'bonk', 'tickle', 'shrug',
     'joke', 'truth', 'dare', 'td', 'wyr', 'ship', 'simp',
-    'gay', 'lesbian', 'meme' 'pp', 'kill', 'murder', 'bomb', 'fuck', 'wank', 'goon'
-
+    'gay', 'lesbian', 'meme', 'pp', 'kill', 'murder', 'bomb', 'kidnap', 'fuck', 'wank', 'goon'
+] 
 let makeWASocket, DisconnectReason
 
 async function loadBaileys() {
@@ -505,6 +505,27 @@ case 'tickle':
     break
 case 'shrug':
     await shrugCommand(sock, msg, from, sender)
+    break
+                    case 'kill':
+    await killCommand(sock, msg, from, sender, args)
+    break
+case 'murder':
+    await murderCommand(sock, msg, from, sender, args)
+    break
+case 'bomb':
+    await bombCommand(sock, msg, from, sender, args)
+    break
+case 'kidnap':
+    await kidnapCommand(sock, msg, from, sender, args)
+    break
+case 'fuck':
+    await fuckCommand(sock, msg, from, sender, args)
+    break
+case 'wank':
+    await wankCommand(sock, msg, from, sender)
+    break
+case 'goon':
+    await goonCommand(sock, msg, from, sender, args)
     break
                 default:
                     break

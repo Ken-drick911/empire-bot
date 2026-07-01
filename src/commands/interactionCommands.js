@@ -432,7 +432,7 @@ async function shrugCommand(sock, msg, from, sender) {
         '¯\\_(ツ)_/¯ The Emperor shrugs. The peasants panic.',
         '¯\\_(ツ)_/¯ Above my pay grade. Way above.',
         '¯\\_(ツ)_/¯ I just work here.',
-        '¯\\_(ツ)_/¯ Ask the throne. I'm just vibing.',
+        "¯\\_(ツ)_/¯ Ask the throne. I'm just vibing.",
         '¯\\_(ツ)_/¯ Genuinely could not care less right now.'
     ]
     const shrugLine = shrugLines[Math.floor(Math.random() * shrugLines.length)]

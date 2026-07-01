@@ -32,10 +32,12 @@ export default function Home() {
             initial={{ scale: 1.04 }}
             animate={{ scale: 1.0 }}
             transition={{ duration: 28, ease: 'easeInOut', repeat: Infinity, repeatType: 'reverse' }}
-            style={{
-              position: 'absolute', inset: 0, width: '100%', height: '100%',
-              objectFit: 'cover', objectPosition: 'center 18%'
-            }}
+            fetchPriority="high"
+loading="eager"
+style={{
+  position: 'absolute', inset: 0, width: '100%', height: '100%',
+  objectFit: 'cover', objectPosition: 'center 18%'
+}}
           />
 
           {/* Atmosphere layers */}

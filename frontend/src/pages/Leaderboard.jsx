@@ -45,7 +45,7 @@ export default function Leaderboard() {
         {/* ===== BACKGROUND LAYERS ===== */}
         <div style={{
           position: 'fixed', inset: 0, zIndex: 0,
-          backgroundImage: 'url(/images/file_00000000765c71f488bf1537bfc3fa44.webp)',
+          backgroundImage: 'url(/images/leaderboardbackground.webp)',
           backgroundSize: 'cover', backgroundPosition: 'top center', opacity: 0.75
         }} />
         {/* Hero light beam from above */}

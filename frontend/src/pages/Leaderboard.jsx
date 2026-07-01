@@ -9,6 +9,19 @@ const statTypes = [
   { key: 'diamonds', label: 'Diamonds', icon: GemIcon }
 ]
 
+const emergeContainer = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } }
+}
+
+const emergeItem = {
+  hidden: { opacity: 0, y: 14, scale: 0.98 },
+  show: {
+    opacity: 1, y: 0, scale: 1,
+    transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1] }
+  }
+}
+
 export default function Leaderboard() {
   const [active, setActive] = useState('xp')
   const [entries, setEntries] = useState([])
@@ -32,7 +45,7 @@ export default function Leaderboard() {
         {/* ===== BACKGROUND LAYERS ===== */}
         <div style={{
           position: 'fixed', inset: 0, zIndex: 0,
-          backgroundImage: 'url(/images/leaderboardbackground.webp)',
+          backgroundImage: 'url(/images/file_00000000765c71f488bf1537bfc3fa44.webp)',
           backgroundSize: 'cover', backgroundPosition: 'top center', opacity: 0.75
         }} />
         {/* Hero light beam from above */}
@@ -44,8 +57,13 @@ export default function Leaderboard() {
         {/* Fade into page ink at bottom */}
         <div className="empire-fade" style={{ position: 'fixed', zIndex: 0 }} />
 
-        <div style={{ padding: '0 20px 20px', position: 'relative', zIndex: 1 }}>
-          <div style={{ textAlign: 'center', marginBottom: 8 }}>
+        <motion.div
+          variants={emergeContainer}
+          initial="hidden"
+          animate="show"
+          style={{ padding: '0 20px 20px', position: 'relative', zIndex: 1 }}
+        >
+          <motion.div variants={emergeItem} style={{ textAlign: 'center', marginBottom: 8 }}>
             <CrestIcon />
             <h1 style={{
               fontFamily: 'var(--font-display)', color: 'var(--gold-bright)',
@@ -55,9 +73,13 @@ export default function Leaderboard() {
             <p style={{ fontSize: 11.5, color: 'var(--parchment-dim)', letterSpacing: '0.12em', margin: 0 }}>
               HONOR. POWER. LEGACY.
             </p>
-          </div>
+          </motion.div>
 
-          <div className="hide-scrollbar" style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: '16px 0', justifyContent: 'center' }}>
+          <motion.div
+            variants={emergeItem}
+            className="hide-scrollbar"
+            style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: '16px 0', justifyContent: 'center' }}
+          >
             {statTypes.map((s) => (
               <button
                 key={s.key} onClick={() => setActive(s.key)}
@@ -75,60 +97,62 @@ export default function Leaderboard() {
                 <s.icon size={15} />{s.label.toUpperCase()}
               </button>
             ))}
-          </div>
+          </motion.div>
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={active}
-              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            >
-              {loading ? (
-                <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--parchment-dim)' }}>
-                  Loading...
-                </div>
-              ) : entries.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--parchment-dim)' }}>
-                  No data yet
-                </div>
-              ) : (
-                <>
-                  <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 10, marginBottom: 26, marginTop: 8 }}>
-                    {podium[1] && <PodiumPennant entry={podium[1]} size="sm" tone="silver" type={active} />}
-                    {podium[0] && <PodiumPennant entry={podium[0]} size="lg" tone="gold" type={active} />}
-                    {podium[2] && <PodiumPennant entry={podium[2]} size="sm" tone="bronze" type={active} />}
+          <motion.div variants={emergeItem}>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={active}
+                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              >
+                {loading ? (
+                  <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--parchment-dim)' }}>
+                    Loading...
                   </div>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: '46vh', overflowY: 'auto' }}>
-                    {rest.map((entry, i) => (
-                      <motion.div
-                        key={entry.name}
-                        initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: i * 0.03, duration: 0.3 }}
-                        className="gold-border-card"
-                        style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px' }}
-                      >
-                        <span style={{ width: 22, textAlign: 'center', color: 'var(--gold-dim)', fontSize: 13 }}>{entry.rank}</span>
-                        <div style={{
-                          width: 34, height: 34, borderRadius: '50%', background: 'var(--ink-raised)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          boxShadow: '0 0 8px rgba(201,168,76,0.15)'
-                        }}><UserIcon size={16} /></div>
-                        <span style={{ flex: 1, fontSize: 14, color: 'var(--parchment)' }}>{entry.name}</span>
-                        <span style={{ fontSize: 13, color: 'var(--gold-bright)' }}>{entry.value.toLocaleString()}</span>
-                        <CrownBadge size={16} />
-                      </motion.div>
-                    ))}
+                ) : entries.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--parchment-dim)' }}>
+                    No data yet
                   </div>
-                </>
-              )}
-            </motion.div>
-          </AnimatePresence>
+                ) : (
+                  <>
+                    <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 10, marginBottom: 26, marginTop: 8 }}>
+                      {podium[1] && <PodiumPennant entry={podium[1]} size="sm" tone="silver" type={active} />}
+                      {podium[0] && <PodiumPennant entry={podium[0]} size="lg" tone="gold" type={active} />}
+                      {podium[2] && <PodiumPennant entry={podium[2]} size="sm" tone="bronze" type={active} />}
+                    </div>
 
-          <div className="ornate-divider" style={{ marginTop: 22 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: '46vh', overflowY: 'auto' }}>
+                      {rest.map((entry, i) => (
+                        <motion.div
+                          key={entry.name}
+                          initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: Math.min(i * 0.03, 0.3), duration: 0.25 }}
+                          className="gold-border-card"
+                          style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px' }}
+                        >
+                          <span style={{ width: 22, textAlign: 'center', color: 'var(--gold-dim)', fontSize: 13 }}>{entry.rank}</span>
+                          <div style={{
+                            width: 34, height: 34, borderRadius: '50%', background: 'var(--ink-raised)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            boxShadow: '0 0 8px rgba(201,168,76,0.15)'
+                          }}><UserIcon size={16} /></div>
+                          <span style={{ flex: 1, fontSize: 14, color: 'var(--parchment)' }}>{entry.name}</span>
+                          <span style={{ fontSize: 13, color: 'var(--gold-bright)' }}>{entry.value.toLocaleString()}</span>
+                          <CrownBadge size={16} />
+                        </motion.div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </motion.div>
+
+          <motion.div variants={emergeItem} className="ornate-divider" style={{ marginTop: 22 }}>
             <span style={{ fontFamily: 'var(--font-body)', fontStyle: 'italic' }}>Great empires are built by legends.</span>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
     </PageTransition>
   )
@@ -189,12 +213,12 @@ function PodiumPennant({ entry, size, tone, type }) {
         overflow: 'hidden', textOverflow: 'ellipsis'
       }}>{entry.name}</div>
       <div style={{
-  fontSize: lg ? 13 : 11.5, color: toneColor,
-  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4
-}}>
-  {entry.value.toLocaleString()}
-  <StatIcon size={lg ? 13 : 11} />
-</div>
+        fontSize: lg ? 13 : 11.5, color: toneColor,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4
+      }}>
+        {entry.value.toLocaleString()}
+        <StatIcon size={lg ? 13 : 11} />
+      </div>
     </motion.div>
   )
 }
@@ -202,12 +226,12 @@ function PodiumPennant({ entry, size, tone, type }) {
 /* ===== FLOATING GOLD DUST ===== */
 function DustField() {
   const particles = React.useMemo(() =>
-    Array.from({ length: 14 }, (_, i) => ({
+    Array.from({ length: 8 }, (_, i) => ({
       id: i,
       left: Math.random() * 100,
-      delay: Math.random() * 8,
-      duration: 8 + Math.random() * 6,
-      size: 1.5 + Math.random() * 2
+      delay: Math.random() * 6,
+      duration: 7 + Math.random() * 5,
+      size: 1.5 + Math.random() * 1.5
     })), [])
 
   return (
@@ -239,8 +263,8 @@ function CrestIcon() {
 function LaurelIcon({ size = 16 }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <path d="M6 20c0-7 3-12 6-15 3 3 6 8 6 15" stroke="var(--gold)" strokeWidth="1.2" />
-      <path d="M7 16c-2 0-3-1-3-3M17 16c2 0 3-1 3-3M8 12c-1.5 0-2.5-1-2.5-2.5M16 12c1.5 0 2.5-1 2.5-2.5" stroke="var(--gold)" strokeWidth="1" />
+      <path d="M6 20c0-7 3-12 6-15 3 3 6 8 6 15" stroke="currentColor" strokeWidth="1.2" />
+      <path d="M7 16c-2 0-3-1-3-3M17 16c2 0 3-1 3-3M8 12c-1.5 0-2.5-1-2.5-2.5M16 12c1.5 0 2.5-1 2.5-2.5" stroke="currentColor" strokeWidth="1" />
     </svg>
   )
 }
@@ -275,4 +299,4 @@ function CrownBadge({ size = 16, color = 'var(--gold-dim)' }) {
       <path d="M3 18l1.5-9L9 13l3-7 3 7 4.5-4L21 18H3z" stroke={color} strokeWidth="1.3" strokeLinejoin="round" />
     </svg>
   )
-}
+        }

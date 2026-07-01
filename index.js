@@ -41,6 +41,7 @@ const { announceCommand, broadcastCommand, restartCommand, listGroupsCommand } =
 const { isBanned } = require('./src/engine/moderation')
 const { OWNER_NUMBER } = require('./src/config/owner')
 const { casinoCommand, coinFlipCommand, diceCommand, slotsCommand, blackjackCommand, hitCommand, standCommand, rouletteCommand } = require('./src/commands/casino')
+const { graphCommand } = require('./src/commands/graphCommands')
 
 const WEB_URL = process.env.WEB_URL || 'https://empire-bot-w94m.onrender.com'
 
@@ -63,6 +64,15 @@ const GAME_COMMANDS = [
     'give', 'steal', 'top', 'leaderboard', 'lb', 'wealthleaderboard', 'wlb',
     'gr', 'gwlb', 'stats', 'ranks', 'titles', 'reputation', 'rep',
     'myreputation', 'mr', 'decree', 'afk', 'flip', 'dice', 'slots', 'bj', 'blackjack', 'hit', 'stand', 'roulette', 'rou', 'casino' 
+]
+
+// GENERAL_COMMANDS pass through freely — no registration check needed
+const GENERAL_COMMANDS = [
+    'skill', 'pov', 'relation', 'duality', 'gen', 'social',
+    'hug', 'kiss', 'slap', 'wave', 'pat', 'dance', 'sad', 'smile',
+    'laugh', 'punch', 'bonk', 'tickle', 'shrug',
+    'joke', 'truth', 'dare', 'td', 'wyr', 'ship', 'simp',
+    'gay', 'lesbian', 'meme'
 ]
 
 let makeWASocket, DisconnectReason
@@ -414,6 +424,14 @@ case 'rou':
     break
                     case 'casino':
     await casinoCommand(sock, msg, from)
+    break
+                    case 'skill':
+case 'pov':
+case 'relation':
+case 'duality':
+case 'gen':
+case 'social':
+    await graphCommand(sock, msg, from, sender, cmd)
     break
                 default:
                     break

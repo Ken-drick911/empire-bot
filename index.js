@@ -40,7 +40,7 @@ const { appointCommand, setRankCommand, giveXPCommand, resetUserCommand } = requ
 const { announceCommand, broadcastCommand, restartCommand, listGroupsCommand } = require('./src/commands/ownerCommands3')
 const { isBanned } = require('./src/engine/moderation')
 const { OWNER_NUMBER } = require('./src/config/owner')
-const { coinFlipCommand, diceCommand, slotsCommand, blackjackCommand, hitCommand, standCommand, rouletteCommand } = require('./src/commands/casino')
+const { casinoCommand, coinFlipCommand, diceCommand, slotsCommand, blackjackCommand, hitCommand, standCommand, rouletteCommand } = require('./src/commands/casino')
 
 const WEB_URL = process.env.WEB_URL || 'https://empire-bot-w94m.onrender.com'
 
@@ -62,7 +62,7 @@ const GAME_COMMANDS = [
     'daily', 'profile', 'p', 'asset', 'deposit', 'dep', 'withdraw', 'wd',
     'give', 'steal', 'top', 'leaderboard', 'lb', 'wealthleaderboard', 'wlb',
     'gr', 'gwlb', 'stats', 'ranks', 'titles', 'reputation', 'rep',
-    'myreputation', 'mr', 'decree', 'afk', 'flip', 'dice', 'slots', 'bj', 'blackjack', 'hit', 'stand', 'roulette', 'rou' 
+    'myreputation', 'mr', 'decree', 'afk', 'flip', 'dice', 'slots', 'bj', 'blackjack', 'hit', 'stand', 'roulette', 'rou', 'casino' 
 ]
 
 let makeWASocket, DisconnectReason
@@ -411,6 +411,9 @@ case 'stand':
 case 'roulette':
 case 'rou':
     await rouletteCommand(sock, msg, from, sender, args)
+    break
+                    case 'casino':
+    await casinoCommand(sock, msg, from)
     break
                 default:
                     break

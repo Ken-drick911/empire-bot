@@ -43,6 +43,7 @@ const { OWNER_NUMBER } = require('./src/config/owner')
 const { casinoCommand, coinFlipCommand, diceCommand, slotsCommand, blackjackCommand, hitCommand, standCommand, rouletteCommand } = require('./src/commands/casino')
 const { graphCommand } = require('./src/commands/graphCommands')
 const { gayCommand, lesbianCommand, simpCommand, ppCommand, shipCommand, jokeCommand, truthCommand, dareCommand, tdCommand, wyrCommand, memeCommand } = require('./src/commands/funCommands')
+const { hugCommand, kissCommand, slapCommand, waveCommand, patCommand, danceCommand, sadCommand, smileCommand, laughCommand, punchCommand, bonkCommand, tickleCommand, shrugCommand } = require('./src/commands/interactionCommands')
 
 const WEB_URL = process.env.WEB_URL || 'https://empire-bot-w94m.onrender.com'
 
@@ -73,7 +74,7 @@ const GENERAL_COMMANDS = [
     'hug', 'kiss', 'slap', 'wave', 'pat', 'dance', 'sad', 'smile',
     'laugh', 'punch', 'bonk', 'tickle', 'shrug',
     'joke', 'truth', 'dare', 'td', 'wyr', 'ship', 'simp',
-    'gay', 'lesbian', 'meme'
+    'gay', 'lesbian', 'meme', 'pp'
 ]
 
 let makeWASocket, DisconnectReason
@@ -466,6 +467,45 @@ case 'wyr':
     break
 case 'meme':
     await memeCommand(sock, msg, from)
+    break
+                    case 'hug':
+    await hugCommand(sock, msg, from, sender, args)
+    break
+case 'kiss':
+    await kissCommand(sock, msg, from, sender, args)
+    break
+case 'slap':
+    await slapCommand(sock, msg, from, sender, args)
+    break
+case 'wave':
+    await waveCommand(sock, msg, from, sender, args)
+    break
+case 'pat':
+    await patCommand(sock, msg, from, sender, args)
+    break
+case 'dance':
+    await danceCommand(sock, msg, from, sender, args)
+    break
+case 'sad':
+    await sadCommand(sock, msg, from, sender)
+    break
+case 'smile':
+    await smileCommand(sock, msg, from, sender)
+    break
+case 'laugh':
+    await laughCommand(sock, msg, from, sender, args)
+    break
+case 'punch':
+    await punchCommand(sock, msg, from, sender, args)
+    break
+case 'bonk':
+    await bonkCommand(sock, msg, from, sender, args)
+    break
+case 'tickle':
+    await tickleCommand(sock, msg, from, sender, args)
+    break
+case 'shrug':
+    await shrugCommand(sock, msg, from, sender)
     break
                 default:
                     break

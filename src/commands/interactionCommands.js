@@ -585,10 +585,10 @@ async function bombCommand(sock, msg, from, sender, args) {
     }
 }
 
-async function killCommand(sock, msg, from, sender, args) {
+ async function kidnapCommand(sock, msg, from, sender, args) {
     const target = getTarget(msg, args)
     if (!target) {
-        await sock.sendMessage(from, { text: '⚔️ Who are you killing?? Tag someone or reply!', quoted: msg })
+        await sock.sendMessage(from, { text: '🎭 Kidnap WHO?? Tag someone or reply!', quoted: msg })
         return
     }
 
@@ -597,28 +597,36 @@ async function killCommand(sock, msg, from, sender, args) {
     const targetUser = await getUserFlexible(target)
     const senderUser = await getUserFlexible(sender)
 
-    const killGifs = [
-        'https://media.tenor.com/vMWFBWHGkMQAAAAC/anime-kill.gif',
-        'https://media.tenor.com/ozy3RMoHH3IAAAAC/anime-sword.gif',
-        'https://media.tenor.com/3e3gJJxcXM8AAAAC/anime-fight.gif'
+    const kidnapGifs = [
+        'https://media.tenor.com/Iy1hFoAeU8AAAAAC/anime-kidnap.gif',
+        'https://media.tenor.com/8sFHOoJqVBUAAAAC/kidnap-anime.gif',
+        'https://media.tenor.com/nGmBfVGQXEAAAAAC/anime-grab.gif'
     ]
-    const gifUrl = killGifs[Math.floor(Math.random() * killGifs.length)]
+    const gifUrl = kidnapGifs[Math.floor(Math.random() * kidnapGifs.length)]
 
-    const deathLines = [
-        'was deleted from existence 💀',
-        'has been removed from the server of life 💀',
-        'got unalived in 4K 💀',
-        'has left the kingdom permanently 💀',
-        'has been yeeted into the void 💀',
-        'just got their subscription to life cancelled 💀'
+    const ransomAmount = Math.floor(Math.random() * 9901) + 100
+    const ransomItems = [
+        `${ransomAmount} Gold Coins 💰`,
+        `${ransomAmount} Imperial Tokens 👑`,
+        `${ransomAmount} Royal Gems 💎`,
+        `${ransomAmount} Kingdom Credits 🏰`
     ]
-    const deathLine = deathLines[Math.floor(Math.random() * deathLines.length)]
+    const ransom = ransomItems[Math.floor(Math.random() * ransomItems.length)]
+
+    const kidnapLines = [
+        'was snatched in broad daylight. Bold move. 😭',
+        'got yeeted into a burlap sack. Classy. 💀',
+        'has been relocated against their will. Legally speaking. 👀',
+        'is currently in an undisclosed royal dungeon. 🏰',
+        'was grabbed so fast the guards are still processing. 💀'
+    ]
+    const kidnapLine = kidnapLines[Math.floor(Math.random() * kidnapLines.length)]
 
     let caption
     if (targetUser?.rank && senderUser?.rank) {
-        caption = `☠️ @${senderName} (${senderUser.rank}) just KILLED @${targetName} (${targetUser.rank})!!\n\n💀 The ${targetUser.rank} ${deathLine}\n\n👑 _The Emperor watches in silence._`
+        caption = `🎭 @${senderName} (${senderUser.rank}) has KIDNAPPED @${targetName} (${targetUser.rank})!!\n\n😭 The ${targetUser.rank} ${kidnapLine}\n\n📜 *RANSOM NOTE:*\n_"Pay ${ransom} or you'll never see your ${targetUser.rank} again!!"_\n\n👑 _The Emperor refuses to negotiate. Good luck._`
     } else {
-        caption = `☠️ @${senderName} just KILLED @${targetName}!!\n\n💀 ${targetName} ${deathLine}`
+        caption = `🎭 @${senderName} has KIDNAPPED @${targetName}!!\n\n😭 ${targetName} ${kidnapLine}\n\n📜 *RANSOM NOTE:*\n_"Pay ${ransom} or you'll never see them again!!"_`
     }
 
     if (gifUrl) {
@@ -628,10 +636,10 @@ async function killCommand(sock, msg, from, sender, args) {
     }
 }
 
-async function murderCommand(sock, msg, from, sender, args) {
+async function fuckCommand(sock, msg, from, sender, args) {
     const target = getTarget(msg, args)
     if (!target) {
-        await sock.sendMessage(from, { text: '🔪 Murder WHO?? Tag someone or reply!', quoted: msg })
+        await sock.sendMessage(from, { text: '😏 Tag someone or reply to their message!', quoted: msg })
         return
     }
 
@@ -640,28 +648,28 @@ async function murderCommand(sock, msg, from, sender, args) {
     const targetUser = await getUserFlexible(target)
     const senderUser = await getUserFlexible(sender)
 
-    const murderGifs = [
-        'https://media.tenor.com/Wnbs9HNZLD4AAAAC/anime-stab.gif',
-        'https://media.tenor.com/6j1ZHqFGkkkAAAAC/anime-murder.gif',
-        'https://media.tenor.com/QmPEFoqRXTsAAAAC/kill-anime.gif'
-    ]
-    const gifUrl = murderGifs[Math.floor(Math.random() * murderGifs.length)]
+    let gifUrl = null
+    try {
+        const res = await fetch('https://nekos.best/api/v2/kiss')
+        const data = await res.json()
+        gifUrl = data.results[0]?.url || null
+    } catch {}
 
-    const mysteryLines = [
-        'No witnesses. No evidence. Just vibes. 🔪',
-        'The royal investigators have no leads. Suspicious. 👀',
-        'The kingdom mourns. Nobody is surprised. 💀',
-        'Motive unknown. Everyone is a suspect. 🕵️',
-        'The body was found in the throne room. Awkward. 💀',
-        'It was ruled an accident. Nobody believes that. 👀'
+    const lines = [
+        'The royal bedchambers have been reserved 👀',
+        'The Emperor looks away respectfully 👑',
+        'The kingdom did NOT need to see this 😭',
+        'Guards have been dismissed from the area 💀',
+        'This is NOT in the imperial constitution 📜',
+        'History books will not record this moment 👀'
     ]
-    const mysteryLine = mysteryLines[Math.floor(Math.random() * mysteryLines.length)]
+    const line = lines[Math.floor(Math.random() * lines.length)]
 
     let caption
     if (targetUser?.rank && senderUser?.rank) {
-        caption = `🔪 @${senderName} (${senderUser.rank}) has MURDERED @${targetName} (${targetUser.rank}) in cold blood!!\n\n🕵️ ${mysteryLine}\n\n👑 _The Emperor has been informed._`
+        caption = `😏 @${senderName} (${senderUser.rank}) and @${targetName} (${targetUser.rank})...\n\n🔞 ${line}\n\n👑 _The Emperor pretends to be blind._`
     } else {
-        caption = `🔪 @${senderName} has MURDERED @${targetName} in cold blood!!\n\n🕵️ ${mysteryLine}`
+        caption = `😏 @${senderName} and @${targetName}...\n\n🔞 ${line}`
     }
 
     if (gifUrl) {
@@ -671,10 +679,45 @@ async function murderCommand(sock, msg, from, sender, args) {
     }
 }
 
-async function bombCommand(sock, msg, from, sender, args) {
+async function wankCommand(sock, msg, from, sender) {
+    const senderName = sender.split('@')[0]
+    const user = await getUserFlexible(sender)
+
+    const wankGifs = [
+        'https://media.tenor.com/DGMXfGPpMvAAAAAC/anime-embarrassed.gif',
+        'https://media.tenor.com/ozy3RMoHH3IAAAAC/anime-caught.gif',
+        'https://media.tenor.com/Yr8PCtW8vNsAAAAC/anime-shocked.gif'
+    ]
+    const gifUrl = wankGifs[Math.floor(Math.random() * wankGifs.length)]
+
+    const caughtLines = [
+        'was caught in 4K by the royal guards 💀',
+        'thought nobody was watching. The Emperor was watching. 👑',
+        'has been reported to the imperial court 📜',
+        'the kingdom has seen too much today 😭',
+        'even the castle walls are traumatized 💀',
+        'was caught red handed. Literally. 👀'
+    ]
+    const caughtLine = caughtLines[Math.floor(Math.random() * caughtLines.length)]
+
+    let caption
+    if (user?.rank) {
+        caption = `💀 @${senderName} (${user.rank}) ${caughtLine}\n\n😭 A ${user.rank}... doing THIS... in the kingdom...\n\n👑 _The Emperor is disappointed but not surprised._`
+    } else {
+        caption = `💀 @${senderName} ${caughtLine}\n\n😭 The kingdom has seen too much today.`
+    }
+
+    if (gifUrl) {
+        await sock.sendMessage(from, { image: { url: gifUrl }, caption, mentions: [sender], quoted: msg })
+    } else {
+        await sock.sendMessage(from, { text: caption, mentions: [sender], quoted: msg })
+    }
+}
+
+async function goonCommand(sock, msg, from, sender, args) {
     const target = getTarget(msg, args)
     if (!target) {
-        await sock.sendMessage(from, { text: '💣 Bomb WHO?? Tag someone or reply!', quoted: msg })
+        await sock.sendMessage(from, { text: '😭 Tag someone or reply to their message!', quoted: msg })
         return
     }
 
@@ -683,28 +726,28 @@ async function bombCommand(sock, msg, from, sender, args) {
     const targetUser = await getUserFlexible(target)
     const senderUser = await getUserFlexible(sender)
 
-    const bombGifs = [
-        'https://media.tenor.com/3e3gJJxcXM8AAAAC/anime-explosion.gif',
-        'https://media.tenor.com/L9CNXR5FXpAAAAAC/explosion-anime.gif',
-        'https://media.tenor.com/2GDMRbKOkHEAAAAC/anime-bomb.gif'
+    const goonGifs = [
+        'https://media.tenor.com/DGMXfGPpMvAAAAAC/anime-embarrassed.gif',
+        'https://media.tenor.com/ozy3RMoHH3IAAAAC/anime-nosebleed.gif',
+        'https://media.tenor.com/3BmkfPVaXgAAAAAC/anime-drool.gif'
     ]
-    const gifUrl = bombGifs[Math.floor(Math.random() * bombGifs.length)]
+    const gifUrl = goonGifs[Math.floor(Math.random() * goonGifs.length)]
 
-    const explosionLines = [
-        'The crater is still smoking 💥',
-        'Imperial architects are already rebuilding 🏗️',
-        'They felt that in 3 kingdoms over 💥',
-        'The shockwave was felt in the royal palace 👑',
-        'Seismologists are confused 📊',
-        'The Emperor pretended not to notice 👀'
+    const goonLines = [
+        'The imperial therapist has been called 📞',
+        'The kingdom files a formal complaint 📜',
+        'Even the dungeon prisoners are uncomfortable 💀',
+        'The royal court is in emergency session 😭',
+        'This has been added to the list of banned activities 📋',
+        'The Emperor has left the group chat 👑💨'
     ]
-    const explosionLine = explosionLines[Math.floor(Math.random() * explosionLines.length)]
+    const goonLine = goonLines[Math.floor(Math.random() * goonLines.length)]
 
     let caption
     if (targetUser?.rank && senderUser?.rank) {
-        caption = `💣 @${senderName} (${senderUser.rank}) just BOMBED @${targetName} (${targetUser.rank})!!\n\n💥 BOOOOM!! ${explosionLine}\n\n👑 _The Emperor files a noise complaint._`
+        caption = `😭 @${senderName} (${senderUser.rank}) is GOONING over @${targetName} (${targetUser.rank})!!\n\n💀 ${goonLine}\n\n👑 _This is NOT what the empire was built for._`
     } else {
-        caption = `💣 @${senderName} just BOMBED @${targetName}!!\n\n💥 BOOOOM!! ${explosionLine}`
+        caption = `😭 @${senderName} is GOONING over @${targetName}!!\n\n💀 ${goonLine}`
     }
 
     if (gifUrl) {
@@ -712,7 +755,7 @@ async function bombCommand(sock, msg, from, sender, args) {
     } else {
         await sock.sendMessage(from, { text: caption, mentions: [sender, target], quoted: msg })
     }
-}
+ }
 module.exports = {
     hugCommand,
     kissCommand,

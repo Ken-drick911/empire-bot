@@ -42,6 +42,7 @@ const { isBanned } = require('./src/engine/moderation')
 const { OWNER_NUMBER } = require('./src/config/owner')
 const { casinoCommand, coinFlipCommand, diceCommand, slotsCommand, blackjackCommand, hitCommand, standCommand, rouletteCommand } = require('./src/commands/casino')
 const { graphCommand } = require('./src/commands/graphCommands')
+const { gayCommand, lesbianCommand, simpCommand, ppCommand, shipCommand, jokeCommand, truthCommand, dareCommand, tdCommand, wyrCommand, memeCommand } = require('./src/commands/funCommands')
 
 const WEB_URL = process.env.WEB_URL || 'https://empire-bot-w94m.onrender.com'
 
@@ -432,6 +433,39 @@ case 'duality':
 case 'gen':
 case 'social':
     await graphCommand(sock, msg, from, sender, cmd)
+    break
+                    case 'gay':
+    await gayCommand(sock, msg, from, sender, pushName)
+    break
+case 'lesbian':
+    await lesbianCommand(sock, msg, from, sender)
+    break
+case 'simp':
+    await simpCommand(sock, msg, from, sender)
+    break
+case 'pp':
+    await ppCommand(sock, msg, from, sender)
+    break
+case 'ship':
+    await shipCommand(sock, msg, from, sender, args)
+    break
+case 'joke':
+    await jokeCommand(sock, msg, from, sender)
+    break
+case 'truth':
+    await truthCommand(sock, msg, from, sender)
+    break
+case 'dare':
+    await dareCommand(sock, msg, from, sender)
+    break
+case 'td':
+    await tdCommand(sock, msg, from, sender)
+    break
+case 'wyr':
+    await wyrCommand(sock, msg, from, sender)
+    break
+case 'meme':
+    await memeCommand(sock, msg, from)
     break
                 default:
                     break

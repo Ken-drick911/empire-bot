@@ -42,20 +42,15 @@ export default function Leaderboard() {
     <PageTransition>
       <div style={{ position: 'relative' }}>
 
-        {/* ===== BACKGROUND LAYERS ===== */}
+        {/* ===== BACKGROUND LAYERS — absolute, not fixed, so they scroll with the page instead of glitching ===== */}
         <div style={{
-          position: 'fixed', inset: 0, zIndex: 0,
-          backgroundImage: 'url(/images/leaderboardbackground.webp)',
+          position: 'absolute', inset: 0, zIndex: 0,
+          backgroundImage: 'url(/images/file_00000000765c71f488bf1537bfc3fa44.webp)',
           backgroundSize: 'cover', backgroundPosition: 'top center', opacity: 0.75
         }} />
-        {/* Hero light beam from above */}
-        <div className="empire-glow" style={{ position: 'fixed', zIndex: 0 }} />
-        {/* Floating gold dust */}
         <DustField />
-        {/* Vignette pulls eye to center */}
-        <div className="empire-vignette" style={{ position: 'fixed', zIndex: 0 }} />
-        {/* Fade into page ink at bottom */}
-        <div className="empire-fade" style={{ position: 'fixed', zIndex: 0 }} />
+        <div className="empire-vignette" style={{ position: 'absolute', zIndex: 0 }} />
+        <div className="empire-fade" style={{ position: 'absolute', zIndex: 0 }} />
 
         <motion.div
           variants={emergeContainer}
@@ -171,7 +166,6 @@ function PodiumPennant({ entry, size, tone, type }) {
       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
       style={{ textAlign: 'center', width: w + 16, position: 'relative' }}
     >
-      {/* Crown above shield */}
       <div style={{ marginBottom: -6, position: 'relative', zIndex: 2 }}>
         <CrownBadge size={lg ? 22 : 18} color={toneColor} />
       </div>
@@ -235,7 +229,7 @@ function DustField() {
     })), [])
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', overflow: 'hidden' }}>
+    <div style={{ position: 'absolute', inset: 0, zIndex: 0, pointerEvents: 'none', overflow: 'hidden' }}>
       {particles.map(p => (
         <span
           key={p.id}
@@ -299,4 +293,4 @@ function CrownBadge({ size = 16, color = 'var(--gold-dim)' }) {
       <path d="M3 18l1.5-9L9 13l3-7 3 7 4.5-4L21 18H3z" stroke={color} strokeWidth="1.3" strokeLinejoin="round" />
     </svg>
   )
-        }
+              }

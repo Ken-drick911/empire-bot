@@ -16,11 +16,59 @@ async function validateBet(sender, betArg, min = 10) {
     const user = await getUser(sender)
     if (!user) return { error: '❌ User not found.' }
 
+    if (!betArg) return { error: `❌ You forgot to enter a bet amount.\nExample: *100* or *all*` }
+
     const bet = betArg === 'all' ? user.wallet : parseInt(betArg)
-    if (isNaN(bet) || bet < min) return { error: `❌ Minimum bet is ${min} 🪙` }
-    if (bet > user.wallet) return { error: `❌ Not enough Gold. You have ${user.wallet} 🪙` }
+    if (isNaN(bet) || bet < min) return { error: `❌ Invalid bet. Minimum is *${min} 🪙*\nExample: *.slots 100* or *.slots all*` }
+    if (bet > user.wallet) return { error: `❌ Not enough Gold.\nYou have *${user.wallet} 🪙* in your wallet.` }
+    if (user.wallet === 0) return { error: `❌ Your wallet is empty! Claim your *.daily* reward first.` }
 
     return { user, bet }
+}
+
+// ─── CASINO HELP ─────────────────────────────────────────────────
+async function casinoCommand(sock, msg, from) {
+    await sock.sendMessage(from, {
+        text: `🎰 *IMPERIAL CASINO* 🎰
+━━━━━━━━━━━━━━━━
+All games require registration.
+Type the command alone to see usage.
+━━━━━━━━━━━━━━━━
+
+🪙 *COIN FLIP*
+┣ .flip heads [bet]
+┣ .flip tails [bet]
+┗ Win = 2x payout
+
+🎲 *DICE*
+┣ .dice [bet] [guess 1-6]
+┗ Correct guess = 5x payout
+
+🎰 *SLOTS*
+┣ .slots [bet]
+┣ 👑👑👑 = 10x
+┣ 💎💎💎 = 7x
+┣ ⭐⭐⭐ = 5x
+┗ Match symbols to win
+
+🃏 *BLACKJACK*
+┣ .bj [bet] — start game
+┣ .hit — draw a card
+┣ .stand — hold your hand
+┗ Beat dealer without busting
+
+🎡 *ROULETTE*
+┣ .roulette red/black [bet]
+┣ .roulette even/odd [bet]
+┣ .roulette high/low [bet]
+┣ .roulette number [0-36] [bet]
+┗ Number bet = 35x payout!
+
+━━━━━━━━━━━━━━━━
+💡 Tip: Use *all* as bet to go all in!
+━━━━━━━━━━━━━━━━`,
+        quoted: msg
+    })
 }
 
 // ─── COIN FLIP ────────────────────────────────────────────────────
@@ -30,7 +78,26 @@ async function coinFlipCommand(sock, msg, from, sender, args) {
 
     if (!side || !['heads', 'tails', 'h', 't'].includes(side)) {
         await sock.sendMessage(from, {
-            text: `🪙 *COIN FLIP*\n━━━━━━━━━━━━━━━━\nUsage: *.flip heads 100* or *.flip tails all*\n━━━━━━━━━━━━━━━━`,
+            text: `❌ *Wrong command format!*
+
+🪙 *COIN FLIP* usage:
+┣ *.flip heads 100*
+┣ *.flip tails 500*
+┗ *.flip heads all*
+
+Pick *heads* or *tails*, then your bet amount.`,
+            quoted: msg
+        })
+        return
+    }
+
+    if (!betArg) {
+        await sock.sendMessage(from, {
+            text: `❌ *You forgot the bet amount!*
+
+🪙 *COIN FLIP* usage:
+┣ *.flip ${side} 100*
+┗ *.flip ${side} all*`,
             quoted: msg
         })
         return
@@ -66,9 +133,39 @@ async function diceCommand(sock, msg, from, sender, args) {
     const betArg = args[0]
     const guess = parseInt(args[1])
 
-    if (!betArg || isNaN(guess) || guess < 1 || guess > 6) {
+    if (!betArg && isNaN(guess)) {
         await sock.sendMessage(from, {
-            text: `🎲 *DICE*\n━━━━━━━━━━━━━━━━\nUsage: *.dice 100 4* (bet amount, guess 1-6)\nGuess right = *5x payout!*\n━━━━━━━━━━━━━━━━`,
+            text: `❌ *Wrong command format!*
+
+🎲 *DICE* usage:
+┣ *.dice [bet] [guess 1-6]*
+┣ *.dice 100 4*
+┗ *.dice all 6*
+
+Guess the correct number = *5x payout!*`,
+            quoted: msg
+        })
+        return
+    }
+
+    if (!betArg) {
+        await sock.sendMessage(from, {
+            text: `❌ *You forgot the bet amount!*
+
+🎲 *DICE* usage:
+┗ *.dice 100 4*`,
+            quoted: msg
+        })
+        return
+    }
+
+    if (isNaN(guess) || guess < 1 || guess > 6) {
+        await sock.sendMessage(from, {
+            text: `❌ *Invalid guess!* Pick a number between *1 and 6*.
+
+🎲 *DICE* usage:
+┣ *.dice 100 3*
+┗ *.dice all 6*`,
             quoted: msg
         })
         return
@@ -93,7 +190,7 @@ async function diceCommand(sock, msg, from, sender, args) {
 Your guess: ${diceEmojis[guess]}
 Result: ${diceEmojis[roll]}
 ━━━━━━━━━━━━━━━━
-${won ? `✅ *CORRECT!* You won *+${bet * 4} 🪙*` : `😞 Wrong! You lost *-${bet} 🪙*`}
+${won ? `🎉 *CORRECT!* You won *+${bet * 4} 🪙*` : `😞 Wrong! You lost *-${bet} 🪙*`}
 👝 Wallet: ${user.wallet + payout} 🪙
 ━━━━━━━━━━━━━━━━`,
         quoted: msg
@@ -140,7 +237,15 @@ async function slotsCommand(sock, msg, from, sender, args) {
 
     if (!betArg) {
         await sock.sendMessage(from, {
-            text: `🎰 *SLOTS*\n━━━━━━━━━━━━━━━━\nUsage: *.slots 100* or *.slots all*\n\n💎💎💎 = 7x  |  👑👑👑 = 10x\n⭐⭐⭐ = 5x  |  🍊🍊🍊 = 3x\n🍒🍒🍒 = 2x  |  Two 👑 = 3x\n━━━━━━━━━━━━━━━━`,
+            text: `❌ *Wrong command format!*
+
+🎰 *SLOTS* usage:
+┣ *.slots 100*
+┗ *.slots all*
+
+💎💎💎 = 7x  |  👑👑👑 = 10x
+⭐⭐⭐ = 5x  |  🍊🍊🍊 = 3x
+🍒🍒🍒 = 2x  |  Two 👑 = 3x`,
             quoted: msg
         })
         return
@@ -162,7 +267,7 @@ async function slotsCommand(sock, msg, from, sender, args) {
 ━━━━━━━━━━━━━━━━
 [ ${reels[0]} | ${reels[1]} | ${reels[2]} ]
 ━━━━━━━━━━━━━━━━
-${winAmount > 0 ? `🎉 You won *+${winAmount} 🪙*` : `😞 No match! You lost *-${bet} 🪙*`}
+${winAmount > 0 ? `🎉 You won *+${winAmount} 🪙*` : `❌ No match! You lost *-${bet} 🪙*`}
 👝 Wallet: ${user.wallet + payout} 🪙
 ━━━━━━━━━━━━━━━━`,
         quoted: msg
@@ -209,7 +314,15 @@ async function blackjackCommand(sock, msg, from, sender, args) {
 
     if (!betArg) {
         await sock.sendMessage(from, {
-            text: `🃏 *BLACKJACK*\n━━━━━━━━━━━━━━━━\nUsage: *.bj 100* to start\nThen: *.hit* or *.stand*\nGet closer to 21 than the dealer!\n━━━━━━━━━━━━━━━━`,
+            text: `❌ *Wrong command format!*
+
+🃏 *BLACKJACK* usage:
+┣ *.bj 100* — start a game
+┣ *.bj all* — go all in
+┗ Then type *.hit* or *.stand*
+
+Get closer to *21* than the dealer!
+Blackjack (21 on deal) = *1.5x payout*`,
             quoted: msg
         })
         return
@@ -217,7 +330,7 @@ async function blackjackCommand(sock, msg, from, sender, args) {
 
     if (BLACKJACK_SESSIONS.has(sender)) {
         await sock.sendMessage(from, {
-            text: `⚠️ You already have an active blackjack game!\nUse *.hit* or *.stand*`,
+            text: `⚠️ *You already have an active game!*\nType *.hit* to draw a card or *.stand* to hold.`,
             quoted: msg
         })
         return
@@ -271,7 +384,10 @@ Type *.hit* to draw or *.stand* to hold
 async function hitCommand(sock, msg, from, sender) {
     const session = BLACKJACK_SESSIONS.get(sender)
     if (!session) {
-        await sock.sendMessage(from, { text: `❌ No active blackjack game. Start one with *.bj 100*`, quoted: msg })
+        await sock.sendMessage(from, {
+            text: `❌ *No active blackjack game!*\nStart one with *.bj 100*`,
+            quoted: msg
+        })
         return
     }
 
@@ -287,7 +403,7 @@ async function hitCommand(sock, msg, from, sender) {
 ━━━━━━━━━━━━━━━━
 Your hand: ${formatHand(session.playerHand)} = *${total}*
 ━━━━━━━━━━━━━━━━
-💥 *BUST!* You lost *-${session.bet} 🪙*
+😞 *BUST!* You lost *-${session.bet} 🪙*
 👝 Wallet: ${user.wallet - session.bet} 🪙
 ━━━━━━━━━━━━━━━━`,
             quoted: msg
@@ -315,7 +431,10 @@ Type *.hit* or *.stand*
 async function standCommand(sock, msg, from, sender) {
     const session = BLACKJACK_SESSIONS.get(sender)
     if (!session) {
-        await sock.sendMessage(from, { text: `❌ No active blackjack game. Start one with *.bj 100*`, quoted: msg })
+        await sock.sendMessage(from, {
+            text: `❌ *No active blackjack game!*\nStart one with *.bj 100*`,
+            quoted: msg
+        })
         return
     }
 
@@ -340,7 +459,7 @@ async function standCommand(sock, msg, from, sender) {
         resultText = `🤝 *PUSH!* Bet returned.`
     } else {
         payout = -session.bet
-        resultText = `❌ Dealer wins! You lost *-${session.bet} 🪙*`
+        resultText = `😞 Dealer wins! You lost *-${session.bet} 🪙*`
     }
 
     await updateUser(sender, { wallet: user.wallet + payout })
@@ -364,38 +483,57 @@ const RED_NUMBERS = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]
 
 async function rouletteCommand(sock, msg, from, sender, args) {
     const betType = args[0]?.toLowerCase()
-    const betArg = args[1]
-
     const validTypes = ['red', 'black', 'even', 'odd', 'high', 'low', 'number']
 
     if (!betType || !validTypes.includes(betType)) {
         await sock.sendMessage(from, {
-            text: `🎡 *ROULETTE*
-━━━━━━━━━━━━━━━━
-Usage: *.roulette [type] [bet]*
+            text: `❌ *Wrong command format!*
 
-Types:
-• red/black — 2x payout
-• even/odd — 2x payout  
-• high(19-36)/low(1-18) — 2x payout
-• number 0-36 — 35x payout!
+🎡 *ROULETTE* usage:
+┣ *.roulette red 100*
+┣ *.roulette black all*
+┣ *.roulette even 200*
+┣ *.roulette odd 200*
+┣ *.roulette high 100* (19-36)
+┣ *.roulette low 100* (1-18)
+┗ *.roulette number 17 500*
 
-Example: *.roulette red 100*
-━━━━━━━━━━━━━━━━`,
+red/black/even/odd/high/low = *2x*
+number (0-36) = *35x payout!*`,
             quoted: msg
         })
         return
     }
 
-    let finalBetArg = betArg
+    let finalBetArg = args[1]
     let numberGuess = null
 
     if (betType === 'number') {
         numberGuess = parseInt(args[1])
         finalBetArg = args[2]
         if (isNaN(numberGuess) || numberGuess < 0 || numberGuess > 36) {
-            return sock.sendMessage(from, { text: `❌ Pick a number between 0 and 36`, quoted: msg })
+            await sock.sendMessage(from, {
+                text: `❌ *Invalid number!*
+
+🎡 *ROULETTE* number usage:
+┗ *.roulette number [0-36] [bet]*
+
+Example: *.roulette number 17 500*`,
+                quoted: msg
+            })
+            return
         }
+    }
+
+    if (!finalBetArg) {
+        await sock.sendMessage(from, {
+            text: `❌ *You forgot the bet amount!*
+
+🎡 *ROULETTE* usage:
+┗ *.roulette ${betType}${numberGuess !== null ? ` ${numberGuess}` : ''} 100*`,
+            quoted: msg
+        })
+        return
     }
 
     const { error, user, bet } = await validateBet(sender, finalBetArg)
@@ -438,6 +576,7 @@ ${won ? `🎉 You won *+${bet * (multiplier - 1)} 🪙*` : `😞 You lost *-${be
 }
 
 module.exports = {
+    casinoCommand,
     coinFlipCommand,
     diceCommand,
     slotsCommand,
@@ -445,4 +584,4 @@ module.exports = {
     hitCommand,
     standCommand,
     rouletteCommand
-      }
+        }

@@ -49,15 +49,16 @@ app.post('/pair', express.urlencoded({ extended: true }), async (req, res) => {
         const phone = req.body.phone?.replace(/\D/g, '')
         if (!phone) return res.send('❌ No phone number')
 
-        const { default: makeWASocket, useMultiFileAuthState } = await import('@whiskeysockets/baileys')
-        const pino = require('pino')
+        const { default: makeWASocket } = await import('@whiskeysockets/baileys')
+const { useMongoAuthState } = require('../src/engine/mongoAuth')
+const pino = require('pino')
 
-        if (pairingSock) {
-            try { pairingSock.end() } catch {}
-            pairingSock = null
-        }
+if (pairingSock) {
+    try { pairingSock.end() } catch {}
+    pairingSock = null
+}
 
-        const { state, saveCreds } = await useMultiFileAuthState('./auth_info_baileys')
+const { state, saveCreds } = await useMongoAuthState(process.env.MONGO_URI)
         pairingSock = makeWASocket({
             auth: state,
             logger: pino({ level: 'silent' }),

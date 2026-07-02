@@ -12,65 +12,52 @@ router.get('/me', auth, async (req, res) => {
   try {
     const db = getDB()
     const phone = req.user.phone
+    const jid = phone + '@s.whatsapp.net'
 
-    // Single user doc — registration merges web + bot data
-    const user = await db.collection('users').findOne({ phone })
-    if (!user) return res.status(404).json({ error: 'User not found' })
+    const webUser = await db.collection('users').findOne({ phone })
+    if (!webUser) return res.status(404).json({ error: 'User not found' })
 
-    const level = user.level || 1
-    const xp = user.xp || 0
-    const xpToNext = user.xpToNext || getXPToNextLevel(level)
+    const botUser = await db.collection('users').findOne({
+      $or: [
+        { id: jid },
+        { id: { $regex: phone } },
+        { phone: phone, xp: { $exists: true } }
+      ]
+    }) || webUser
+
+    const level = botUser.level || webUser.level || 1
+    const xp = botUser.xp || webUser.xp || 0
+    const xpToNext = botUser.xpToNext || getXPToNextLevel(level)
 
     const now = Date.now()
-    const lastReset = user.ticketResetAt
-      ? new Date(user.ticketResetAt).getTime() : 0
+    const lastReset = botUser.ticketResetAt
+      ? new Date(botUser.ticketResetAt).getTime() : 0
     const tickets = (now - lastReset) >= 5 * 60 * 60 * 1000
-      ? 0 : (user.lotteryTickets || 0)
+      ? 0 : (botUser.lotteryTickets || 0)
 
     res.json({
-      username: user.username,
+      username: webUser.username,
       phone,
-      avatar: user.avatar || null,
-      cover: user.cover || null,
-      bio: user.bio || '',
+      avatar: webUser.avatar || null,
+      cover: webUser.cover || null,
+      bio: webUser.bio || '',
       xp,
       level,
       xpToNext,
-      rank: user.rank || 'Peasant',
-      gold: user.wallet || 0,
-      vaultGold: user.vault || 0,
-      vaultDiamonds: user.diamonds || 0,
-      reputation: user.reputation || null,
-      title: user.title || '',
-      titleDesc: user.titleDesc || 'Begin your rise.',
+      rank: botUser.rank || webUser.rank || 'Peasant',
+      gold: botUser.wallet || webUser.wallet || 0,
+      vaultGold: botUser.vault || webUser.vault || 0,
+      vaultDiamonds: botUser.diamonds || webUser.diamonds || 0,
+      reputation: botUser.reputation || null,
+      title: botUser.title || webUser.title || '',
+      titleDesc: botUser.titleDesc || webUser.titleDesc || 'Begin your rise.',
       lotteryTickets: tickets,
-      frame: user.frame || 'classic',
-      inventory: user.inventory || []
+      frame: webUser.frame || 'classic',
+      inventory: webUser.inventory || []
     })
   } catch (err) {
+    console.error('Profile error:', err)
     res.status(500).json({ error: 'Server error' })
   }
 })
-
-router.post('/update', auth, async (req, res) => {
-  try {
-    const db = getDB()
-    const { avatar, cover, bio, username, frame } = req.body
-    const update = {}
-    if (avatar) update.avatar = avatar
-    if (cover) update.cover = cover
-    if (bio !== undefined) update.bio = bio
-    if (username) update.username = username
-    if (frame) update.frame = frame
-
-    await db.collection('users').updateOne(
-      { phone: req.user.phone },
-      { $set: update }
-    )
-    res.json({ success: true })
-  } catch (err) {
-    res.status(500).json({ error: 'Server error' })
-  }
-})
-
 module.exports = router

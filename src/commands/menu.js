@@ -26,12 +26,15 @@ function getMenuText(senderName) {
 ┗━━━━━━━━━━━
 
 🎰 𝗜𝗠𝗣𝗘𝗥𝗜𝗔𝗟 𝗖𝗔𝗦𝗜𝗡𝗢 🎰
-┣ ♤ .casino — view all games
+┣ ♤ .ec [amount] — enter casino
+┣ ♤ .ccd — check cooldowns
 ┣ ♤ .flip heads/tails [bet]
 ┣ ♤ .dice [bet] [1-6]
 ┣ ♤ .slots [bet]
-┣ ♤ .bj [bet]  → .hit / .stand
+┣ ♤ .bj [bet] → .hit / .stand
+┣ ♤ .db [bet] — dice battle
 ┣ ♤ .roulette [type] [bet]
+┣ ♤ .casino [bet]
 ┗━━━━━━━━━━━
 
 ⚜️ 𝗜𝗠𝗣𝗘𝗥𝗜𝗔𝗟 𝗦𝗛𝗢𝗣 ⚜️

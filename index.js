@@ -1,6 +1,17 @@
 const { useMongoAuthState } = require('./src/engine/mongoAuth')
 const pino = require('pino')
+const readline = require('readline')
 const { saveSession, loadSession, getAllGroupSettings } = require('./src/data/db')
+
+let isPairing = false
+let hasPrompted = false
+
+process.on('unhandledRejection', (err) => {
+    console.log('⚠️  Unhandled error (ignored, bot stays alive):', err.message)
+})
+process.on('uncaughtException', (err) => {
+    console.log('⚠️  Uncaught error (ignored, bot stays alive):', err.message)
+})
 
 // Group Management
 const {
@@ -43,7 +54,7 @@ const { OWNER_NUMBER } = require('./src/config/owner')
 const { casinoCommand, coinFlipCommand, diceCommand, slotsCommand, blackjackCommand, hitCommand, standCommand, rouletteCommand } = require('./src/commands/casino')
 const { graphCommand } = require('./src/commands/graphCommands')
 const { gayCommand, lesbianCommand, simpCommand, ppCommand, shipCommand, jokeCommand, truthCommand, dareCommand, tdCommand, wyrCommand, memeCommand } = require('./src/commands/funCommands')
-const { hugCommand, kissCommand, slapCommand, waveCommand, patCommand, danceCommand, sadCommand, smileCommand, laughCommand, punchCommand, bonkCommand, tickleCommand, shrugCommand, killCommand, murderCommand, bombCommand, fuckCommand, wankCommand, goonCommand } = require('./src/commands/interactionCommands')
+const { hugCommand, kissCommand, slapCommand, waveCommand, patCommand, danceCommand, sadCommand, smileCommand, laughCommand, punchCommand, bonkCommand, tickleCommand, shrugCommand, killCommand, murderCommand, bombCommand, kidnapCommand, fuckCommand, wankCommand, goonCommand } = require('./src/commands/interactionCommands')
 
 const WEB_URL = process.env.WEB_URL || 'https://empire-bot-w94m.onrender.com'
 
@@ -95,6 +106,43 @@ async function startBot() {
         printQRInTerminal: false
     })
 
+    const needsPairing = !sock.authState.creds.registered
+
+    if (needsPairing && !hasPrompted) {
+        hasPrompted = true
+        isPairing = true
+
+        const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
+        const question = (text) => new Promise((resolve) => rl.question(text, resolve))
+
+        const phone = await question('📱 Enter phone number (e.g. 2348012345678): ')
+        rl.close()
+
+        const requestCode = async () => {
+            try {
+                const code = await sock.requestPairingCode(phone.replace(/\D/g, ''))
+                console.log(`\n⚔️  Your pairing code: ${code}\n`)
+                console.log('Go to WhatsApp → Settings → Linked Devices → Link a Device → Link with phone number instead')
+                console.log('⏳ Code expires in ~60s. Take your time reading this — the bot will wait.\n')
+            } catch (e) {
+                console.log('❌ Failed to get pairing code:', e.message)
+                console.log('Restart the bot to try again.\n')
+                isPairing = false
+            }
+        }
+
+        if (sock.ws?.socket?.readyState === 1) {
+            await requestCode()
+        } else {
+            sock.ev.on('connection.update', function onceOpen(u) {
+                if (u.connection === 'open' || u.qr) {
+                    sock.ev.off('connection.update', onceOpen)
+                    requestCode()
+                }
+            })
+        }
+    }
+
     const savedSettings = await getAllGroupSettings()
     savedSettings.forEach(doc => {
         const { chatId, ...settings } = doc
@@ -109,12 +157,14 @@ async function startBot() {
         if (connection === 'close') {
             const code = lastDisconnect?.error?.output?.statusCode
             if (code === DisconnectReason.loggedOut) {
-                console.log('❌ Logged out. Visit /pair to re-pair.')
-            } else if (code !== 401) {
+                console.log('❌ Logged out. Restart the bot to re-pair.')
+                hasPrompted = false
+            } else if (code !== 401 && !isPairing) {
                 setTimeout(startBot, 10000)
             }
         }
         if (connection === 'open') {
+            isPairing = false
             console.log('✅ Empire Bot connected!')
             try {
                 const allGroups = await sock.groupFetchAllParticipating()
@@ -400,133 +450,133 @@ async function startBot() {
                 case 'mods':
                     await tagMods(sock, msg, from, args)
                     break
-                    case 'flip':
-    await coinFlipCommand(sock, msg, from, sender, args)
-    break
-case 'dice':
-    await diceCommand(sock, msg, from, sender, args)
-    break
-case 'slots':
-    await slotsCommand(sock, msg, from, sender, args)
-    break
-case 'bj':
-case 'blackjack':
-    await blackjackCommand(sock, msg, from, sender, args)
-    break
-case 'hit':
-    await hitCommand(sock, msg, from, sender)
-    break
-case 'stand':
-    await standCommand(sock, msg, from, sender)
-    break
-case 'roulette':
-case 'rou':
-    await rouletteCommand(sock, msg, from, sender, args)
-    break
-                    case 'casino':
-    await casinoCommand(sock, msg, from)
-    break
-                    case 'skill':
-case 'pov':
-case 'relation':
-case 'duality':
-case 'gen':
-case 'social':
-    await graphCommand(sock, msg, from, sender, cmd)
-    break
-                    case 'gay':
-    await gayCommand(sock, msg, from, sender, pushName)
-    break
-case 'lesbian':
-    await lesbianCommand(sock, msg, from, sender)
-    break
-case 'simp':
-    await simpCommand(sock, msg, from, sender)
-    break
-case 'pp':
-    await ppCommand(sock, msg, from, sender)
-    break
-case 'ship':
-    await shipCommand(sock, msg, from, sender, args)
-    break
-case 'joke':
-    await jokeCommand(sock, msg, from, sender)
-    break
-case 'truth':
-    await truthCommand(sock, msg, from, sender)
-    break
-case 'dare':
-    await dareCommand(sock, msg, from, sender)
-    break
-case 'td':
-    await tdCommand(sock, msg, from, sender)
-    break
-case 'wyr':
-    await wyrCommand(sock, msg, from, sender)
-    break
-case 'meme':
-    await memeCommand(sock, msg, from)
-    break
-                    case 'hug':
-    await hugCommand(sock, msg, from, sender, args)
-    break
-case 'kiss':
-    await kissCommand(sock, msg, from, sender, args)
-    break
-case 'slap':
-    await slapCommand(sock, msg, from, sender, args)
-    break
-case 'wave':
-    await waveCommand(sock, msg, from, sender, args)
-    break
-case 'pat':
-    await patCommand(sock, msg, from, sender, args)
-    break
-case 'dance':
-    await danceCommand(sock, msg, from, sender, args)
-    break
-case 'sad':
-    await sadCommand(sock, msg, from, sender)
-    break
-case 'smile':
-    await smileCommand(sock, msg, from, sender)
-    break
-case 'laugh':
-    await laughCommand(sock, msg, from, sender, args)
-    break
-case 'punch':
-    await punchCommand(sock, msg, from, sender, args)
-    break
-case 'bonk':
-    await bonkCommand(sock, msg, from, sender, args)
-    break
-case 'tickle':
-    await tickleCommand(sock, msg, from, sender, args)
-    break
-case 'shrug':
-    await shrugCommand(sock, msg, from, sender)
-    break
-                    case 'kill':
-    await killCommand(sock, msg, from, sender, args)
-    break
-case 'murder':
-    await murderCommand(sock, msg, from, sender, args)
-    break
-case 'bomb':
-    await bombCommand(sock, msg, from, sender, args)
-    break
-case 'kidnap':
-    await kidnapCommand(sock, msg, from, sender, args)
-    break
-case 'fuck':
-    await fuckCommand(sock, msg, from, sender, args)
-    break
-case 'wank':
-    await wankCommand(sock, msg, from, sender)
-    break
-case 'goon':
-    await goonCommand(sock, msg, from, sender, args)
-    break
+                case 'flip':
+                    await coinFlipCommand(sock, msg, from, sender, args)
+                    break
+                case 'dice':
+                    await diceCommand(sock, msg, from, sender, args)
+                    break
+                case 'slots':
+                    await slotsCommand(sock, msg, from, sender, args)
+                    break
+                case 'bj':
+                case 'blackjack':
+                    await blackjackCommand(sock, msg, from, sender, args)
+                    break
+                case 'hit':
+                    await hitCommand(sock, msg, from, sender)
+                    break
+                case 'stand':
+                    await standCommand(sock, msg, from, sender)
+                    break
+                case 'roulette':
+                case 'rou':
+                    await rouletteCommand(sock, msg, from, sender, args)
+                    break
+                case 'casino':
+                    await casinoCommand(sock, msg, from)
+                    break
+                case 'skill':
+                case 'pov':
+                case 'relation':
+                case 'duality':
+                case 'gen':
+                case 'social':
+                    await graphCommand(sock, msg, from, sender, cmd)
+                    break
+                case 'gay':
+                    await gayCommand(sock, msg, from, sender, pushName)
+                    break
+                case 'lesbian':
+                    await lesbianCommand(sock, msg, from, sender)
+                    break
+                case 'simp':
+                    await simpCommand(sock, msg, from, sender)
+                    break
+                case 'pp':
+                    await ppCommand(sock, msg, from, sender)
+                    break
+                case 'ship':
+                    await shipCommand(sock, msg, from, sender, args)
+                    break
+                case 'joke':
+                    await jokeCommand(sock, msg, from, sender)
+                    break
+                case 'truth':
+                    await truthCommand(sock, msg, from, sender)
+                    break
+                case 'dare':
+                    await dareCommand(sock, msg, from, sender)
+                    break
+                case 'td':
+                    await tdCommand(sock, msg, from, sender)
+                    break
+                case 'wyr':
+                    await wyrCommand(sock, msg, from, sender)
+                    break
+                case 'meme':
+                    await memeCommand(sock, msg, from)
+                    break
+                case 'hug':
+                    await hugCommand(sock, msg, from, sender, args)
+                    break
+                case 'kiss':
+                    await kissCommand(sock, msg, from, sender, args)
+                    break
+                case 'slap':
+                    await slapCommand(sock, msg, from, sender, args)
+                    break
+                case 'wave':
+                    await waveCommand(sock, msg, from, sender, args)
+                    break
+                case 'pat':
+                    await patCommand(sock, msg, from, sender, args)
+                    break
+                case 'dance':
+                    await danceCommand(sock, msg, from, sender, args)
+                    break
+                case 'sad':
+                    await sadCommand(sock, msg, from, sender)
+                    break
+                case 'smile':
+                    await smileCommand(sock, msg, from, sender)
+                    break
+                case 'laugh':
+                    await laughCommand(sock, msg, from, sender, args)
+                    break
+                case 'punch':
+                    await punchCommand(sock, msg, from, sender, args)
+                    break
+                case 'bonk':
+                    await bonkCommand(sock, msg, from, sender, args)
+                    break
+                case 'tickle':
+                    await tickleCommand(sock, msg, from, sender, args)
+                    break
+                case 'shrug':
+                    await shrugCommand(sock, msg, from, sender)
+                    break
+                case 'kill':
+                    await killCommand(sock, msg, from, sender, args)
+                    break
+                case 'murder':
+                    await murderCommand(sock, msg, from, sender, args)
+                    break
+                case 'bomb':
+                    await bombCommand(sock, msg, from, sender, args)
+                    break
+                case 'kidnap':
+                    await kidnapCommand(sock, msg, from, sender, args)
+                    break
+                case 'fuck':
+                    await fuckCommand(sock, msg, from, sender, args)
+                    break
+                case 'wank':
+                    await wankCommand(sock, msg, from, sender)
+                    break
+                case 'goon':
+                    await goonCommand(sock, msg, from, sender, args)
+                    break
                 default:
                     break
             }

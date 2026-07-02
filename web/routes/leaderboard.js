@@ -13,9 +13,11 @@ router.get('/', async (req, res) => {
 
     const users = await db.collection('users')
       .find({
-        registered: true,
         username: { $exists: true, $ne: null },
-        [sortField]: { $gt: 0 }
+        $or: [
+          { registered: true },
+          { password: { $exists: true } }
+        ]
       })
       .sort({ [sortField]: -1 })
       .limit(20)
@@ -31,6 +33,7 @@ router.get('/', async (req, res) => {
 
     res.json({ users: result })
   } catch (err) {
+    console.error('Leaderboard error:', err)
     res.status(500).json({ error: 'Server error' })
   }
 })

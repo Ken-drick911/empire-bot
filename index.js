@@ -51,7 +51,20 @@ const { appointCommand, setRankCommand, giveXPCommand, resetUserCommand } = requ
 const { announceCommand, broadcastCommand, restartCommand, listGroupsCommand } = require('./src/commands/ownerCommands3')
 const { isBanned } = require('./src/engine/moderation')
 const { OWNER_NUMBER } = require('./src/config/owner')
-const { casinoCommand, coinFlipCommand, diceCommand, slotsCommand, blackjackCommand, hitCommand, standCommand, rouletteCommand } = require('./src/commands/casino')
+const {
+    casinoHelpCommand,
+    enterCasinoCommand,
+    checkCooldownCommand,
+    coinFlipCommand,
+    diceCommand,
+    slotsCommand,
+    blackjackCommand,
+    hitCommand,
+    standCommand,
+    rouletteCommand,
+    diceBattleCommand,
+    casinoGameCommand
+} = require('./src/commands/casino')
 const { graphCommand } = require('./src/commands/graphCommands')
 const { gayCommand, lesbianCommand, simpCommand, ppCommand, shipCommand, jokeCommand, truthCommand, dareCommand, tdCommand, wyrCommand, memeCommand } = require('./src/commands/funCommands')
 const { hugCommand, kissCommand, slapCommand, waveCommand, patCommand, danceCommand, sadCommand, smileCommand, laughCommand, punchCommand, bonkCommand, tickleCommand, shrugCommand, killCommand, murderCommand, bombCommand, kidnapCommand, fuckCommand, wankCommand, goonCommand } = require('./src/commands/interactionCommands')
@@ -85,7 +98,7 @@ const GENERAL_COMMANDS = [
     'hug', 'kiss', 'slap', 'wave', 'pat', 'dance', 'sad', 'smile',
     'laugh', 'punch', 'bonk', 'tickle', 'shrug',
     'joke', 'truth', 'dare', 'td', 'wyr', 'ship', 'simp',
-    'gay', 'lesbian', 'meme', 'pp', 'kill', 'murder', 'bomb', 'kidnap', 'fuck', 'wank', 'goon'
+    'gay', 'lesbian', 'meme', 'pp', 'kill', 'murder', 'bomb', 'kidnap', 'fuck', 'wank', 'goon', 'ec', 'entercasino', 'ccd', 'db', 'casino'
 ] 
 let makeWASocket, DisconnectReason
 
@@ -308,7 +321,7 @@ async function startBot() {
                 return
             }
 
-            const noCooldownCommands = ['daily', 'steal', 'hit', 'stand']
+            const noCooldownCommands = ['daily', 'steal', 'hit', 'stand', 'ec', 'entercasino', 'ccd', 'db', 'casino']
             if (!noCooldownCommands.includes(cmd)) {
                 if (isOnCooldown(sender, cmd)) {
                     const remaining = getRemainingTime(sender, cmd)
@@ -471,6 +484,22 @@ async function startBot() {
                 case 'casino':
                     await casinoCommand(sock, msg, from)
                     break
+                    case 'ec':
+ case 'entercasino':
+    await enterCasinoCommand(sock, msg, from, sender, args)
+    break
+case 'ccd':
+    await checkCooldownCommand(sock, msg, from, sender)
+    break
+case 'casinohelp':
+    await casinoHelpCommand(sock, msg, from)
+    break
+case 'db':
+    await diceBattleCommand(sock, msg, from, sender, args)
+    break
+case 'casino':
+    await casinoGameCommand(sock, msg, from, sender, args)
+    break
                 case 'skill':
                 case 'pov':
                 case 'relation':

@@ -134,12 +134,7 @@ async function startBot() {
         if (sock.ws?.socket?.readyState === 1) {
             await requestCode()
         } else {
-            sock.ev.on('connection.update', function onceOpen(u) {
-                if (u.connection === 'open' || u.qr) {
-                    sock.ev.off('connection.update', onceOpen)
-                    requestCode()
-                }
-            })
+            sock.ws.on('open', requestCode)
         }
     }
 

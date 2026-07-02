@@ -1,110 +1,318 @@
 const { getUser, updateUser } = require('../data/db')
 
-// ─── House Edge RNG ───────────────────────────────────────────────
+// ─── CASINO SESSIONS ─────────────────────────────────────────────
+const casinoEntry = new Map()      // sender → expiry timestamp
+const gameCooldowns = new Map()    // sender → { game: expiry }
+
+const ENTRY_COST_PER_UNIT = 100
+const ENTRY_MINUTES_PER_UNIT = 20
+const MAX_ENTRY = 1000
+
+const COOLDOWN_SECONDS = {
+    flip: 40,
+    dice: 60,
+    slots: 120,
+    bj: 180,
+    blackjack: 180,
+    roulette: 120,
+    rou: 120,
+    db: 180,
+    casino: 300
+}
+
+// ─── ENTRY HELPERS ───────────────────────────────────────────────
+function hasEntry(sender) {
+    const expiry = casinoEntry.get(sender)
+    if (!expiry) return false
+    if (Date.now() > expiry) {
+        casinoEntry.delete(sender)
+        return false
+    }
+    return true
+}
+
+function getRemainingEntry(sender) {
+    const expiry = casinoEntry.get(sender)
+    if (!expiry) return 0
+    const remaining = expiry - Date.now()
+    if (remaining <= 0) {
+        casinoEntry.delete(sender)
+        return 0
+    }
+    return Math.ceil(remaining / 1000 / 60)
+}
+
+// ─── COOLDOWN HELPERS ────────────────────────────────────────────
+function isOnGameCooldown(sender, game) {
+    const userCDs = gameCooldowns.get(sender)
+    if (!userCDs) return false
+    const expiry = userCDs[game]
+    if (!expiry) return false
+    if (Date.now() > expiry) {
+        delete userCDs[game]
+        return false
+    }
+    return true
+}
+
+function setGameCooldown(sender, game) {
+    const secs = COOLDOWN_SECONDS[game] || 60
+    const userCDs = gameCooldowns.get(sender) || {}
+    userCDs[game] = Date.now() + secs * 1000
+    gameCooldowns.set(sender, userCDs)
+}
+
+function getGameCooldownRemaining(sender, game) {
+    const userCDs = gameCooldowns.get(sender)
+    if (!userCDs || !userCDs[game]) return 0
+    const remaining = userCDs[game] - Date.now()
+    if (remaining <= 0) return 0
+    return remaining
+}
+
+function formatTime(ms) {
+    const totalSecs = Math.ceil(ms / 1000)
+    if (totalSecs < 60) return `${totalSecs}s`
+    const mins = Math.floor(totalSecs / 60)
+    const secs = totalSecs % 60
+    return secs > 0 ? `${mins}m ${secs}s` : `${mins}m`
+}
+
+// ─── HOUSE EDGE RNG ──────────────────────────────────────────────
 function houseRoll(winChance) {
-    const houseEdge = 0.05
-    const adjustedChance = winChance * (1 - houseEdge)
-    return Math.random() < adjustedChance
+    return Math.random() < winChance * 0.95
 }
 
 function randInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min
 }
 
-// ─── Bet Validation ───────────────────────────────────────────────
+// ─── BET VALIDATION ──────────────────────────────────────────────
 async function validateBet(sender, betArg, min = 10) {
     const user = await getUser(sender)
     if (!user) return { error: '❌ User not found.' }
-
-    if (!betArg) return { error: `❌ You forgot to enter a bet amount.\nExample: *100* or *all*` }
-
+    if (!betArg) return { error: `❌ You forgot the bet amount.\nExample: *100* or *all*` }
     const bet = betArg === 'all' ? user.wallet : parseInt(betArg)
-    if (isNaN(bet) || bet < min) return { error: `❌ Invalid bet. Minimum is *${min} 🪙*\nExample: *.slots 100* or *.slots all*` }
-    if (bet > user.wallet) return { error: `❌ Not enough Gold.\nYou have *${user.wallet} 🪙* in your wallet.` }
-    if (user.wallet === 0) return { error: `❌ Your wallet is empty! Claim your *.daily* reward first.` }
-
+    if (isNaN(bet) || bet < min) return { error: `❌ Invalid bet. Minimum is *${min} 🪙*` }
+    if (bet > user.wallet) return { error: `❌ Not enough Gold. You have *${user.wallet} 🪙*` }
+    if (user.wallet === 0) return { error: `❌ Your wallet is empty! Claim *.daily* first.` }
     return { user, bet }
 }
 
-// ─── CASINO HELP ─────────────────────────────────────────────────
-async function casinoCommand(sock, msg, from) {
+// ─── ENTRY FEE ───────────────────────────────────────────────────
+async function enterCasinoCommand(sock, msg, from, sender, args) {
+    const amountArg = parseInt(args[0])
+
+    if (!args[0] || isNaN(amountArg)) {
+        await sock.sendMessage(from, {
+            text: `🎰 *CASINO ENTRY*
+━━━━━━━━━━━━━━━━
+Pay to enter the gambling room!
+
+💰 100 Gold = 20 minutes
+💰 Max 1000 Gold = 200 minutes
+
+Usage: *.ec 100* or *.ec 500*
+
+_Paying again adds to your time!_
+━━━━━━━━━━━━━━━━`,
+            quoted: msg
+        })
+        return
+    }
+
+    if (amountArg % 100 !== 0 || amountArg < 100 || amountArg > MAX_ENTRY) {
+        await sock.sendMessage(from, {
+            text: `❌ *Invalid amount!*\nMust be a multiple of 100 (100, 200... up to 1000).\n\nExample: *.ec 100* or *.ec 500*`,
+            quoted: msg
+        })
+        return
+    }
+
+    const user = await getUser(sender)
+    if (!user) return sock.sendMessage(from, { text: '❌ User not found.', quoted: msg })
+    if (user.wallet < amountArg) {
+        return sock.sendMessage(from, {
+            text: `❌ Not enough Gold!\nYou need *${amountArg} 🪙* but have *${user.wallet} 🪙*`,
+            quoted: msg
+        })
+    }
+
+    const units = amountArg / 100
+    const minutesAdded = units * ENTRY_MINUTES_PER_UNIT
+    const msAdded = minutesAdded * 60 * 1000
+
+    const currentExpiry = casinoEntry.get(sender) || Date.now()
+    const newExpiry = Math.max(currentExpiry, Date.now()) + msAdded
+    casinoEntry.set(sender, newExpiry)
+
+    await updateUser(sender, { wallet: user.wallet - amountArg })
+
+    const totalRemaining = Math.ceil((newExpiry - Date.now()) / 1000 / 60)
+
     await sock.sendMessage(from, {
-        text: `🎰 *IMPERIAL CASINO* 🎰
+        text: `🎰 *CASINO ENTRY*
 ━━━━━━━━━━━━━━━━
-All games require registration.
-Type the command alone to see usage.
+👤 ${user.username}
 ━━━━━━━━━━━━━━━━
-
-🪙 *COIN FLIP*
-┣ .flip heads [bet]
-┣ .flip tails [bet]
-┗ Win = 2x payout
-
-🎲 *DICE*
-┣ .dice [bet] [guess 1-6]
-┗ Correct guess = 5x payout
-
-🎰 *SLOTS*
-┣ .slots [bet]
-┣ 👑👑👑 = 10x
-┣ 💎💎💎 = 7x
-┣ ⭐⭐⭐ = 5x
-┗ Match symbols to win
-
-🃏 *BLACKJACK*
-┣ .bj [bet] — start game
-┣ .hit — draw a card
-┣ .stand — hold your hand
-┗ Beat dealer without busting
-
-🎡 *ROULETTE*
-┣ .roulette red/black [bet]
-┣ .roulette even/odd [bet]
-┣ .roulette high/low [bet]
-┣ .roulette number [0-36] [bet]
-┗ Number bet = 35x payout!
-
+💰 Paid: *${amountArg} 🪙*
+⏱️ Time added: *${minutesAdded} minutes*
+⏳ Total time left: *${totalRemaining} minutes*
+👝 Wallet: ${user.wallet - amountArg} 🪙
 ━━━━━━━━━━━━━━━━
-💡 Tip: Use *all* as bet to go all in!
+🎲 You may now gamble! Good luck!
 ━━━━━━━━━━━━━━━━`,
         quoted: msg
     })
 }
 
+// ─── CHECK COOLDOWNS ─────────────────────────────────────────────
+async function checkCooldownCommand(sock, msg, from, sender) {
+    const userCDs = gameCooldowns.get(sender) || {}
+    const now = Date.now()
+
+    const activeGames = Object.entries(userCDs).filter(([game, expiry]) => expiry > now)
+
+    const entryRemaining = getRemainingEntry(sender)
+
+    if (activeGames.length === 0 && entryRemaining === 0) {
+        await sock.sendMessage(from, {
+            text: `🎰 *COOLDOWN STATUS*
+━━━━━━━━━━━━━━━━
+✅ *All cooldowns ready!*
+No active casino entry.
+
+Pay entry with *.ec 100* to gamble.
+━━━━━━━━━━━━━━━━`,
+            quoted: msg
+        })
+        return
+    }
+
+    if (activeGames.length === 0 && entryRemaining > 0) {
+        await sock.sendMessage(from, {
+            text: `🎰 *COOLDOWN STATUS*
+━━━━━━━━━━━━━━━━
+✅ *All game cooldowns ready!*
+🎰 Casino entry: *${entryRemaining} min left*
+━━━━━━━━━━━━━━━━
+You're free to gamble!
+━━━━━━━━━━━━━━━━`,
+            quoted: msg
+        })
+        return
+    }
+
+    const gameNames = {
+        flip: '🪙 Coin Flip',
+        dice: '🎲 Dice',
+        slots: '🎰 Slots',
+        bj: '🃏 Blackjack',
+        blackjack: '🃏 Blackjack',
+        roulette: '🎡 Roulette',
+        rou: '🎡 Roulette',
+        db: '⚔️ Dice Battle',
+        casino: '🎴 Casino'
+    }
+
+    const cdLines = activeGames
+        .sort((a, b) => a[1] - b[1])
+        .map(([game, expiry]) => {
+            const remaining = expiry - now
+            return `┣ ${gameNames[game] || game}: *${formatTime(remaining)}*`
+        })
+        .join('\n')
+
+    await sock.sendMessage(from, {
+        text: `🎰 *COOLDOWN STATUS*
+━━━━━━━━━━━━━━━━
+${entryRemaining > 0 ? `🎰 Casino entry: *${entryRemaining} min left*` : `❌ No casino entry — pay *.ec 100*`}
+━━━━━━━━━━━━━━━━
+⏳ *Active Cooldowns:*
+${cdLines}
+━━━━━━━━━━━━━━━━`,
+        quoted: msg
+    })
+}
+
+// ─── CASINO HELP ─────────────────────────────────────────────────
+async function casinoHelpCommand(sock, msg, from) {
+    await sock.sendMessage(from, {
+        text: `🎰 *IMPERIAL CASINO* 🎰
+━━━━━━━━━━━━━━━━
+Pay entry fee first: *.ec 100*
+(100 Gold = 20 minutes access)
+━━━━━━━━━━━━━━━━
+🪙 *COIN FLIP* — .flip heads/tails [bet]
+  Cooldown: 40s | Win = 2x
+
+🎲 *DICE* — .dice [bet] [guess 1-6]
+  Cooldown: 60s | Win = 5x
+
+🎰 *SLOTS* — .slots [bet]
+  Cooldown: 2min | Up to 10x
+
+🃏 *BLACKJACK* — .bj [bet]
+  Cooldown: 3min | Win = 2x
+
+🎡 *ROULETTE* — .roulette [type] [bet]
+  Cooldown: 2min | Up to 35x
+
+⚔️ *DICE BATTLE* — .db [bet]
+  Cooldown: 3min | Win = 2x
+
+🎴 *CASINO* — .casino [bet]
+  Cooldown: 5min | Win = 2x
+
+━━━━━━━━━━━━━━━━
+📊 Check cooldowns: *.ccd*
+🎫 Check entry: *.ec*
+━━━━━━━━━━━━━━━━`,
+        quoted: msg
+    })
+}
+
+// ─── ENTRY GATE ──────────────────────────────────────────────────
+async function checkEntry(sock, msg, from, sender) {
+    if (!hasEntry(sender)) {
+        await sock.sendMessage(from, {
+            text: `🚫 *Casino access required!*\n\nPay the entry fee to gamble:\n*.ec 100* — 20 minutes access\n*.ec 500* — 100 minutes access\n\n💡 100 Gold per 20 minutes, max 1000 Gold`,
+            quoted: msg
+        })
+        return false
+    }
+    return true
+}
+
 // ─── COIN FLIP ────────────────────────────────────────────────────
 async function coinFlipCommand(sock, msg, from, sender, args) {
+    if (!await checkEntry(sock, msg, from, sender)) return
+    if (isOnGameCooldown(sender, 'flip')) {
+        const rem = getGameCooldownRemaining(sender, 'flip')
+        return sock.sendMessage(from, { text: `⏳ Coin flip on cooldown! Wait *${formatTime(rem)}*`, quoted: msg })
+    }
+
     const side = args[0]?.toLowerCase()
     const betArg = args[1]
 
     if (!side || !['heads', 'tails', 'h', 't'].includes(side)) {
-        await sock.sendMessage(from, {
-            text: `❌ *Wrong command format!*
-
-🪙 *COIN FLIP* usage:
-┣ *.flip heads 100*
-┣ *.flip tails 500*
-┗ *.flip heads all*
-
-Pick *heads* or *tails*, then your bet amount.`,
+        return sock.sendMessage(from, {
+            text: `❌ *Wrong format!*\n\n🪙 *COIN FLIP* usage:\n┣ *.flip heads 100*\n┗ *.flip tails all*`,
             quoted: msg
         })
-        return
     }
 
     if (!betArg) {
-        await sock.sendMessage(from, {
-            text: `❌ *You forgot the bet amount!*
-
-🪙 *COIN FLIP* usage:
-┣ *.flip ${side} 100*
-┗ *.flip ${side} all*`,
+        return sock.sendMessage(from, {
+            text: `❌ *Missing bet amount!*\n\nExample: *.flip ${side} 100*`,
             quoted: msg
         })
-        return
     }
 
     const { error, user, bet } = await validateBet(sender, betArg)
     if (error) return sock.sendMessage(from, { text: error, quoted: msg })
+
+    setGameCooldown(sender, 'flip')
 
     const userSide = ['h', 'heads'].includes(side) ? 'heads' : 'tails'
     const result = houseRoll(0.5) ? userSide : (userSide === 'heads' ? 'tails' : 'heads')
@@ -123,6 +331,7 @@ Result: *${result.toUpperCase()}* ${result === 'heads' ? '👑' : '🦅'}
 ━━━━━━━━━━━━━━━━
 ${won ? `🎉 You won *+${bet} 🪙*` : `😞 You lost *-${bet} 🪙*`}
 👝 Wallet: ${user.wallet + payout} 🪙
+⏳ Next flip in: *40s*
 ━━━━━━━━━━━━━━━━`,
         quoted: msg
     })
@@ -130,49 +339,26 @@ ${won ? `🎉 You won *+${bet} 🪙*` : `😞 You lost *-${bet} 🪙*`}
 
 // ─── DICE ────────────────────────────────────────────────────────
 async function diceCommand(sock, msg, from, sender, args) {
+    if (!await checkEntry(sock, msg, from, sender)) return
+    if (isOnGameCooldown(sender, 'dice')) {
+        const rem = getGameCooldownRemaining(sender, 'dice')
+        return sock.sendMessage(from, { text: `⏳ Dice on cooldown! Wait *${formatTime(rem)}*`, quoted: msg })
+    }
+
     const betArg = args[0]
     const guess = parseInt(args[1])
 
-    if (!betArg && isNaN(guess)) {
-        await sock.sendMessage(from, {
-            text: `❌ *Wrong command format!*
-
-🎲 *DICE* usage:
-┣ *.dice [bet] [guess 1-6]*
-┣ *.dice 100 4*
-┗ *.dice all 6*
-
-Guess the correct number = *5x payout!*`,
+    if (!betArg || isNaN(guess) || guess < 1 || guess > 6) {
+        return sock.sendMessage(from, {
+            text: `❌ *Wrong format!*\n\n🎲 *DICE* usage:\n┣ *.dice 100 4*\n┗ *.dice all 6*\n\nGuess right = *5x payout!*`,
             quoted: msg
         })
-        return
-    }
-
-    if (!betArg) {
-        await sock.sendMessage(from, {
-            text: `❌ *You forgot the bet amount!*
-
-🎲 *DICE* usage:
-┗ *.dice 100 4*`,
-            quoted: msg
-        })
-        return
-    }
-
-    if (isNaN(guess) || guess < 1 || guess > 6) {
-        await sock.sendMessage(from, {
-            text: `❌ *Invalid guess!* Pick a number between *1 and 6*.
-
-🎲 *DICE* usage:
-┣ *.dice 100 3*
-┗ *.dice all 6*`,
-            quoted: msg
-        })
-        return
     }
 
     const { error, user, bet } = await validateBet(sender, betArg)
     if (error) return sock.sendMessage(from, { text: error, quoted: msg })
+
+    setGameCooldown(sender, 'dice')
 
     const roll = randInt(1, 6)
     const won = roll === guess
@@ -192,6 +378,7 @@ Result: ${diceEmojis[roll]}
 ━━━━━━━━━━━━━━━━
 ${won ? `🎉 *CORRECT!* You won *+${bet * 4} 🪙*` : `😞 Wrong! You lost *-${bet} 🪙*`}
 👝 Wallet: ${user.wallet + payout} 🪙
+⏳ Next dice in: *60s*
 ━━━━━━━━━━━━━━━━`,
         quoted: msg
     })
@@ -200,59 +387,45 @@ ${won ? `🎉 *CORRECT!* You won *+${bet * 4} 🪙*` : `😞 Wrong! You lost *-$
 // ─── SLOTS ───────────────────────────────────────────────────────
 const SLOT_SYMBOLS = ['🍒', '🍋', '🍊', '⭐', '💎', '👑']
 const SLOT_PAYOUTS = {
-    '👑👑👑': 10,
-    '💎💎💎': 7,
-    '⭐⭐⭐': 5,
-    '🍊🍊🍊': 3,
-    '🍋🍋🍋': 2,
-    '🍒🍒🍒': 2,
-    'two_crown': 3,
-    'two_diamond': 2,
-    'any_cherry': 1.5
+    '👑👑👑': 10, '💎💎💎': 7, '⭐⭐⭐': 5,
+    '🍊🍊🍊': 3, '🍋🍋🍋': 2, '🍒🍒🍒': 2
 }
 
 function spinSlots() {
-    return [
-        SLOT_SYMBOLS[randInt(0, 5)],
-        SLOT_SYMBOLS[randInt(0, 5)],
-        SLOT_SYMBOLS[randInt(0, 5)]
-    ]
+    return [SLOT_SYMBOLS[randInt(0, 5)], SLOT_SYMBOLS[randInt(0, 5)], SLOT_SYMBOLS[randInt(0, 5)]]
 }
 
 function calcSlotPayout(reels, bet) {
     const key = reels.join('')
     if (SLOT_PAYOUTS[key]) return Math.floor(bet * SLOT_PAYOUTS[key])
-    if (reels[0] === reels[1] && reels[1] === reels[2]) return Math.floor(bet * 2)
     const crowns = reels.filter(r => r === '👑').length
     const diamonds = reels.filter(r => r === '💎').length
     const cherries = reels.filter(r => r === '🍒').length
-    if (crowns >= 2) return Math.floor(bet * SLOT_PAYOUTS['two_crown'])
-    if (diamonds >= 2) return Math.floor(bet * SLOT_PAYOUTS['two_diamond'])
-    if (cherries >= 1) return Math.floor(bet * SLOT_PAYOUTS['any_cherry'])
+    if (crowns >= 2) return Math.floor(bet * 3)
+    if (diamonds >= 2) return Math.floor(bet * 2)
+    if (cherries >= 1) return Math.floor(bet * 1.5)
     return 0
 }
 
 async function slotsCommand(sock, msg, from, sender, args) {
+    if (!await checkEntry(sock, msg, from, sender)) return
+    if (isOnGameCooldown(sender, 'slots')) {
+        const rem = getGameCooldownRemaining(sender, 'slots')
+        return sock.sendMessage(from, { text: `⏳ Slots on cooldown! Wait *${formatTime(rem)}*`, quoted: msg })
+    }
+
     const betArg = args[0]
-
     if (!betArg) {
-        await sock.sendMessage(from, {
-            text: `❌ *Wrong command format!*
-
-🎰 *SLOTS* usage:
-┣ *.slots 100*
-┗ *.slots all*
-
-💎💎💎 = 7x  |  👑👑👑 = 10x
-⭐⭐⭐ = 5x  |  🍊🍊🍊 = 3x
-🍒🍒🍒 = 2x  |  Two 👑 = 3x`,
+        return sock.sendMessage(from, {
+            text: `❌ *Wrong format!*\n\n🎰 *SLOTS* usage:\n┣ *.slots 100*\n┗ *.slots all*\n\n👑👑👑 = 10x | 💎💎💎 = 7x\n⭐⭐⭐ = 5x | 🍊🍊🍊 = 3x`,
             quoted: msg
         })
-        return
     }
 
     const { error, user, bet } = await validateBet(sender, betArg)
     if (error) return sock.sendMessage(from, { text: error, quoted: msg })
+
+    setGameCooldown(sender, 'slots')
 
     const reels = spinSlots()
     const winAmount = calcSlotPayout(reels, bet)
@@ -267,8 +440,9 @@ async function slotsCommand(sock, msg, from, sender, args) {
 ━━━━━━━━━━━━━━━━
 [ ${reels[0]} | ${reels[1]} | ${reels[2]} ]
 ━━━━━━━━━━━━━━━━
-${winAmount > 0 ? `🎉 You won *+${winAmount} 🪙*` : `❌ No match! You lost *-${bet} 🪙*`}
+${winAmount > 0 ? `🎉 You won *+${winAmount} 🪙*` : `😞 No match! You lost *-${bet} 🪙*`}
 👝 Wallet: ${user.wallet + payout} 🪙
+⏳ Next spin in: *2 min*
 ━━━━━━━━━━━━━━━━`,
         quoted: msg
     })
@@ -281,11 +455,7 @@ function createDeck() {
     const suits = ['♠', '♥', '♦', '♣']
     const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']
     const deck = []
-    for (const suit of suits) {
-        for (const val of values) {
-            deck.push({ suit, val })
-        }
-    }
+    for (const suit of suits) for (const val of values) deck.push({ suit, val })
     return deck.sort(() => Math.random() - 0.5)
 }
 
@@ -298,10 +468,7 @@ function cardValue(card) {
 function handTotal(hand) {
     let total = hand.reduce((sum, c) => sum + cardValue(c), 0)
     let aces = hand.filter(c => c.val === 'A').length
-    while (total > 21 && aces > 0) {
-        total -= 10
-        aces--
-    }
+    while (total > 21 && aces > 0) { total -= 10; aces-- }
     return total
 }
 
@@ -310,39 +477,35 @@ function formatHand(hand) {
 }
 
 async function blackjackCommand(sock, msg, from, sender, args) {
+    if (!await checkEntry(sock, msg, from, sender)) return
+    if (isOnGameCooldown(sender, 'bj')) {
+        const rem = getGameCooldownRemaining(sender, 'bj')
+        return sock.sendMessage(from, { text: `⏳ Blackjack on cooldown! Wait *${formatTime(rem)}*`, quoted: msg })
+    }
+
     const betArg = args[0]
-
     if (!betArg) {
-        await sock.sendMessage(from, {
-            text: `❌ *Wrong command format!*
-
-🃏 *BLACKJACK* usage:
-┣ *.bj 100* — start a game
-┣ *.bj all* — go all in
-┗ Then type *.hit* or *.stand*
-
-Get closer to *21* than the dealer!
-Blackjack (21 on deal) = *1.5x payout*`,
+        return sock.sendMessage(from, {
+            text: `❌ *Wrong format!*\n\n🃏 *BLACKJACK* usage:\n┣ *.bj 100*\n┗ *.bj all*\n\nThen type *.hit* or *.stand*`,
             quoted: msg
         })
-        return
     }
 
     if (BLACKJACK_SESSIONS.has(sender)) {
-        await sock.sendMessage(from, {
-            text: `⚠️ *You already have an active game!*\nType *.hit* to draw a card or *.stand* to hold.`,
+        return sock.sendMessage(from, {
+            text: `⚠️ *Active game running!*\nType *.hit* or *.stand*`,
             quoted: msg
         })
-        return
     }
 
     const { error, user, bet } = await validateBet(sender, betArg)
     if (error) return sock.sendMessage(from, { text: error, quoted: msg })
 
+    setGameCooldown(sender, 'bj')
+
     const deck = createDeck()
     const playerHand = [deck.pop(), deck.pop()]
     const dealerHand = [deck.pop(), deck.pop()]
-
     BLACKJACK_SESSIONS.set(sender, { deck, playerHand, dealerHand, bet, from })
 
     const playerTotal = handTotal(playerHand)
@@ -351,45 +514,21 @@ Blackjack (21 on deal) = *1.5x payout*`,
         const winAmount = Math.floor(bet * 1.5)
         await updateUser(sender, { wallet: user.wallet + winAmount })
         BLACKJACK_SESSIONS.delete(sender)
-        await sock.sendMessage(from, {
-            text: `🃏 *BLACKJACK*
-━━━━━━━━━━━━━━━━
-👤 ${user.username}
-━━━━━━━━━━━━━━━━
-Your hand: ${formatHand(playerHand)} = *21*
-Dealer: ${formatHand(dealerHand)} = ${handTotal(dealerHand)}
-━━━━━━━━━━━━━━━━
-🎉 *BLACKJACK!* You won *+${winAmount} 🪙*
-👝 Wallet: ${user.wallet + winAmount} 🪙
-━━━━━━━━━━━━━━━━`,
+        return sock.sendMessage(from, {
+            text: `🃏 *BLACKJACK*\n━━━━━━━━━━━━━━━━\n👤 ${user.username}\n━━━━━━━━━━━━━━━━\nYour hand: ${formatHand(playerHand)} = *21*\n━━━━━━━━━━━━━━━━\n🎉 *BLACKJACK!* You won *+${winAmount} 🪙*\n👝 Wallet: ${user.wallet + winAmount} 🪙\n━━━━━━━━━━━━━━━━`,
             quoted: msg
         })
-        return
     }
 
     await sock.sendMessage(from, {
-        text: `🃏 *BLACKJACK*
-━━━━━━━━━━━━━━━━
-👤 ${user.username} | Bet: ${bet} 🪙
-━━━━━━━━━━━━━━━━
-Your hand: ${formatHand(playerHand)} = *${playerTotal}*
-Dealer shows: ${dealerHand[0].val}${dealerHand[0].suit} 🂠
-━━━━━━━━━━━━━━━━
-Type *.hit* to draw or *.stand* to hold
-━━━━━━━━━━━━━━━━`,
+        text: `🃏 *BLACKJACK*\n━━━━━━━━━━━━━━━━\n👤 ${user.username} | Bet: ${bet} 🪙\n━━━━━━━━━━━━━━━━\nYour hand: ${formatHand(playerHand)} = *${playerTotal}*\nDealer shows: ${dealerHand[0].val}${dealerHand[0].suit} 🂠\n━━━━━━━━━━━━━━━━\nType *.hit* to draw or *.stand* to hold\n━━━━━━━━━━━━━━━━`,
         quoted: msg
     })
 }
 
 async function hitCommand(sock, msg, from, sender) {
     const session = BLACKJACK_SESSIONS.get(sender)
-    if (!session) {
-        await sock.sendMessage(from, {
-            text: `❌ *No active blackjack game!*\nStart one with *.bj 100*`,
-            quoted: msg
-        })
-        return
-    }
+    if (!session) return sock.sendMessage(from, { text: `❌ No active game! Start with *.bj 100*`, quoted: msg })
 
     const user = await getUser(sender)
     session.playerHand.push(session.deck.pop())
@@ -398,52 +537,28 @@ async function hitCommand(sock, msg, from, sender) {
     if (total > 21) {
         BLACKJACK_SESSIONS.delete(sender)
         await updateUser(sender, { wallet: user.wallet - session.bet })
-        await sock.sendMessage(from, {
-            text: `🃏 *BLACKJACK*
-━━━━━━━━━━━━━━━━
-Your hand: ${formatHand(session.playerHand)} = *${total}*
-━━━━━━━━━━━━━━━━
-😞 *BUST!* You lost *-${session.bet} 🪙*
-👝 Wallet: ${user.wallet - session.bet} 🪙
-━━━━━━━━━━━━━━━━`,
+        return sock.sendMessage(from, {
+            text: `🃏 *BLACKJACK*\n━━━━━━━━━━━━━━━━\nYour hand: ${formatHand(session.playerHand)} = *${total}*\n━━━━━━━━━━━━━━━━\n😞 *BUST!* You lost *-${session.bet} 🪙*\n👝 Wallet: ${user.wallet - session.bet} 🪙\n━━━━━━━━━━━━━━━━`,
             quoted: msg
         })
-        return
     }
 
-    if (total === 21) {
-        await standCommand(sock, msg, from, sender)
-        return
-    }
+    if (total === 21) return standCommand(sock, msg, from, sender)
 
     await sock.sendMessage(from, {
-        text: `🃏 *BLACKJACK*
-━━━━━━━━━━━━━━━━
-Your hand: ${formatHand(session.playerHand)} = *${total}*
-Dealer shows: ${session.dealerHand[0].val}${session.dealerHand[0].suit} 🂠
-━━━━━━━━━━━━━━━━
-Type *.hit* or *.stand*
-━━━━━━━━━━━━━━━━`,
+        text: `🃏 *BLACKJACK*\n━━━━━━━━━━━━━━━━\nYour hand: ${formatHand(session.playerHand)} = *${total}*\nDealer shows: ${session.dealerHand[0].val}${session.dealerHand[0].suit} 🂠\n━━━━━━━━━━━━━━━━\nType *.hit* or *.stand*\n━━━━━━━━━━━━━━━━`,
         quoted: msg
     })
 }
 
 async function standCommand(sock, msg, from, sender) {
     const session = BLACKJACK_SESSIONS.get(sender)
-    if (!session) {
-        await sock.sendMessage(from, {
-            text: `❌ *No active blackjack game!*\nStart one with *.bj 100*`,
-            quoted: msg
-        })
-        return
-    }
+    if (!session) return sock.sendMessage(from, { text: `❌ No active game! Start with *.bj 100*`, quoted: msg })
 
     const user = await getUser(sender)
     BLACKJACK_SESSIONS.delete(sender)
 
-    while (handTotal(session.dealerHand) < 17) {
-        session.dealerHand.push(session.deck.pop())
-    }
+    while (handTotal(session.dealerHand) < 17) session.dealerHand.push(session.deck.pop())
 
     const playerTotal = handTotal(session.playerHand)
     const dealerTotal = handTotal(session.dealerHand)
@@ -455,7 +570,6 @@ async function standCommand(sock, msg, from, sender) {
         payout = session.bet
         resultText = `🎉 You won *+${session.bet} 🪙*`
     } else if (playerTotal === dealerTotal) {
-        payout = 0
         resultText = `🤝 *PUSH!* Bet returned.`
     } else {
         payout = -session.bet
@@ -463,16 +577,8 @@ async function standCommand(sock, msg, from, sender) {
     }
 
     await updateUser(sender, { wallet: user.wallet + payout })
-
     await sock.sendMessage(from, {
-        text: `🃏 *BLACKJACK*
-━━━━━━━━━━━━━━━━
-Your hand: ${formatHand(session.playerHand)} = *${playerTotal}*
-Dealer hand: ${formatHand(session.dealerHand)} = *${dealerTotal}*
-━━━━━━━━━━━━━━━━
-${resultText}
-👝 Wallet: ${user.wallet + payout} 🪙
-━━━━━━━━━━━━━━━━`,
+        text: `🃏 *BLACKJACK*\n━━━━━━━━━━━━━━━━\nYour hand: ${formatHand(session.playerHand)} = *${playerTotal}*\nDealer hand: ${formatHand(session.dealerHand)} = *${dealerTotal}*\n━━━━━━━━━━━━━━━━\n${resultText}\n👝 Wallet: ${user.wallet + payout} 🪙\n━━━━━━━━━━━━━━━━`,
         quoted: msg
     })
 }
@@ -482,27 +588,20 @@ const ROULETTE_NUMBERS = Array.from({ length: 37 }, (_, i) => i)
 const RED_NUMBERS = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]
 
 async function rouletteCommand(sock, msg, from, sender, args) {
+    if (!await checkEntry(sock, msg, from, sender)) return
+    if (isOnGameCooldown(sender, 'roulette')) {
+        const rem = getGameCooldownRemaining(sender, 'roulette')
+        return sock.sendMessage(from, { text: `⏳ Roulette on cooldown! Wait *${formatTime(rem)}*`, quoted: msg })
+    }
+
     const betType = args[0]?.toLowerCase()
     const validTypes = ['red', 'black', 'even', 'odd', 'high', 'low', 'number']
 
     if (!betType || !validTypes.includes(betType)) {
-        await sock.sendMessage(from, {
-            text: `❌ *Wrong command format!*
-
-🎡 *ROULETTE* usage:
-┣ *.roulette red 100*
-┣ *.roulette black all*
-┣ *.roulette even 200*
-┣ *.roulette odd 200*
-┣ *.roulette high 100* (19-36)
-┣ *.roulette low 100* (1-18)
-┗ *.roulette number 17 500*
-
-red/black/even/odd/high/low = *2x*
-number (0-36) = *35x payout!*`,
+        return sock.sendMessage(from, {
+            text: `❌ *Wrong format!*\n\n🎡 *ROULETTE* usage:\n┣ *.roulette red 100*\n┣ *.roulette black 100*\n┣ *.roulette even 100*\n┣ *.roulette odd 100*\n┣ *.roulette high 100* (19-36)\n┣ *.roulette low 100* (1-18)\n┗ *.roulette number 17 500*\n\nred/black/even/odd = *2x* | number = *35x*`,
             quoted: msg
         })
-        return
     }
 
     let finalBetArg = args[1]
@@ -512,32 +611,24 @@ number (0-36) = *35x payout!*`,
         numberGuess = parseInt(args[1])
         finalBetArg = args[2]
         if (isNaN(numberGuess) || numberGuess < 0 || numberGuess > 36) {
-            await sock.sendMessage(from, {
-                text: `❌ *Invalid number!*
-
-🎡 *ROULETTE* number usage:
-┗ *.roulette number [0-36] [bet]*
-
-Example: *.roulette number 17 500*`,
+            return sock.sendMessage(from, {
+                text: `❌ *Invalid number!*\nPick between *0 and 36*\n\nExample: *.roulette number 17 500*`,
                 quoted: msg
             })
-            return
         }
     }
 
     if (!finalBetArg) {
-        await sock.sendMessage(from, {
-            text: `❌ *You forgot the bet amount!*
-
-🎡 *ROULETTE* usage:
-┗ *.roulette ${betType}${numberGuess !== null ? ` ${numberGuess}` : ''} 100*`,
+        return sock.sendMessage(from, {
+            text: `❌ *Missing bet amount!*\nExample: *.roulette ${betType}${numberGuess !== null ? ` ${numberGuess}` : ''} 100*`,
             quoted: msg
         })
-        return
     }
 
     const { error, user, bet } = await validateBet(sender, finalBetArg)
     if (error) return sock.sendMessage(from, { text: error, quoted: msg })
+
+    setGameCooldown(sender, 'roulette')
 
     const spin = ROULETTE_NUMBERS[randInt(0, 36)]
     const isRed = RED_NUMBERS.includes(spin)
@@ -552,10 +643,7 @@ Example: *.roulette number 17 500*`,
     else if (betType === 'odd') won = spin % 2 !== 0
     else if (betType === 'high') won = spin >= 19
     else if (betType === 'low') won = spin >= 1 && spin <= 18
-    else if (betType === 'number') {
-        won = spin === numberGuess
-        multiplier = 35
-    }
+    else if (betType === 'number') { won = spin === numberGuess; multiplier = 35 }
 
     const payout = won ? bet * (multiplier - 1) : -bet
     await updateUser(sender, { wallet: user.wallet + payout })
@@ -565,23 +653,128 @@ Example: *.roulette number 17 500*`,
 ━━━━━━━━━━━━━━━━
 👤 ${user.username}
 ━━━━━━━━━━━━━━━━
-Ball landed on: ${color} *${spin}*
+Ball landed: ${color} *${spin}*
 Your bet: *${betType}${numberGuess !== null ? ` ${numberGuess}` : ''}*
 ━━━━━━━━━━━━━━━━
 ${won ? `🎉 You won *+${bet * (multiplier - 1)} 🪙*` : `😞 You lost *-${bet} 🪙*`}
 👝 Wallet: ${user.wallet + payout} 🪙
+⏳ Next spin in: *2 min*
+━━━━━━━━━━━━━━━━`,
+        quoted: msg
+    })
+}
+
+// ─── DICE BATTLE ─────────────────────────────────────────────────
+async function diceBattleCommand(sock, msg, from, sender, args) {
+    if (!await checkEntry(sock, msg, from, sender)) return
+    if (isOnGameCooldown(sender, 'db')) {
+        const rem = getGameCooldownRemaining(sender, 'db')
+        return sock.sendMessage(from, { text: `⏳ Dice Battle on cooldown! Wait *${formatTime(rem)}*`, quoted: msg })
+    }
+
+    const betArg = args[0]
+    if (!betArg) {
+        return sock.sendMessage(from, {
+            text: `❌ *Wrong format!*\n\n⚔️ *DICE BATTLE* usage:\n┣ *.db 100*\n┗ *.db all*\n\nYou vs the house — highest roll wins!\nTie = roll again. Win = *2x payout*`,
+            quoted: msg
+        })
+    }
+
+    const { error, user, bet } = await validateBet(sender, betArg)
+    if (error) return sock.sendMessage(from, { text: error, quoted: msg })
+
+    setGameCooldown(sender, 'db')
+
+    const diceEmojis = ['', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣']
+    let playerRoll, houseRoll2, rounds = 0
+
+    do {
+        playerRoll = randInt(1, 6)
+        houseRoll2 = randInt(1, 6)
+        rounds++
+    } while (playerRoll === houseRoll2 && rounds < 5)
+
+    const won = playerRoll > houseRoll2
+    const payout = won ? bet : -bet
+
+    await updateUser(sender, { wallet: user.wallet + payout })
+
+    const tieText = rounds > 1 ? `\n🔄 *Tied ${rounds - 1} time(s)! Re-rolled.*` : ''
+
+    await sock.sendMessage(from, {
+        text: `⚔️ *DICE BATTLE*
+━━━━━━━━━━━━━━━━
+👤 ${user.username}
+━━━━━━━━━━━━━━━━
+You rolled: ${diceEmojis[playerRoll]}
+House rolled: ${diceEmojis[houseRoll2]}${tieText}
+━━━━━━━━━━━━━━━━
+${won ? `🎉 You win! *+${bet} 🪙*` : `😞 House wins! *-${bet} 🪙*`}
+👝 Wallet: ${user.wallet + payout} 🪙
+⏳ Next battle in: *3 min*
+━━━━━━━━━━━━━━━━`,
+        quoted: msg
+    })
+}
+
+// ─── CASINO (FLAT BET) ───────────────────────────────────────────
+async function casinoGameCommand(sock, msg, from, sender, args) {
+    if (!await checkEntry(sock, msg, from, sender)) return
+    if (isOnGameCooldown(sender, 'casino')) {
+        const rem = getGameCooldownRemaining(sender, 'casino')
+        return sock.sendMessage(from, { text: `⏳ Casino on cooldown! Wait *${formatTime(rem)}*`, quoted: msg })
+    }
+
+    const betArg = args[0]
+    if (!betArg) {
+        return sock.sendMessage(from, {
+            text: `❌ *Wrong format!*\n\n🎴 *CASINO* usage:\n┣ *.casino 500*\n┗ *.casino all*\n\nFlat bet — pure luck. Win = *2x payout*\nCooldown: *5 minutes*`,
+            quoted: msg
+        })
+    }
+
+    const { error, user, bet } = await validateBet(sender, betArg, 50)
+    if (error) return sock.sendMessage(from, { text: error, quoted: msg })
+
+    setGameCooldown(sender, 'casino')
+
+    const won = houseRoll(0.5)
+    const payout = won ? bet : -bet
+
+    await updateUser(sender, { wallet: user.wallet + payout })
+
+    const outcomes = won
+        ? ['🎰 The stars align in your favor!', '🏆 Fortune favors the bold!', '👑 The Empire smiles upon you!', '🎊 Lady Luck is on your side!']
+        : ['💀 The house always has its way...', '😔 Not your night, soldier.', '⚔️ The Empire takes its cut.', '🌑 Darkness falls on your gold.']
+
+    const flavor = outcomes[randInt(0, outcomes.length - 1)]
+
+    await sock.sendMessage(from, {
+        text: `🎴 *CASINO*
+━━━━━━━━━━━━━━━━
+👤 ${user.username} | Bet: ${bet} 🪙
+━━━━━━━━━━━━━━━━
+${flavor}
+━━━━━━━━━━━━━━━━
+${won ? `🎉 You won *+${bet} 🪙*` : `😞 You lost *-${bet} 🪙*`}
+👝 Wallet: ${user.wallet + payout} 🪙
+⏳ Next game in: *5 min*
 ━━━━━━━━━━━━━━━━`,
         quoted: msg
     })
 }
 
 module.exports = {
-    casinoCommand,
+    casinoHelpCommand,
+    enterCasinoCommand,
+    checkCooldownCommand,
     coinFlipCommand,
     diceCommand,
     slotsCommand,
     blackjackCommand,
     hitCommand,
     standCommand,
-    rouletteCommand
-        }
+    rouletteCommand,
+    diceBattleCommand,
+    casinoGameCommand
+}
